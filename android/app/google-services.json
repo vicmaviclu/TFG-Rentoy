@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "868806432422",
+    "project_id": "rentoy-online",
+    "storage_bucket": "rentoy-online.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868806432422:android:29a26ddc9d510848d60667",
+        "android_client_info": {
+          "package_name": "com.example.rentoy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868806432422-b5hjv3f0vutelo49h9m2r9kfm1dt4568.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rentoy",
+            "certificate_hash": "8678e3628fe79a97e138b07c8ebc97d6668a8dac"
+          }
+        },
+        {
+          "client_id": "868806432422-9c8v4odbtc2p7olrk1umc6urcbc0kqop.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlyOHm-qLbukRW7IANj7Z8tCMjGaT5B0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868806432422-9c8v4odbtc2p7olrk1umc6urcbc0kqop.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "868806432422-aj5l73nae9qmklgibqb9te5c8hnfa42q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rentoy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
