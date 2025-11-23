@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../constantes/tamanos.dart';
-import '../constantes/cadenas.dart';
-import '../constantes/textos.dart';
-import '../constantes/colores.dart';
+import '../../../core/constantes/tamanos.dart';
+import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
+import '../../../core/constantes/recursos.dart';
 
 /// Botón presentacional para iniciar sesión con Google.
 ///
@@ -16,7 +17,7 @@ class BotonGoogle extends StatelessWidget {
   /// Si es true, el botón usará todo el ancho disponible. Si es false,
   /// ajustará su tamaño al contenido y se centrará.
   final bool fullWidth;
-  /// Altura opcional del botón (si no se proporciona se usa AppSizes.buttonHeight).
+  /// Altura opcional del botón (si no se proporciona se usa `Tamanos.buttonHeight`).
   final double? height;
   /// Tamaño opcional del icono.
   final double? iconSize;
@@ -27,7 +28,7 @@ class BotonGoogle extends StatelessWidget {
     super.key,
     this.isLoading = false,
     required this.onPressed,
-    this.label = AppStrings.googleSignIn,
+    this.label = Cadenas.continuarConGoogle,
     this.fullWidth = false,
     this.height,
     this.iconSize,
@@ -37,7 +38,7 @@ class BotonGoogle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double resolvedIconSize = iconSize ?? 30.0;
-    final double resolvedHeight = height ?? AppSizes.buttonHeight;
+    final double resolvedHeight = height ?? Tamanos.buttonHeight;
     final btn = ElevatedButton.icon(
       icon: isLoading
           ? SizedBox(
@@ -46,18 +47,18 @@ class BotonGoogle extends StatelessWidget {
               child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             )
           : Image.asset(
-              'assets/images/simbolo_google.png',
+              Recursos.iconoGoogle,
               height: resolvedIconSize,
               width: resolvedIconSize,
             ),
-      label: Text(
-        isLoading ? AppStrings.iniciando : label,
-        style: textStyle ?? AppTextStyles.body.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        label: Text(
+        isLoading ? Cadenas.iniciando : label,
+        style: textStyle ?? EstilosTexto.cuerpo.copyWith(fontWeight: FontWeight.w600, color: Colores.textoPrimario),
       ),
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.googleGrey,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: Colores.grisGoogle,
+        foregroundColor: Colores.textoPrimario,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         minimumSize: fullWidth ? Size(double.infinity, resolvedHeight) : Size.zero,

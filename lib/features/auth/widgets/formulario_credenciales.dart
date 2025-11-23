@@ -3,20 +3,17 @@ import '../controllers/controlador_login.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 
-/// Credentials form for sign-in using email + password.
-///
-/// Presentation-only widget that delegates authentication actions to
-/// `ControladorLogin` provided by the parent screen.
-class CredentialsForm extends StatefulWidget {
+/// Formulario para inicio de sesión (correo + contraseña).
+class FormularioCredenciales extends StatefulWidget {
   final ControladorLogin controller;
 
-  const CredentialsForm({required this.controller, super.key});
+  const FormularioCredenciales({required this.controller, super.key});
 
   @override
-  State<CredentialsForm> createState() => _CredentialsFormState();
+  State<FormularioCredenciales> createState() => _FormularioCredencialesState();
 }
 
-class _CredentialsFormState extends State<CredentialsForm> {
+class _FormularioCredencialesState extends State<FormularioCredenciales> {
   ControladorLogin get controller => widget.controller;
 
   @override
@@ -28,13 +25,18 @@ class _CredentialsFormState extends State<CredentialsForm> {
           children: [
             TextField(
               controller: controller.controladorCorreo,
-              decoration: InputDecoration(labelText: AppStrings.emailHint, filled: true),
+              decoration: InputDecoration(labelText: Cadenas.correoHint, filled: true),
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
             ),
             const SizedBox(height: 8),
             TextField(
               controller: controller.controladorContrasena,
-              decoration: InputDecoration(labelText: AppStrings.passwordHint, filled: true),
+              decoration: InputDecoration(labelText: Cadenas.contrasenaHint, filled: true),
               obscureText: true,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.password],
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -45,23 +47,23 @@ class _CredentialsFormState extends State<CredentialsForm> {
                   minimumSize: const Size(double.infinity, 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: controller.cargando
-                    ? null
-                    : () async {
-                        final err = await controller.iniciarSesionConEmail();
-                        if (err != null) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
-                        }
-                      },
+                onPressed: controller.cargando ? null : _performLogin,
                 child: controller.cargando
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
-                    : Text(AppStrings.loginTitle, style: AppTextStyles.subheading),
+                    : Text(Cadenas.tituloLogin, style: EstilosTexto.cuerpoNegrita),
               ),
             ),
           ],
         );
       },
     );
+  }
+
+  Future<void> _performLogin() async {
+    final err = await controller.iniciarSesionConEmail();
+    if (err != null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../core/servicios/servicio_autenticacion.dart';
 import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/errores.dart';
 
 /// Controlador para la pantalla de inicio de sesión.
 ///
@@ -14,16 +15,20 @@ class ControladorLogin extends ChangeNotifier {
   bool _cargando = false;
   bool get cargando => _cargando;
 
+  // Marca para evitar notificar listeners después de `dispose()`.
+  bool _disposed = false;
+
   @override
   void dispose() {
     controladorCorreo.dispose();
     controladorContrasena.dispose();
+    _disposed = true;
     super.dispose();
   }
 
   void _setCargando(bool v) {
     _cargando = v;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   /// Intenta iniciar sesión con Google. Devuelve `null` si tuvo éxito,
@@ -47,12 +52,12 @@ class ControladorLogin extends ChangeNotifier {
     try {
       final email = controladorCorreo.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@')) return AppStrings.invalidEmail;
-      if (pass.length < 6) return AppStrings.passwordTooShort;
+      if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
       await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message ?? e.code;
+      // Mapear códigos de Firebase a mensajes amigables cuando sea posible
+      return mensajeErrorFirebaseAuth(e.code);
     } catch (e) {
       return e.toString();
     } finally {
@@ -66,12 +71,12 @@ class ControladorLogin extends ChangeNotifier {
     try {
       final email = controladorCorreo.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@')) return AppStrings.invalidEmail;
-      if (pass.length < 6) return AppStrings.passwordTooShort;
+      if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
+      if (pass.length < 6) return Cadenas.contrasenaCorta;
       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message ?? e.code;
+      return mensajeErrorFirebaseAuth(e.code);
     } catch (e) {
       return e.toString();
     } finally {

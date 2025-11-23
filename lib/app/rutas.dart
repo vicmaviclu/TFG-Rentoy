@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import '../features/auth/screens/pantalla_login.dart';
-import '../features/auth/screens/register_screen.dart';
+import '../features/auth/screens/pantalla_registro.dart';
+import '../features/home/screens/home_screen.dart';
 
 /// Rutas globales de la aplicación.
 ///
@@ -12,9 +13,9 @@ class RutasApp {
 
   static Map<String, WidgetBuilder> get todas {
     return {
-      login: (c) => const LoginScreen(),
-      registro: (c) => const RegisterScreen(),
-      // `inicio` se resuelve por el estado de autenticación en `AplicacionWidget`.
+      login: (c) => const PantallaLogin(),
+      registro: (c) => const PantallaRegistro(),
+      inicio: (c) => const HomeScreen(),
     };
   }
 }
