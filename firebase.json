@@ -1,1 +1,32 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"rentoy-online","appId":"1:868806432422:android:29a26ddc9d510848d60667","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"rentoy-online","configurations":{"android":"1:868806432422:android:29a26ddc9d510848d60667","ios":"1:868806432422:ios:c6a4011d3938f204d60667","web":"1:868806432422:web:b7e74edf6ffbdb16d60667"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "rentoy-online",
+          "appId": "1:868806432422:android:29a26ddc9d510848d60667",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "rentoy-online",
+          "configurations": {
+            "android": "1:868806432422:android:29a26ddc9d510848d60667",
+            "ios": "1:868806432422:ios:c6a4011d3938f204d60667",
+            "web": "1:868806432422:web:b7e74edf6ffbdb16d60667"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

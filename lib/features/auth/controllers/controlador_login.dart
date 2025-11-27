@@ -4,6 +4,10 @@ import '../../../core/servicios/servicio_autenticacion.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 
+// Typedef para las funciones de autenticación por email/contraseña.
+// Hace el código más legible y facilita el uso en parámetros y mocks.
+typedef AuthEmailFn = Future<UserCredential> Function(String email, String password);
+
 /// Controlador para la pantalla de inicio de sesión.
 ///
 /// Contiene los `TextEditingController` para los campos, el estado de carga
@@ -17,6 +21,18 @@ class ControladorLogin extends ChangeNotifier {
 
   // Marca para evitar notificar listeners después de `dispose()`.
   bool _disposed = false;
+
+  // Funciones inyectables para facilitar testing. Por defecto usan FirebaseAuth.
+  final AuthEmailFn _signInWithEmail;
+  final AuthEmailFn _createUserWithEmail;
+
+  ControladorLogin({
+    AuthEmailFn? signInWithEmail,
+    AuthEmailFn? createUserWithEmail,
+  })  : _signInWithEmail = signInWithEmail ??
+            ((email, password) => FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password)),
+        _createUserWithEmail = createUserWithEmail ??
+            ((email, password) => FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password));
 
   @override
   void dispose() {
@@ -53,7 +69,7 @@ class ControladorLogin extends ChangeNotifier {
       final email = controladorCorreo.text.trim();
       final pass = controladorContrasena.text;
       if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
+      await _signInWithEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
       // Mapear códigos de Firebase a mensajes amigables cuando sea posible
@@ -73,7 +89,7 @@ class ControladorLogin extends ChangeNotifier {
       final pass = controladorContrasena.text;
       if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
       if (pass.length < 6) return Cadenas.contrasenaCorta;
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
+      await _createUserWithEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
       return mensajeErrorFirebaseAuth(e.code);
