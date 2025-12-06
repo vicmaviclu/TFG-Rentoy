@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   AuthService._();
@@ -12,7 +13,24 @@ class AuthService {
     if (kIsWeb) {
       final provider = GoogleAuthProvider();
       provider.addScope('email');
-      return await _auth.signInWithPopup(provider);
+      final cred = await _auth.signInWithPopup(provider);
+      // Guardar perfil en Firestore si no existe
+      try {
+        final user = cred.user;
+        if (user != null) {
+          final doc = FirebaseFirestore.instance.collection('usuarios').doc(user.uid);
+          final snapshot = await doc.get();
+          if (!snapshot.exists) {
+            await doc.set({
+              'email': user.email ?? '',
+              'nombre_usuario': user.email ?? '',
+              'avatar': 1,
+              'fecha_creacion': FieldValue.serverTimestamp(),
+            });
+          }
+        }
+      } catch (_) {}
+      return cred;
     } else {
       final google = GoogleSignIn();
       final account = await google.signIn();
@@ -22,7 +40,24 @@ class AuthService {
         accessToken: auth.accessToken,
         idToken: auth.idToken,
       );
-      return await _auth.signInWithCredential(credential);
+      final cred = await _auth.signInWithCredential(credential);
+      // Guardar perfil en Firestore si no existe
+      try {
+        final user = cred.user;
+        if (user != null) {
+          final doc = FirebaseFirestore.instance.collection('usuarios').doc(user.uid);
+          final snapshot = await doc.get();
+          if (!snapshot.exists) {
+            await doc.set({
+              'email': user.email ?? '',
+              'nombre_usuario': user.email ?? '',
+              'avatar': 1,
+              'fecha_creacion': FieldValue.serverTimestamp(),
+            });
+          }
+        }
+      } catch (_) {}
+      return cred;
     }
   }
 

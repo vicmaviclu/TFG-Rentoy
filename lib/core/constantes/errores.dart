@@ -24,3 +24,13 @@ String mensajeErrorFirebaseAuth(String code) {
       return Cadenas.errorInesperado; // fallback legible para el usuario
   }
 }
+
+/// Errores específicos de la gestión de perfil.
+class ErroresPerfil {
+  static const String noAutenticado = 'No autenticado';
+  static const String nombreUsuarioVacio = 'Introduce un nombre de usuario';
+  static const String nombreUsuarioEnUso = 'El nombre de usuario ya está en uso';
+  static const String permisoInsuficiente = 'Permisos insuficientes para guardar el perfil';
+  static const String requiereReautenticacion = 'Operación requiere inicio de sesión reciente';
+  static const String errorFirebaseDesconocido = 'Error al acceder a Firebase';
+}

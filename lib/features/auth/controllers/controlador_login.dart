@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/servicios/servicio_autenticacion.dart';
 import '../../../core/constantes/cadenas.dart';
@@ -15,6 +16,7 @@ typedef AuthEmailFn = Future<UserCredential> Function(String email, String passw
 class ControladorLogin extends ChangeNotifier {
   final TextEditingController controladorCorreo = TextEditingController();
   final TextEditingController controladorContrasena = TextEditingController();
+  final TextEditingController controladorUsuario = TextEditingController();
 
   bool _cargando = false;
   bool get cargando => _cargando;
@@ -38,6 +40,7 @@ class ControladorLogin extends ChangeNotifier {
   void dispose() {
     controladorCorreo.dispose();
     controladorContrasena.dispose();
+    controladorUsuario.dispose();
     _disposed = true;
     super.dispose();
   }
@@ -86,10 +89,36 @@ class ControladorLogin extends ChangeNotifier {
     _setCargando(true);
     try {
       final email = controladorCorreo.text.trim();
+      final username = controladorUsuario.text.trim();
       final pass = controladorContrasena.text;
       if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
       if (pass.length < 6) return Cadenas.contrasenaCorta;
+      if (username.isEmpty) return 'Introduce un nombre de usuario';
+
+      // Comprobar si el nombre de usuario ya existe en la colección 'usuarios'
+      final existente = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('nombre_usuario', isEqualTo: username)
+          .limit(1)
+          .get();
+      if (existente.docs.isNotEmpty) {
+        return 'El nombre de usuario ya está en uso';
+      }
+
+      // Crear el usuario en Firebase Auth
       await _createUserWithEmail(email, pass);
+
+      // Guardar datos adicionales en Firestore (sin contraseña)
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final uid = user.uid;
+        await FirebaseFirestore.instance.collection('usuarios').doc(uid).set({
+          'email': email,
+          'nombre_usuario': username,
+          'avatar': 1,
+          'fecha_creacion': FieldValue.serverTimestamp(),
+        });
+      }
       return null;
     } on FirebaseAuthException catch (e) {
       return mensajeErrorFirebaseAuth(e.code);

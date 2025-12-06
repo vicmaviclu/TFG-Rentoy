@@ -8,10 +8,11 @@ import '../constantes/recursos.dart';
 /// semitransparente, además de proporcionar el layout superior común
 /// utilizado en varias páginas (padding, scroll, título del juego).
 class PaginaFondo extends StatelessWidget {
-  const PaginaFondo({super.key, required this.child, this.showTitle = true});
+  const PaginaFondo({super.key, required this.child, this.showTitle = true, this.topRight});
 
   final Widget child;
   final bool showTitle;
+  final Widget? topRight;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,12 @@ class PaginaFondo extends StatelessWidget {
                 ),
               ),
             ),
+            if (topRight != null)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: topRight!,
+              ),
           ],
         ),
       ),

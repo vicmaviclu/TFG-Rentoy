@@ -15,10 +15,12 @@ class FormularioRegistro extends StatefulWidget {
 
 class _FormularioRegistroState extends State<FormularioRegistro> {
   final _confirmPasswordController = TextEditingController();
+  final _usuarioController = TextEditingController();
 
   @override
   void dispose() {
     _confirmPasswordController.dispose();
+    _usuarioController.dispose();
     super.dispose();
   }
 
@@ -39,13 +41,19 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: widget.controller.controladorContrasena,
-              decoration: InputDecoration(labelText: Cadenas.contrasenaHint, filled: true),
-              obscureText: true,
+              controller: _usuarioController,
+              decoration: InputDecoration(labelText: Cadenas.nombreUsuario, filled: true),
               textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.newPassword],
             ),
             const SizedBox(height: 8),
+                   TextField(
+                     controller: widget.controller.controladorContrasena,
+                     decoration: InputDecoration(labelText: Cadenas.contrasenaHint, filled: true),
+                     obscureText: true,
+                     textInputAction: TextInputAction.next,
+                     autofillHints: const [AutofillHints.newPassword],
+                   ),
+                   const SizedBox(height: 8),
             TextField(
               controller: _confirmPasswordController,
               decoration: InputDecoration(labelText: Cadenas.confirmarContrasena, filled: true),
@@ -70,6 +78,8 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
   }
 
   Future<void> _performRegistration() async {
+    // Transferir el valor del nombre de usuario al controlador principal
+    widget.controller.controladorUsuario.text = _usuarioController.text.trim();
     if (_confirmPasswordController.text != widget.controller.controladorContrasena.text) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Cadenas.contrasenasNoCoinciden)));
       return;

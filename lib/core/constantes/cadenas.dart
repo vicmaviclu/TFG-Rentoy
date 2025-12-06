@@ -41,6 +41,7 @@ class Cadenas {
 
   // Perfil y formulario
   static const String nombre = 'Nombre';
+  static const String nombreUsuario = 'Nombre de usuario';
   static const String apellidos = 'Apellidos';
   static const String telefono = 'Teléfono';
   static const String direccion = 'Dirección';
@@ -49,6 +50,8 @@ class Cadenas {
   // Ajustes y navegación
   static const String ajustes = 'Ajustes';
   static const String perfil = 'Perfil';
+  static const String avatar = 'Avatar';
+  static const String guardarCambios = 'Guardar cambios';
   static const String idioma = 'Idioma';
   static const String notificaciones = 'Notificaciones';
   static const String privacidad = 'Privacidad';
@@ -59,6 +62,9 @@ class Cadenas {
   static const String sinConexion = 'Sin conexión a internet';
   static const String reintentar = 'Reintentar';
   static const String accionExitosa = 'Acción completada con éxito';
+
+  // Perfil específicos
+  static const String correoNoEditable = 'El correo no puede modificarse aquí';
 
   // Validaciones adicionales
   static const String campoRequerido = 'Este campo es obligatorio';
