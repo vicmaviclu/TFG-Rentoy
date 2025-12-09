@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
 
 /// Selector simple de avatar: muestra círculo con número y botones para cambiar.
 class AvatarSelector extends StatelessWidget {
@@ -12,10 +14,14 @@ class AvatarSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          child: Text('$valor', style: const TextStyle(fontSize: 24, color: Colors.white)),
+        Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            color: Colores.primario,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(child: Text('$valor', style: EstilosTexto.titulo.copyWith(color: Colors.white, fontSize: 22))),
         ),
         const SizedBox(height: 8),
         Row(
@@ -24,13 +30,15 @@ class AvatarSelector extends StatelessWidget {
             IconButton(
               onPressed: () => onChanged((valor - 1).clamp(1, 9)),
               icon: const Icon(Icons.remove_circle_outline),
+              color: Colores.textoPrimario,
             ),
             const SizedBox(width: 8),
-            Text(Cadenas.avatar),
+            Text(Cadenas.avatar, style: EstilosTexto.subtitulo.copyWith(color: Colores.textoPrimario)),
             const SizedBox(width: 8),
             IconButton(
               onPressed: () => onChanged((valor + 1).clamp(1, 9)),
               icon: const Icon(Icons.add_circle_outline),
+              color: Colores.textoPrimario,
             ),
           ],
         ),

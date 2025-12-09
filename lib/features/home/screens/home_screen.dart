@@ -4,6 +4,7 @@ import '../../../core/constantes/cadenas.dart';
 // import '../../../core/servicios/servicio_autenticacion.dart'; // no usado aquí
 import '../../auth/widgets/tarjeta_auth.dart';
 import '../../perfil/screens/pantalla_perfil.dart';
+import '../../perfil/widgets/avatar_button.dart';
 import '../../../core/widgets/pagina_fondo.dart';
 // import '../../../core/constantes/tamanos.dart';
 
@@ -18,14 +19,9 @@ class HomeScreen extends StatelessWidget {
 
     return PaginaFondo(
       showTitle: true,
-      topRight: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PantallaPerfil()));
-        },
-        child: CircleAvatar(
-          backgroundColor: const Color.fromRGBO(255, 255, 255, 0.12),
-          child: Text((user?.email ?? '').isNotEmpty ? (user!.email![0].toUpperCase()) : '?'),
-        ),
+      topRight: AvatarButton(
+        radius: 28,
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PantallaPerfil())),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

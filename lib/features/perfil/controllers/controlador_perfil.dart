@@ -11,16 +11,35 @@ class ControladorPerfil extends ChangeNotifier {
   final TextEditingController controladorCorreo = TextEditingController();
   final TextEditingController controladorContrasena = TextEditingController();
 
-  int avatarSeleccionado = 1;
+  // Allow injecting Firestore and a user provider for easier testing.
+  final FirebaseFirestore? _firestore;
+  final dynamic _authProvider; // returns a FirebaseAuth-like instance with signOut()
+  final dynamic Function() _userProvider;
+
+  ControladorPerfil({FirebaseFirestore? firestore, dynamic Function()? userProvider, dynamic Function()? authProvider})
+      : _firestore = firestore,
+        _userProvider = userProvider ?? (() => FirebaseAuth.instance.currentUser),
+        _authProvider = authProvider ?? (() => FirebaseAuth.instance);
+
+  int _avatarSeleccionado = 1;
+  int get avatarSeleccionado => _avatarSeleccionado;
+  set avatarSeleccionado(int value) {
+    final v = value.clamp(1, 9).toInt();
+    if (v == _avatarSeleccionado) return;
+    _avatarSeleccionado = v;
+    notifyListeners();
+  }
   bool cargando = false;
 
-  User? get usuario => FirebaseAuth.instance.currentUser;
+  // Use the injected user provider (returns dynamic to allow simple test fakes)
+  dynamic get usuario => _userProvider();
 
   Future<void> cargarPerfil() async {
     final u = usuario;
     if (u == null) return;
     controladorCorreo.text = u.email ?? '';
-    final doc = await FirebaseFirestore.instance.collection('usuarios').doc(u.uid).get();
+    final fs = _firestore ?? FirebaseFirestore.instance;
+    final doc = await fs.collection('usuarios').doc(u.uid).get();
     if (doc.exists) {
       final data = doc.data()!;
       controladorNombreUsuario.text = (data['nombre_usuario'] as String?) ?? '';
@@ -40,7 +59,8 @@ class ControladorPerfil extends ChangeNotifier {
       if (newUsername.isEmpty) return 'Introduce un nombre de usuario';
 
       // Comprobar unicidad (simple)
-      final q = await FirebaseFirestore.instance
+        final fs = _firestore ?? FirebaseFirestore.instance;
+        final q = await fs
           .collection('usuarios')
           .where('nombre_usuario', isEqualTo: newUsername)
           .limit(1)
@@ -52,7 +72,8 @@ class ControladorPerfil extends ChangeNotifier {
 
       // Guardamos perfil en Firestore. No permitimos cambiar el email desde aquí
       // (el email en Auth es la fuente de la verdad para el correo).
-      await FirebaseFirestore.instance.collection('usuarios').doc(u.uid).set({
+      final fs2 = _firestore ?? FirebaseFirestore.instance;
+      await fs2.collection('usuarios').doc(u.uid).set({
         'nombre_usuario': newUsername,
         'avatar': avatarSeleccionado,
         'email': u.email ?? '',
@@ -91,5 +112,12 @@ class ControladorPerfil extends ChangeNotifier {
     controladorCorreo.dispose();
     controladorContrasena.dispose();
     super.dispose();
+  }
+
+  /// Sign out the current user. Uses injected `authProvider` when available
+  /// which helps tests mock sign-out behavior.
+  Future<void> signOut() async {
+    final auth = _authProvider == null ? FirebaseAuth.instance : _authProvider();
+    await (auth as dynamic).signOut();
   }
 }
