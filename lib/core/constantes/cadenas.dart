@@ -1,6 +1,6 @@
 class Cadenas {
   // App
-  static const String nombreApp = 'Rentoy Online';
+  static const String nombreApp = 'Pocket Rentoy';
 
   // Autenticación / pantallas
   static const String tituloLogin = 'Inicia sesión';
@@ -9,6 +9,10 @@ class Cadenas {
   static const String contrasenaHint = 'Contraseña';
   static const String continuarConGoogle = 'Continuar con Google';
   static const String iniciarPartida = 'Iniciar partida';
+  static const String tituloCrearPartida = 'Crear Partida';
+  static const String tituloUnirsePartida = 'Unirse a Partida';
+  static const String btnCrearPartida = 'Crear Partida';
+  static const String btnUnirsePartida = 'Unirse a Partida';
   static const String subtitulo = 'Juega, diviértete y conecta';
   static const String crearCuenta = 'Crear cuenta';
   static const String confirmarContrasena = 'Confirmar contraseña';
@@ -19,14 +23,16 @@ class Cadenas {
 
   // Mensajes de validación y estado
   static const String emailInvalido = 'Correo electrónico inválido';
-  static const String contrasenaCorta = 'La contraseña debe tener al menos 6 caracteres';
+  static const String contrasenaCorta =
+      'La contraseña debe tener al menos 6 caracteres';
   static const String contrasenasNoCoinciden = 'Las contraseñas no coinciden';
   static const String registroCompletado = 'Registro completado';
   static const String usuarioNoEncontrado = 'Usuario no encontrado';
   static const String contrasenaIncorrecta = 'Contraseña incorrecta';
   static const String correoEnUso = 'El correo ya está en uso';
   static const String contrasenaDebil = 'Contraseña demasiado débil';
-  static const String demasiadosIntentos = 'Demasiados intentos, inténtalo más tarde';
+  static const String demasiadosIntentos =
+      'Demasiados intentos, inténtalo más tarde';
   static const String iniciando = 'Iniciando...';
   static const String bienvenido = 'Bienvenido';
 

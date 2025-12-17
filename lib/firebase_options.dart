@@ -52,6 +52,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '868806432422',
     projectId: 'rentoy-online',
     authDomain: 'rentoy-online.firebaseapp.com',
+    databaseURL: 'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'rentoy-online.firebasestorage.app',
     measurementId: 'G-QWZZEXFVDW',
   );
@@ -61,6 +62,7 @@ class DefaultFirebaseOptions {
     appId: '1:868806432422:android:29a26ddc9d510848d60667',
     messagingSenderId: '868806432422',
     projectId: 'rentoy-online',
+    databaseURL: 'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'rentoy-online.firebasestorage.app',
   );
 
@@ -69,6 +71,7 @@ class DefaultFirebaseOptions {
     appId: '1:868806432422:ios:c6a4011d3938f204d60667',
     messagingSenderId: '868806432422',
     projectId: 'rentoy-online',
+    databaseURL: 'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'rentoy-online.firebasestorage.app',
     iosBundleId: 'com.example.rentoy',
   );
