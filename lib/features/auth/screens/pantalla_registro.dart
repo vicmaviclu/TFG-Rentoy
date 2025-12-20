@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controllers/controlador_login.dart';
 import '../widgets/formulario_registro.dart';
@@ -41,13 +42,21 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const EncabezadoApp(),
+            if (Platform.isWindows)
+              const EncabezadoApp(
+                title: TextoAuth.tituloRegistro,
+                showBackButton: true,
+              )
+            else
+              const EncabezadoApp(),
             const SizedBox(height: 16),
             FormularioRegistro(controller: _controller),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.of(context).pushNamed(RutasApp.login),
-              child: const Text(Cadenas.yaTienesCuenta),
+              child: const Text(
+                TextoAuth.yaTienesCuenta,
+              ),
             ),
           ],
         ),

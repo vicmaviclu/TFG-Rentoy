@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constantes/textos.dart';
+
 import '../../../core/constantes/colores.dart';
+import '../../../core/constantes/recursos.dart';
 
 /// Widget que muestra el avatar del usuario en un CircleAvatar y reacciona
 /// a cambios en Firestore en tiempo real. Si no hay avatar en la base de datos
@@ -21,13 +23,15 @@ class AvatarButton extends StatelessWidget {
         onTap: onTap,
         child: CircleAvatar(
           radius: radius,
-          backgroundColor: Colors.white24,
+          backgroundColor: Colores.blanco24,
           child: const Icon(Icons.person),
         ),
       );
     }
 
-    final docRef = FirebaseFirestore.instance.collection('usuarios').doc(user.uid);
+    final docRef = FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid);
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: docRef.snapshots(),
       builder: (context, snap) {
@@ -35,16 +39,16 @@ class AvatarButton extends StatelessWidget {
           final data = snap.data!.data()!;
           final av = data['avatar'];
           final int avatarIndex = (av is int) ? av : 1;
-          final assetPath = 'assets/images/avatares/avatar $avatarIndex.png';
+          final assetPath = Recursos.obtenerAvatar(avatarIndex);
           return GestureDetector(
             onTap: onTap,
             child: Container(
               width: radius * 2,
               height: radius * 2,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colores.blanco24,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white24),
+                border: Border.all(color: Colores.blanco24),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
@@ -56,7 +60,14 @@ class AvatarButton extends StatelessWidget {
                     child: Image.asset(
                       assetPath,
                       errorBuilder: (context, error, stack) {
-                        return Center(child: Text((user.email ?? '?')[0].toUpperCase(), style: EstilosTexto.cuerpo.copyWith(color: Colores.textoPrimario)));
+                        return Center(
+                          child: Text(
+                            (user.email ?? '?')[0].toUpperCase(),
+                            style: EstilosTexto.cuerpo.copyWith(
+                              color: Colores.textoPrimario,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -71,7 +82,7 @@ class AvatarButton extends StatelessWidget {
           onTap: onTap,
           child: CircleAvatar(
             radius: radius,
-            backgroundColor: Colors.white24,
+            backgroundColor: Colores.blanco24,
             child: const Icon(Icons.person),
           ),
         );

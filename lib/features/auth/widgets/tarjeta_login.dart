@@ -5,7 +5,7 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../controllers/controlador_login.dart';
-import 'formulario_credenciales.dart';
+import 'formulario_login.dart';
 import '../../../core/widgets/encabezado_app.dart';
 import '../../../app/rutas.dart';
 import 'tarjeta_auth.dart';
@@ -26,9 +26,16 @@ class TarjetaLogin extends StatelessWidget {
         children: [
           const EncabezadoApp(),
           const SizedBox(height: 6),
-          FormularioCredenciales(controller: controller),
+          FormularioLogin(controller: controller),
           const SizedBox(height: 5),
-          Text('o', style: EstilosTexto.subtitulo.copyWith(color: Colores.textoSecundario, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+          Text(
+            'o',
+            style: EstilosTexto.subtitulo.copyWith(
+              color: Colores.textoSecundario,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 1),
           AnimatedBuilder(
             animation: controller,
@@ -39,22 +46,26 @@ class TarjetaLogin extends StatelessWidget {
                   onPressed: () async {
                     final err = await controller.iniciarSesionConGoogle();
                     if (err != null && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(err)));
                     }
                   },
                   fullWidth: false,
-                  label: Cadenas.continuarConGoogle,
+                  label: TextoAuth.continuarConGoogle,
                   height: 54,
                   iconSize: 30,
-                  textStyle: EstilosTexto.cuerpo.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+                  textStyle: EstilosTexto.boton,
                 ),
               );
             },
           ),
           const SizedBox(height: 6),
           TextButton(
-            onPressed: controller.cargando ? null : () => Navigator.of(context).pushNamed(RutasApp.registro),
-            child: const Text(Cadenas.noTienesCuenta),
+            onPressed: controller.cargando
+                ? null
+                : () => Navigator.of(context).pushNamed(RutasApp.registro),
+            child: const Text(TextoAuth.noTienesCuenta),
           ),
         ],
       ),

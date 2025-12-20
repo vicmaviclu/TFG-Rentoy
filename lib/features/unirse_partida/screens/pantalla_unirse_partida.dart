@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/pagina_fondo.dart';
-import '../../../../core/constantes/cadenas.dart';
+import '../../../core/widgets/pagina_fondo.dart';
+import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
 
 class PantallaUnirsePartida extends StatelessWidget {
   const PantallaUnirsePartida({super.key});
@@ -16,7 +18,7 @@ class PantallaUnirsePartida extends StatelessWidget {
           Align(
             alignment: Alignment.topLeft,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Colores.blanco),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -24,12 +26,8 @@ class PantallaUnirsePartida extends StatelessWidget {
             height: size.height * 0.6,
             child: Center(
               child: Text(
-                Cadenas.tituloUnirsePartida,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                TextoPartida.tituloUnirsePartida,
+                style: EstilosTexto.tituloMedio.copyWith(color: Colores.blanco),
               ),
             ),
           ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'tema.dart';
 import '../features/auth/screens/pantalla_login.dart';
-import '../features/home/screens/home_screen.dart';
+import '../features/home/screens/pantalla_home.dart';
 import 'splash.dart';
 import 'rutas.dart';
 import '../core/constantes/cadenas.dart';
@@ -13,10 +13,10 @@ class AplicacionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: Cadenas.nombreApp,
+      title: TextoComun.nombreApp,
       theme: TemaApp.temaClaro,
       home: const SwitchEstadoAuth(),
-      routes: RutasApp.todas,
+      routes: RutasApp.rutasApp,
     );
   }
 }

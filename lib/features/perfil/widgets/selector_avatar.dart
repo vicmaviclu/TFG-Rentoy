@@ -5,7 +5,11 @@ import '../../../core/constantes/colores.dart';
 
 /// Selector simple de avatar: muestra círculo con número y botones para cambiar.
 class AvatarSelector extends StatelessWidget {
-  const AvatarSelector({super.key, required this.valor, required this.onChanged});
+  const AvatarSelector({
+    super.key,
+    required this.valor,
+    required this.onChanged,
+  });
 
   final int valor;
   final ValueChanged<int> onChanged;
@@ -21,7 +25,12 @@ class AvatarSelector extends StatelessWidget {
             color: Colores.primario,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(child: Text('$valor', style: EstilosTexto.titulo.copyWith(color: Colors.white, fontSize: 22))),
+          child: Center(
+            child: Text(
+              '$valor',
+              style: EstilosTexto.tituloMedio.copyWith(color: Colores.blanco),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Row(
@@ -33,7 +42,12 @@ class AvatarSelector extends StatelessWidget {
               color: Colores.textoPrimario,
             ),
             const SizedBox(width: 8),
-            Text(Cadenas.avatar, style: EstilosTexto.subtitulo.copyWith(color: Colores.textoPrimario)),
+            Text(
+              TextoPerfil.avatar,
+              style: EstilosTexto.subtitulo.copyWith(
+                color: Colores.textoPrimario,
+              ),
+            ),
             const SizedBox(width: 8),
             IconButton(
               onPressed: () => onChanged((valor + 1).clamp(1, 9)),

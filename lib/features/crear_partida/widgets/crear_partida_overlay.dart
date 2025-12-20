@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../controllers/controlador_crear_partida.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
-import '../screens/pantalla_sala_espera.dart';
+import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/errores.dart';
+import '../../../app/rutas.dart';
 
 /// Dialog overlay used on top of Home. Uses `ControladorCrearPartida` to
 /// obtain host name and create the session. Designed to be small and
@@ -43,26 +46,43 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
       rootNav.pop();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        rootNav.push(MaterialPageRoute(
-          builder: (_) => PantallaSalaEspera(sessionId: id, hostName: _ctrl.hostName, maxPlayers: _ctrl.maxPlayers),
-        ));
+        rootNav.pushNamed(
+          RutasApp.salaEspera,
+          arguments: {
+            'sessionId': id,
+            'hostName': _ctrl.hostName,
+            'maxPlayers': _ctrl.maxPlayers,
+          },
+        );
       });
+    } on TimeoutException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(ErroresRed.tiempoAgotado)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creando partida: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${ErroresPartida.errorCrear}: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: 24.0,
+        vertical: 24.0,
+      ),
+      backgroundColor: Colores.transparente,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
         child: Card(
-          color: Color.fromRGBO(247, 255, 249, 0.96),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          color: Colores.primarioTransparente,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           elevation: 16,
           child: Padding(
             padding: const EdgeInsets.all(18.0),
@@ -72,35 +92,76 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text('Crear partida', style: EstilosTexto.tituloMedio)),
-                    IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+                    Expanded(
+                      child: Text(
+                        TextoPartida.tituloCrearPartida,
+                        style: EstilosTexto.tituloMedio.copyWith(
+                          color: Colores.blanco,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text('Nombre: ${_ctrl.hostName}', style: EstilosTexto.subtitulo),
+                Text(
+                  '${TextoPerfil.nombre}: ${_ctrl.hostName}',
+                  style: EstilosTexto.subtitulo.copyWith(
+                    color: Colores.blanco70,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                Text('Número de jugadores', style: EstilosTexto.subtitulo),
+                Text(
+                  TextoPartida.numeroJugadores,
+                  style: EstilosTexto.subtitulo.copyWith(
+                    color: Colores.blanco70,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Row(children: [2, 4, 6].map((n) {
-                  final selected = _ctrl.maxPlayers == n;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text('$n', style: TextStyle(color: selected ? Colors.white : Colores.textoPrimario)),
-                      selected: selected,
-                      selectedColor: Colores.primario,
-                      backgroundColor: Colores.grisGoogle,
-                      onSelected: (_) => setState(() => _ctrl.maxPlayers = n),
-                    ),
-                  );
-                }).toList()),
+                Row(
+                  children: [2, 4, 6].map((n) {
+                    final selected = _ctrl.maxPlayers == n;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ChoiceChip(
+                        label: Text(
+                          '$n',
+                          style: EstilosTexto.boton.copyWith(
+                            color: selected
+                                ? Colores.blanco
+                                : Colores.textoPrimario,
+                          ),
+                        ),
+                        selected: selected,
+                        selectedColor: Colores.primario,
+                        backgroundColor: Colores.grisGoogle,
+                        onSelected: (_) => setState(() => _ctrl.maxPlayers = n),
+                      ),
+                    );
+                  }).toList(),
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 46,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colores.secundario, foregroundColor: Colors.black),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colores.secundario,
+                      foregroundColor: Colores.textoPrimario,
+                    ),
                     onPressed: _ctrl.cargando ? null : _crear,
-                    child: _ctrl.cargando ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Crear partida'),
+                    child: _ctrl.cargando
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colores.blanco,
+                            ),
+                          )
+                        : const Text(TextoPartida.btnCrearPartida),
                   ),
                 ),
               ],

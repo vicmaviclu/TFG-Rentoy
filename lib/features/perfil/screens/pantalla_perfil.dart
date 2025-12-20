@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/controlador_perfil.dart';
-import '../widgets/perfil_scaffold.dart';
+import '../widgets/scaffold_perfil.dart';
 
 class PantallaPerfil extends StatefulWidget {
   const PantallaPerfil({super.key});

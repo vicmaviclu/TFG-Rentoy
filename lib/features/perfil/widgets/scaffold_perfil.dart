@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/pagina_fondo.dart';
 import '../../auth/widgets/tarjeta_auth.dart';
 import '../controllers/controlador_perfil.dart';
-import 'perfil_form.dart';
+import 'formulario_perfil.dart';
 
 class PerfilScaffold extends StatefulWidget {
   final ControladorPerfil controlador;
@@ -32,7 +32,8 @@ class _PerfilScaffoldState extends State<PerfilScaffold> {
     final size = MediaQuery.of(context).size;
 
     return PaginaFondo(
-      showTitle: true,
+      showTitle: false,
+      scrollable: false,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

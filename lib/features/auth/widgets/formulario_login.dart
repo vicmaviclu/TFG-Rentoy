@@ -4,16 +4,16 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 
 /// Formulario para inicio de sesión (correo + contraseña).
-class FormularioCredenciales extends StatefulWidget {
+class FormularioLogin extends StatefulWidget {
   final ControladorLogin controller;
 
-  const FormularioCredenciales({required this.controller, super.key});
+  const FormularioLogin({required this.controller, super.key});
 
   @override
-  State<FormularioCredenciales> createState() => _FormularioCredencialesState();
+  State<FormularioLogin> createState() => _FormularioLoginState();
 }
 
-class _FormularioCredencialesState extends State<FormularioCredenciales> {
+class _FormularioLoginState extends State<FormularioLogin> {
   ControladorLogin get controller => widget.controller;
 
   @override
@@ -25,7 +25,10 @@ class _FormularioCredencialesState extends State<FormularioCredenciales> {
           children: [
             TextField(
               controller: controller.controladorCorreo,
-              decoration: InputDecoration(labelText: Cadenas.correoHint, filled: true),
+              decoration: InputDecoration(
+                labelText: TextoAuth.correoHint,
+                filled: true,
+              ),
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.email],
@@ -33,7 +36,10 @@ class _FormularioCredencialesState extends State<FormularioCredenciales> {
             const SizedBox(height: 8),
             TextField(
               controller: controller.controladorContrasena,
-              decoration: InputDecoration(labelText: Cadenas.contrasenaHint, filled: true),
+              decoration: InputDecoration(
+                labelText: TextoAuth.contrasenaHint,
+                filled: true,
+              ),
               obscureText: true,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.password],
@@ -45,12 +51,21 @@ class _FormularioCredencialesState extends State<FormularioCredenciales> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   minimumSize: const Size(double.infinity, 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: controller.cargando ? null : _performLogin,
                 child: controller.cargando
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
-                    : Text(Cadenas.tituloLogin, style: EstilosTexto.cuerpoNegrita),
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(),
+                      )
+                    : Text(
+                        TextoAuth.tituloLogin,
+                        style: EstilosTexto.cuerpoNegrita,
+                      ),
               ),
             ),
           ],

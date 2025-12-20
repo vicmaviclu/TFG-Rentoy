@@ -14,13 +14,17 @@ class BotonGoogle extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
   final String label;
+
   /// Si es true, el botón usará todo el ancho disponible. Si es false,
   /// ajustará su tamaño al contenido y se centrará.
   final bool fullWidth;
+
   /// Altura opcional del botón (si no se proporciona se usa `Tamanos.buttonHeight`).
   final double? height;
+
   /// Tamaño opcional del icono.
   final double? iconSize;
+
   /// Estilo de texto opcional para la etiqueta.
   final TextStyle? textStyle;
 
@@ -28,7 +32,7 @@ class BotonGoogle extends StatelessWidget {
     super.key,
     this.isLoading = false,
     required this.onPressed,
-    this.label = Cadenas.continuarConGoogle,
+    this.label = TextoAuth.continuarConGoogle,
     this.fullWidth = false,
     this.height,
     this.iconSize,
@@ -44,16 +48,24 @@ class BotonGoogle extends StatelessWidget {
           ? SizedBox(
               width: resolvedIconSize,
               height: resolvedIconSize,
-              child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: const CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colores.blanco,
+              ),
             )
           : Image.asset(
               Recursos.iconoGoogle,
               height: resolvedIconSize,
               width: resolvedIconSize,
             ),
-        label: Text(
-        isLoading ? Cadenas.iniciando : label,
-        style: textStyle ?? EstilosTexto.cuerpo.copyWith(fontWeight: FontWeight.w600, color: Colores.textoPrimario),
+      label: Text(
+        isLoading ? TextoAuth.iniciando : label,
+        style:
+            textStyle ??
+            EstilosTexto.cuerpo.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colores.textoPrimario,
+            ),
       ),
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
@@ -61,15 +73,24 @@ class BotonGoogle extends StatelessWidget {
         foregroundColor: Colores.textoPrimario,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        minimumSize: fullWidth ? Size(double.infinity, resolvedHeight) : Size.zero,
+        minimumSize: fullWidth
+            ? Size(double.infinity, resolvedHeight)
+            : Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
 
     if (fullWidth) {
-      return SizedBox(width: double.infinity, height: resolvedHeight, child: btn);
+      return SizedBox(
+        width: double.infinity,
+        height: resolvedHeight,
+        child: btn,
+      );
     }
 
-    return SizedBox(height: resolvedHeight, child: Center(child: btn));
+    return SizedBox(
+      height: resolvedHeight,
+      child: Center(child: btn),
+    );
   }
 }

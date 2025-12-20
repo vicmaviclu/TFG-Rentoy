@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rentoy/features/sala_espera/screens/pantalla_sala_espera.dart';
+import 'package:rentoy/features/perfil/screens/pantalla_perfil.dart';
 import '../features/auth/screens/pantalla_login.dart';
 import '../features/auth/screens/pantalla_registro.dart';
-import '../features/home/screens/home_screen.dart';
+import '../features/home/screens/pantalla_home.dart';
 import '../features/crear_partida/screens/pantalla_crear_partida.dart';
 import '../features/unirse_partida/screens/pantalla_unirse_partida.dart';
-import '../features/plantilla/screens/pantalla_plantilla.dart';
 
 /// Rutas globales de la aplicación.
 ///
@@ -16,15 +18,45 @@ class RutasApp {
   static const String crearPartida = '/crear_partida';
   static const String unirsePartida = '/unirse_partida';
   static const String plantilla = '/plantilla';
+  static const String salaEspera = '/sala_espera';
+  static const String perfil = '/perfil';
 
-  static Map<String, WidgetBuilder> get todas {
+  static Map<String, WidgetBuilder> get rutasApp {
     return {
       login: (c) => const PantallaLogin(),
       registro: (c) => const PantallaRegistro(),
       inicio: (c) => const HomeScreen(),
+      perfil: (c) => const PantallaPerfil(),
       crearPartida: (c) => const PantallaCrearPartida(),
       unirsePartida: (c) => const PantallaUnirsePartida(),
-      plantilla: (c) => const PantallaPlantilla(),
+      salaEspera: (c) => _salaEsperaFromContext(c),
     };
+  }
+
+  // Helper: construye el widget de la sala de espera.
+  static Widget _salaEsperaWidget(
+    String sessionId,
+    String hostName,
+    int maxPlayers,
+  ) {
+    return PantallaSalaEspera(
+      sessionId: sessionId,
+      hostName: hostName,
+      maxPlayers: maxPlayers,
+    );
+  }
+
+  // Extrae `RouteSettings.arguments` del contexto y construye el widget.
+  static Widget _salaEsperaFromContext(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<String, dynamic>) {
+      final sessionId = args['sessionId']?.toString() ?? '';
+      final hostName = args['hostName']?.toString() ?? '';
+      final maxPlayers = args['maxPlayers'] is int
+          ? args['maxPlayers'] as int
+          : int.tryParse(args['maxPlayers']?.toString() ?? '') ?? 2;
+      return _salaEsperaWidget(sessionId, hostName, maxPlayers);
+    }
+    return const SizedBox.shrink();
   }
 }

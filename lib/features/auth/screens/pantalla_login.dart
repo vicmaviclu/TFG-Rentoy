@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-
-// Header and common page background provided by core widgets
 import '../../../core/widgets/pagina_fondo.dart';
 import '../controllers/controlador_login.dart';
 import '../widgets/tarjeta_login.dart';
 
 /// Pantalla de inicio de sesión (presentación y navegación).
-///
-/// Esta pantalla delega la parte visual a widgets en
-/// `features/auth/widgets/` y mantiene la lógica de navegación y
-/// controladores.
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
 

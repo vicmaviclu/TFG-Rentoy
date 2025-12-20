@@ -16,8 +16,8 @@ class TarjetaAuth extends StatelessWidget {
     return SizedBox(
       width: size.width < 600 ? size.width * 0.92 : 700,
       child: Material(
-        elevation: 8,
-        color: Colors.transparent,
+      elevation: 8,
+      color: Colores.transparente,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tamanos.cardRadius)),
         child: Container(
           decoration: BoxDecoration(

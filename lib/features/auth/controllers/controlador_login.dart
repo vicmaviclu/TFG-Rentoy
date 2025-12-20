@@ -2,12 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/servicios/servicio_autenticacion.dart';
-import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 
 // Typedef para las funciones de autenticación por email/contraseña.
 // Hace el código más legible y facilita el uso en parámetros y mocks.
-typedef AuthEmailFn = Future<UserCredential> Function(String email, String password);
+typedef AuthEmailFn =
+    Future<UserCredential> Function(String email, String password);
 
 /// Controlador para la pantalla de inicio de sesión.
 ///
@@ -31,10 +31,17 @@ class ControladorLogin extends ChangeNotifier {
   ControladorLogin({
     AuthEmailFn? signInWithEmail,
     AuthEmailFn? createUserWithEmail,
-  })  : _signInWithEmail = signInWithEmail ??
-            ((email, password) => FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password)),
-        _createUserWithEmail = createUserWithEmail ??
-            ((email, password) => FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password));
+  }) : _signInWithEmail =
+           signInWithEmail ??
+           ((email, password) => FirebaseAuth.instance
+               .signInWithEmailAndPassword(email: email, password: password)),
+       _createUserWithEmail =
+           createUserWithEmail ??
+           ((email, password) =>
+               FirebaseAuth.instance.createUserWithEmailAndPassword(
+                 email: email,
+                 password: password,
+               ));
 
   @override
   void dispose() {
@@ -71,7 +78,8 @@ class ControladorLogin extends ChangeNotifier {
     try {
       final email = controladorCorreo.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
+      if (email.isEmpty || !email.contains('@'))
+        return ErroresValidacion.emailInvalido;
       await _signInWithEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -91,8 +99,9 @@ class ControladorLogin extends ChangeNotifier {
       final email = controladorCorreo.text.trim();
       final username = controladorUsuario.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@')) return Cadenas.emailInvalido;
-      if (pass.length < 6) return Cadenas.contrasenaCorta;
+      if (email.isEmpty || !email.contains('@'))
+        return ErroresValidacion.emailInvalido;
+      if (pass.length < 6) return ErroresValidacion.contrasenaCorta;
       if (username.isEmpty) return 'Introduce un nombre de usuario';
 
       // Comprobar si el nombre de usuario ya existe en la colección 'usuarios'

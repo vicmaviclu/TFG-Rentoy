@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../core/services/realtime_service.dart';
+import '../../../core/servicios/servicio_realtime.dart';
 import '../../perfil/controllers/controlador_perfil.dart';
 
 /// Controlador que encapsula la lógica de crear una partida. Obtiene el
-/// nombre del perfil (si existe) y delega la creación en `RealtimeService`.
+/// nombre del perfil (si existe) y delega la creación en `ServicioRealtime`.
 class ControladorCrearPartida extends ChangeNotifier {
-  final RealtimeService _servicio = RealtimeService();
+  final ServicioRealtime _servicio = ServicioRealtime();
   final ControladorPerfil _perfil = ControladorPerfil();
 
   int maxPlayers = 2;
@@ -19,7 +19,9 @@ class ControladorCrearPartida extends ChangeNotifier {
     if (perfilName.isNotEmpty) return perfilName;
     final user = _perfil.usuario as User?;
     if (user == null) return 'Jugador';
-    return user.displayName?.trim().isEmpty == false ? user.displayName! : (user.email ?? user.uid);
+    return user.displayName?.trim().isNotEmpty == true
+        ? user.displayName!
+        : 'Jugador';
   }
 
   /// Precarga perfil (intenta cargar valores guardados en Firestore).
@@ -32,7 +34,10 @@ class ControladorCrearPartida extends ChangeNotifier {
     cargando = true;
     notifyListeners();
     try {
-      final id = await _servicio.createSession(hostName: nombre, maxPlayers: maxPlayers);
+      final id = await _servicio.crearSesion(
+        hostName: nombre,
+        maxPlayers: maxPlayers,
+      );
       return id;
     } finally {
       cargando = false;

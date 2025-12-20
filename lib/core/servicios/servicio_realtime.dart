@@ -1,0 +1,341 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+import '../../models/usuario_model.dart';
+
+class ServicioRealtime {
+  final FirebaseDatabase _db = FirebaseDatabase.instance;
+
+  /// Devuelve el nombre de usuario a usar (preferente: campo `name` o `username` en Firestore,
+  /// luego displayName; nunca usar el email si es posible). Si no encuentra nada, usa `fallback` o 'Jugador'.
+  Future<String> _resolvedUsernameForUser(
+    String? providedName,
+    String uid,
+  ) async {
+    // If providedName looks like a real username (not an email), keep it
+    if (providedName != null &&
+        providedName.isNotEmpty &&
+        !providedName.contains('@')) {
+      return providedName;
+    }
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          final userModel = UsuarioModel.fromDocument(doc);
+          if (userModel.nombreUsuario.isNotEmpty) {
+            return userModel.nombreUsuario;
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Fallback to displayName if available and not an email
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null &&
+        user.displayName != null &&
+        user.displayName!.isNotEmpty &&
+        !user.displayName!.contains('@')) {
+      return user.displayName!;
+    }
+
+    return providedName != null && providedName.isNotEmpty
+        ? providedName.replaceAll(RegExp(r'@.*'), '')
+        : 'Jugador';
+  }
+
+  /// Crea una nueva sesión con código numérico de 6 dígitos y la guarda
+  /// en Realtime Database y en Firestore (colección `partidas`).
+  Future<String> crearSesion({
+    required String hostName,
+    required int maxPlayers,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception(
+        'Autenticación requerida. Inicia sesión para crear una partida.',
+      );
+    }
+    final rnd = Random.secure();
+    // Generar PIN de 6 dígitos (no comprobamos colisiones según petición)
+    final pin = (rnd.nextInt(900000) + 100000).toString();
+
+    // Crear referencia push para que Firebase genere un id aleatorio
+    final ref = _db.ref().child('sessions').push();
+    final sessionId = ref.key ?? '';
+    final now = DateTime.now().toIso8601String();
+
+    // try to fetch current user's avatar index from Firestore profile
+    int avatarIndex = 1;
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      if (userDoc.exists) {
+        final userModel = UsuarioModel.fromDocument(userDoc);
+        avatarIndex = userModel.avatar;
+      }
+    } catch (_) {}
+
+    final hostDisplay = await _resolvedUsernameForUser(hostName, user.uid);
+
+    final sessionData = {
+      'pin': pin,
+      'anfitrion': hostDisplay,
+      'maxJugadores': maxPlayers,
+      'estado': 'esperando',
+      'creadoEn': now,
+      'jugadores': {
+        // initial value: store as a map with name+avatar+uid when available
+        'jugador 1': {
+          'name': hostDisplay,
+          'avatar': avatarIndex,
+          'uid': user.uid,
+        },
+      },
+    };
+
+    // Add timeouts to DB operations
+    await ref.set(sessionData).timeout(const Duration(seconds: 10));
+
+    // Ensure the host slot is explicitly set (avoid race/format issues from other writers)
+    await ref
+        .child('jugadores/jugador 1')
+        .set({'name': hostDisplay, 'avatar': avatarIndex, 'uid': user.uid})
+        .timeout(const Duration(seconds: 5));
+
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    await partidaDoc
+        .set({
+          'pin': pin,
+          'jugadores': [hostDisplay],
+          'estado': 'esperando',
+          'maxJugadores': maxPlayers,
+          'creadoEn': FieldValue.serverTimestamp(),
+        })
+        .timeout(const Duration(seconds: 10));
+
+    return sessionId;
+  }
+
+  /// Sale de la sesión: elimina la entrada del jugador que coincide con el uid actual
+  /// y actualiza el documento de Firestore eliminando el nombre del array `jugadores`.
+  Future<void> salirDeSesion(String sessionId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('Autenticación requerida.');
+    }
+    final ref = referenciaSesion(sessionId);
+    final snap = await ref.get();
+    if (!snap.exists) {
+      return;
+    }
+
+    final data = snap.value as dynamic;
+    Map<String, dynamic> players = {};
+    try {
+      if (data is Map && data['jugadores'] != null) {
+        players = Map<String, dynamic>.from(data['jugadores']);
+      }
+    } catch (_) {
+      players = {};
+    }
+
+    String? removedName;
+    for (var i = 1; i <= (data['maxJugadores'] ?? 4); i++) {
+      final key = 'jugador $i';
+      final val = players.containsKey(key) ? players[key] : null;
+      if (val is Map && val['uid'] != null && val['uid'] == user.uid) {
+        removedName = val['name']?.toString();
+        await ref.child('jugadores/$key').remove();
+        break;
+      } else if (val is String) {
+        // if the slot stores a plain name, try to match by resolving current user's name
+        final resolved = await _resolvedUsernameForUser(null, user.uid);
+        if (val == resolved) {
+          removedName = val.toString();
+          await ref.child('jugadores/$key').remove();
+          break;
+        }
+      }
+    }
+
+    if (removedName != null) {
+      final firestore = FirebaseFirestore.instance;
+      final partidaDoc = firestore.collection('partidas').doc(sessionId);
+      final partidaSnap = await partidaDoc.get();
+      if (partidaSnap.exists) {
+        await partidaDoc.update({
+          'jugadores': FieldValue.arrayRemove([removedName]),
+        });
+      }
+    }
+  }
+
+  DatabaseReference referenciaSesion(String sessionId) =>
+      _db.ref('sessions/$sessionId');
+
+  Stream<DatabaseEvent> streamSesion(String sessionId) =>
+      referenciaSesion(sessionId).onValue;
+
+  /// Elimina la sesión tanto en Realtime como en Firestore (usado por el anfitrión)
+  Future<void> cancelarSesion(String sessionId) async {
+    // eliminar Realtime
+    await referenciaSesion(sessionId).remove();
+    // eliminar Firestore
+    final firestore = FirebaseFirestore.instance;
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    final partidaSnap = await partidaDoc.get();
+    if (partidaSnap.exists) {
+      await partidaDoc.delete();
+    }
+  }
+
+  /// Une a la sesión buscando el siguiente slot libre (jugador2..jugadorN)
+  Future<void> unirASesion(String sessionId, String playerName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception(
+        'Autenticación requerida. Inicia sesión para unirte a una partida.',
+      );
+    }
+    final ref = referenciaSesion(sessionId);
+    final snap = await ref.get();
+    if (!snap.exists) {
+      throw Exception('Sesión no encontrada');
+    }
+
+    final data = snap.value as dynamic;
+    final maxPlayers = (data is Map && data['maxJugadores'] is int)
+        ? data['maxJugadores'] as int
+        : (data['maxJugadores'] as int?) ?? 2;
+
+    Map<String, dynamic> players = {};
+    try {
+      if (data is Map && data['jugadores'] != null) {
+        players = Map<String, dynamic>.from(data['jugadores']);
+      }
+    } catch (_) {
+      players = {};
+    }
+
+    int slot = 0;
+    for (var i = 1; i <= maxPlayers; i++) {
+      final key = 'jugador $i';
+      final val = players.containsKey(key) ? players[key] : null;
+      if (val == null || (val is String && val.isEmpty)) {
+        slot = i;
+        break;
+      }
+    }
+
+    if (slot == 0) {
+      throw Exception('La sala está llena');
+    }
+
+    // fetch avatar for current user
+    int avatarIndex = 1;
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        final userModel = UsuarioModel.fromDocument(userDoc);
+        avatarIndex = userModel.avatar;
+      }
+    } catch (_) {}
+
+    final resolvedName = await _resolvedUsernameForUser(playerName, user.uid);
+    final playerKey = 'jugador $slot';
+    // write as map with name, avatar and uid to allow avatars in UI
+    await ref.child('jugadores/$playerKey').set({
+      'name': resolvedName,
+      'avatar': avatarIndex,
+      'uid': user.uid,
+    });
+
+    // Actualizar Firestore (solo nombre)
+    final firestore = FirebaseFirestore.instance;
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    final partidaSnap = await partidaDoc.get();
+    if (partidaSnap.exists) {
+      await partidaDoc.update({
+        'jugadores': FieldValue.arrayUnion([resolvedName]),
+      });
+    }
+  }
+
+  /// Toma un hueco específico en la sesión (cambia de slot si ya estabas en otro).
+  Future<void> tomarHueco(String sessionId, int slot) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('Autenticación requerida.');
+    }
+    final ref = referenciaSesion(sessionId);
+    final snap = await ref.get();
+    if (!snap.exists) {
+      throw Exception('Sesión no encontrada');
+    }
+
+    final data = snap.value as dynamic;
+    final maxPlayers = (data is Map && data['maxJugadores'] is int)
+        ? data['maxJugadores'] as int
+        : (data['maxJugadores'] as int?) ?? 2;
+
+    Map<String, dynamic> players = {};
+    try {
+      if (data is Map && data['jugadores'] != null) {
+        players = Map<String, dynamic>.from(data['jugadores']);
+      }
+    } catch (_) {
+      players = {};
+    }
+
+    // resolve display name for current user (prefer usuarios doc, then displayName)
+    final resolvedName = await _resolvedUsernameForUser(null, user.uid);
+
+    // try to fetch avatar index for current user
+    int avatarIndex = 1;
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        final userModel = UsuarioModel.fromDocument(userDoc);
+        avatarIndex = userModel.avatar;
+      }
+    } catch (_) {}
+
+    // remove any existing slot for this uid (handle old map entries and string entries)
+    for (var i = 1; i <= maxPlayers; i++) {
+      final key = 'jugador $i';
+      final val = players.containsKey(key) ? players[key] : null;
+      if (val is Map && val['uid'] != null && val['uid'] == user.uid) {
+        await ref.child('jugadores/$key').remove();
+      } else if (val is String && val == resolvedName) {
+        await ref.child('jugadores/$key').remove();
+      }
+    }
+
+    final targetKey = 'jugador $slot';
+    await ref.child('jugadores/$targetKey').set({
+      'name': resolvedName,
+      'avatar': avatarIndex,
+      'uid': user.uid,
+    });
+  }
+}
