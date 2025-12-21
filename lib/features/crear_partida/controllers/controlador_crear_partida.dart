@@ -29,7 +29,10 @@ class ControladorCrearPartida extends ChangeNotifier {
 
   /// Crea la sesión y devuelve el id/código.
   Future<String> crearSesion() async {
-    await cargarPerfil();
+    // No esperamos a cargarPerfil explícitamente aquí para evitar bloqueos
+    // si Firestore tarda o no hay conexión. Ya se lanzó en initState y
+    // el servicio maneja su propia resolución de nombre con timeout.
+
     final nombre = hostName;
     cargando = true;
     notifyListeners();
@@ -37,6 +40,7 @@ class ControladorCrearPartida extends ChangeNotifier {
       final id = await _servicio.crearSesion(
         hostName: nombre,
         maxPlayers: maxPlayers,
+        avatar: _perfil.avatarSeleccionado,
       );
       return id;
     } finally {

@@ -82,32 +82,81 @@ class _JugadorTileState extends State<JugadorTile> {
     final display = (_displayName ?? '').isNotEmpty
         ? _displayName!
         : TextoPartida.esperando;
+
+    // Check if slot is effectively empty (no name/uid)
+    // In our logic, waiting slots usually have name="" or "Esperando..." depending on upstream
+    // But usually waiting players in the stream have empty name if not joined.
+    // Let's rely on whether we have a valid display name that is NOT the placeholder, OR a valid UID.
+
+    final bool isEmptySlot = widget.uid == null || (widget.uid!.isEmpty);
+
+    if (isEmptySlot) {
+      // Diseño de "hueco vacío" (Empty Slot)
+      return GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(
+              0xFF1B5E20,
+            ).withOpacity(0.6), // Verde oscuro traslúcido
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color.fromARGB(31, 15, 11, 11),
+              width: 2,
+            ), // Borde suave
+            boxShadow: [
+              const BoxShadow(
+                color: Colors.black26,
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            TextoPartida.esperando, // "Esperando..."
+            style: EstilosTexto.cuerpo.copyWith(
+              color: Colores.blanco70,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Diseño de "Slot ocupado" (Filled Slot)
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colores.blanco08,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colores.negro12, blurRadius: 6)],
-          border: Border.all(color: Colores.blanco12),
+          color: Colores.blanco12, // Fondo semi-claro para destacar jugador
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            const BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
+          border: Border.all(color: Colores.blanco24), // Borde sutil
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            // avatar image if provided
-            // prefer resolved avatar -> widget.avatarIndex -> fallback initial
+            // avatar
             if (_resolvedAvatar != null || widget.avatarIndex != null)
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: Colores.blanco24,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       Recursos.obtenerAvatar(
                         _resolvedAvatar ?? widget.avatarIndex ?? 1,
@@ -127,7 +176,7 @@ class _JugadorTileState extends State<JugadorTile> {
               )
             else
               CircleAvatar(
-                radius: 20,
+                radius: 22,
                 backgroundColor: Colores.acento,
                 child: Text(
                   display.isNotEmpty ? display[0].toUpperCase() : '?',
@@ -136,15 +185,13 @@ class _JugadorTileState extends State<JugadorTile> {
               ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    display,
-                    style: EstilosTexto.cuerpo.copyWith(color: Colores.blanco),
-                  ),
-                ],
+              child: Text(
+                display,
+                style: EstilosTexto.cuerpoNegrita.copyWith(
+                  color: Colores.blanco,
+                  fontSize: 16,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

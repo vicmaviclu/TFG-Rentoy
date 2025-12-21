@@ -58,7 +58,7 @@ class SalaEsperaController {
       }
 
       return players;
-    });
+    }).asBroadcastStream();
   }
 
   /// Pide al servicio que tome un hueco específico (delegado)
@@ -72,7 +72,7 @@ class SalaEsperaController {
 
   /// Stream con el snapshot completo de la sesión (DatabaseEvent)
   Stream<DatabaseEvent> sessionStream(String sessionId) =>
-      _servicio.streamSesion(sessionId);
+      _servicio.streamSesion(sessionId).asBroadcastStream();
 
   /// Pide al servicio cancelar la sesion (eliminar)
   Future<void> cancelarSesion(String sessionId) async {

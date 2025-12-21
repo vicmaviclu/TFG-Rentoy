@@ -53,13 +53,14 @@ class ServicioRealtime {
         : 'Jugador';
   }
 
-  /// Crea una nueva sesión con código numérico de 6 dígitos y la guarda
-  /// en Realtime Database y en Firestore (colección `partidas`).
+  /// Crea una nueva sesión con código numérico de 6 dígitos.
+  /// Genera la escritura de forma optimista (sin esperar confirmación de red)
+  /// para evitar bloqueos y timeouts en conexiones lentas.
   Future<String> crearSesion({
     required String hostName,
     required int maxPlayers,
+    required int avatar,
   }) async {
-    final firestore = FirebaseFirestore.instance;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception(
@@ -67,29 +68,14 @@ class ServicioRealtime {
       );
     }
     final rnd = Random.secure();
-    // Generar PIN de 6 dígitos (no comprobamos colisiones según petición)
     final pin = (rnd.nextInt(900000) + 100000).toString();
 
-    // Crear referencia push para que Firebase genere un id aleatorio
     final ref = _db.ref().child('sessions').push();
     final sessionId = ref.key ?? '';
     final now = DateTime.now().toIso8601String();
 
-    // try to fetch current user's avatar index from Firestore profile
-    int avatarIndex = 1;
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .get()
-          .timeout(const Duration(seconds: 5));
-      if (userDoc.exists) {
-        final userModel = UsuarioModel.fromDocument(userDoc);
-        avatarIndex = userModel.avatar;
-      }
-    } catch (_) {}
-
-    final hostDisplay = await _resolvedUsernameForUser(hostName, user.uid);
+    // Host Display comes directly from arguments
+    final hostDisplay = hostName.isEmpty ? 'Jugador' : hostName;
 
     final sessionData = {
       'pin': pin,
@@ -98,26 +84,20 @@ class ServicioRealtime {
       'estado': 'esperando',
       'creadoEn': now,
       'jugadores': {
-        // initial value: store as a map with name+avatar+uid when available
-        'jugador 1': {
-          'name': hostDisplay,
-          'avatar': avatarIndex,
-          'uid': user.uid,
-        },
+        'jugador 1': {'name': hostDisplay, 'avatar': avatar, 'uid': user.uid},
       },
     };
 
-    // Add timeouts to DB operations
-    await ref.set(sessionData).timeout(const Duration(seconds: 10));
+    // Fire and forget - Do not await DB writes
+    ref.set(sessionData).catchError((e) {
+      print("Error writing session Rtdb: $e");
+    });
 
-    // Ensure the host slot is explicitly set (avoid race/format issues from other writers)
-    await ref
-        .child('jugadores/jugador 1')
-        .set({'name': hostDisplay, 'avatar': avatarIndex, 'uid': user.uid})
-        .timeout(const Duration(seconds: 5));
-
-    final partidaDoc = firestore.collection('partidas').doc(sessionId);
-    await partidaDoc
+    // Also fire-and-forget Firestore write
+    final firestore = FirebaseFirestore.instance;
+    firestore
+        .collection('partidas')
+        .doc(sessionId)
         .set({
           'pin': pin,
           'jugadores': [hostDisplay],
@@ -125,7 +105,9 @@ class ServicioRealtime {
           'maxJugadores': maxPlayers,
           'creadoEn': FieldValue.serverTimestamp(),
         })
-        .timeout(const Duration(seconds: 10));
+        .catchError((e) {
+          print("Error writing session Firestore: $e");
+        });
 
     return sessionId;
   }
