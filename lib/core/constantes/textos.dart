@@ -42,7 +42,6 @@ class EstilosTexto {
     color: Colores.textoSecundario,
   );
 
-  // Más estilos útiles
   static const TextStyle boton = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w600,

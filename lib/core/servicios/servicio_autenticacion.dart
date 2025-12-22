@@ -53,8 +53,7 @@ class AuthService {
           fechaCreacion: DateTime.now(),
         );
         final map = newUser.toMap();
-        // Ensure server timestamp compatibility if needed, though DateTime.now() is fine for creation time usually.
-        // If we strictly want server time:
+
         map['fecha_creacion'] = FieldValue.serverTimestamp();
 
         await doc.set(map);

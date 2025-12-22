@@ -1,35 +1,32 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/pagina_fondo.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
+import '../../../core/widgets/plantilla_pantalla_principal.dart';
 
 class PantallaUnirsePartida extends StatelessWidget {
   const PantallaUnirsePartida({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return PaginaFondo(
-      showTitle: true,
+    return PlantillaPantallaPrincipal(
+      mostrarVolver: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colores.blanco),
-              onPressed: () => Navigator.of(context).pop(),
+          Text(
+            TextoPartida.tituloUnirsePartida,
+            style: EstilosTexto.tituloMedio.copyWith(
+              color: Colores.blanco,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
-          SizedBox(
-            height: size.height * 0.6,
-            child: Center(
-              child: Text(
-                TextoPartida.tituloUnirsePartida,
-                style: EstilosTexto.tituloMedio.copyWith(color: Colores.blanco),
-              ),
-            ),
+          // TODO: Añadir entrada de PIN y botón de unirse
+          const SizedBox(height: 20),
+          Text(
+            TextoPartida.introducePin,
+            style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
           ),
         ],
       ),

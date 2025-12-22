@@ -10,10 +10,10 @@ import '../../../core/constantes/recursos.dart';
 /// Widget que muestra el avatar del usuario en un CircleAvatar y reacciona
 /// a cambios en Firestore en tiempo real. Si no hay avatar en la base de datos
 /// muestra una letra por defecto.
-class AvatarButton extends StatelessWidget {
+class BotonAvatar extends StatelessWidget {
   final double radius;
   final VoidCallback? onTap;
-  const AvatarButton({this.radius = 24, this.onTap, super.key});
+  const BotonAvatar({this.radius = 24, this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {

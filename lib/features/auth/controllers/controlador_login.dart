@@ -12,7 +12,7 @@ typedef AuthEmailFn =
 /// Controlador para la pantalla de inicio de sesión.
 ///
 /// Contiene los `TextEditingController` para los campos, el estado de carga
-/// y los métodos que delegan en `AuthService`/Firebase para autenticación.
+/// y los métodos que delegan en `ServicioAutenticacion`/Firebase para autenticación.
 class ControladorLogin extends ChangeNotifier {
   final TextEditingController controladorCorreo = TextEditingController();
   final TextEditingController controladorContrasena = TextEditingController();
@@ -24,19 +24,19 @@ class ControladorLogin extends ChangeNotifier {
   // Marca para evitar notificar listeners después de `dispose()`.
   bool _disposed = false;
 
-  // Funciones inyectables para facilitar testing. Por defecto usan FirebaseAuth.
-  final AuthEmailFn _signInWithEmail;
-  final AuthEmailFn _createUserWithEmail;
+  // Funciones inyectables para facilitar pruebas. Por defecto usan FirebaseAuth.
+  final AuthEmailFn _iniciarSesionEmail;
+  final AuthEmailFn _crearUsuarioEmail;
 
   ControladorLogin({
-    AuthEmailFn? signInWithEmail,
-    AuthEmailFn? createUserWithEmail,
-  }) : _signInWithEmail =
-           signInWithEmail ??
+    AuthEmailFn? iniciarSesionEmail,
+    AuthEmailFn? crearUsuarioEmail,
+  }) : _iniciarSesionEmail =
+           iniciarSesionEmail ??
            ((email, password) => FirebaseAuth.instance
                .signInWithEmailAndPassword(email: email, password: password)),
-       _createUserWithEmail =
-           createUserWithEmail ??
+       _crearUsuarioEmail =
+           crearUsuarioEmail ??
            ((email, password) =>
                FirebaseAuth.instance.createUserWithEmailAndPassword(
                  email: email,
@@ -80,7 +80,7 @@ class ControladorLogin extends ChangeNotifier {
       final pass = controladorContrasena.text;
       if (email.isEmpty || !email.contains('@'))
         return ErroresValidacion.emailInvalido;
-      await _signInWithEmail(email, pass);
+      await _iniciarSesionEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
       // Mapear códigos de Firebase a mensajes amigables cuando sea posible
@@ -115,7 +115,7 @@ class ControladorLogin extends ChangeNotifier {
       }
 
       // Crear el usuario en Firebase Auth
-      await _createUserWithEmail(email, pass);
+      await _crearUsuarioEmail(email, pass);
 
       // Guardar datos adicionales en Firestore (sin contraseña)
       final user = FirebaseAuth.instance.currentUser;

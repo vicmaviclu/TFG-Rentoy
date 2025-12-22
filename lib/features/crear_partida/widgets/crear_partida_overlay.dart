@@ -7,10 +7,8 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 import '../../../app/rutas.dart';
+import '../../../core/widgets/contenedor_principal.dart';
 
-/// Dialog overlay used on top of Home. Uses `ControladorCrearPartida` to
-/// obtain host name and create the session. Designed to be small and
-/// semitransparent over the Home screen.
 class CrearPartidaOverlay extends StatefulWidget {
   const CrearPartidaOverlay({super.key});
 
@@ -49,9 +47,9 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
         rootNav.pushNamed(
           RutasApp.salaEspera,
           arguments: {
-            'sessionId': id,
-            'hostName': _ctrl.hostName,
-            'maxPlayers': _ctrl.maxPlayers,
+            'idSesion': id,
+            'nombreAnfitrion': _ctrl.nombreAnfitrion,
+            'maxJugadores': _ctrl.maxJugadores,
           },
         );
       });
@@ -78,94 +76,84 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
       backgroundColor: Colores.transparente,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
-        child: Card(
-          color: Colores.primarioTransparente,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          elevation: 16,
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        TextoPartida.tituloCrearPartida,
-                        style: EstilosTexto.tituloMedio.copyWith(
-                          color: Colores.blanco,
-                        ),
+        child: ContenedorPrincipal(
+          // ContenedorPrincipal añade 20px de padding internamente
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      TextoPartida.tituloCrearPartida,
+                      style: EstilosTexto.tituloMedio.copyWith(
+                        color: Colores.blanco,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colores.blanco,
+                    ), // Color blanco añadido
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${TextoPerfil.nombre}: ${_ctrl.nombreAnfitrion}',
+                style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                TextoPartida.numeroJugadores,
+                style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [2, 4, 6].map((n) {
+                  final selected = _ctrl.maxJugadores == n;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(
+                        '$n',
+                        style: EstilosTexto.boton.copyWith(
+                          color: Colores.textoPrimario,
+                        ),
+                      ),
+                      selected: selected,
+                      selectedColor: Colores.secundario,
+                      backgroundColor: Colores.superficie,
+                      onSelected: (_) => setState(() => _ctrl.maxJugadores = n),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${TextoPerfil.nombre}: ${_ctrl.hostName}',
-                  style: EstilosTexto.subtitulo.copyWith(
-                    color: Colores.blanco70,
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 46,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colores.secundario,
+                    foregroundColor: Colores.textoPrimario,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  TextoPartida.numeroJugadores,
-                  style: EstilosTexto.subtitulo.copyWith(
-                    color: Colores.blanco70,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [2, 4, 6].map((n) {
-                    final selected = _ctrl.maxPlayers == n;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ChoiceChip(
-                        label: Text(
-                          '$n',
-                          style: EstilosTexto.boton.copyWith(
-                            color: selected
-                                ? Colores.blanco
-                                : Colores.textoPrimario,
+                  onPressed: _ctrl.cargando ? null : _crear,
+                  child: _ctrl.cargando
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colores.textoPrimario,
                           ),
-                        ),
-                        selected: selected,
-                        selectedColor: Colores.primario,
-                        backgroundColor: Colores.grisGoogle,
-                        onSelected: (_) => setState(() => _ctrl.maxPlayers = n),
-                      ),
-                    );
-                  }).toList(),
+                        )
+                      : const Text(TextoPartida.btnCrearPartida),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 46,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colores.secundario,
-                      foregroundColor: Colores.textoPrimario,
-                    ),
-                    onPressed: _ctrl.cargando ? null : _crear,
-                    child: _ctrl.cargando
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colores.blanco,
-                            ),
-                          )
-                        : const Text(TextoPartida.btnCrearPartida),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -13,10 +13,8 @@ class ControladorPerfil extends ChangeNotifier {
   final TextEditingController controladorCorreo = TextEditingController();
   final TextEditingController controladorContrasena = TextEditingController();
 
-  // Allow injecting Firestore and a user provider for easier testing.
   final FirebaseFirestore? _firestore;
-  final dynamic
-  _authProvider; // returns a FirebaseAuth-like instance with signOut()
+  final dynamic _authProvider;
   final dynamic Function() _userProvider;
 
   ControladorPerfil({
@@ -41,7 +39,6 @@ class ControladorPerfil extends ChangeNotifier {
 
   bool cargando = false;
 
-  // Use the injected user provider (returns dynamic to allow simple test fakes)
   dynamic get usuario => _userProvider();
 
   Future<void> cargarPerfil() async {
@@ -64,14 +61,14 @@ class ControladorPerfil extends ChangeNotifier {
   Future<String?> guardarPerfil() async {
     final u = usuario;
     if (u == null) {
-      return 'No autenticado';
+      return ErroresPerfil.noAutenticado;
     }
     cargando = true;
     notifyListeners();
     try {
       final newUsername = controladorNombreUsuario.text.trim();
       if (newUsername.isEmpty) {
-        return 'Introduce un nombre de usuario';
+        return ErroresPerfil.nombreUsuarioVacio;
       }
 
       final fs = _firestore ?? FirebaseFirestore.instance;
@@ -84,7 +81,7 @@ class ControladorPerfil extends ChangeNotifier {
       if (q.docs.isNotEmpty) {
         final existingId = q.docs.first.id;
         if (existingId != u.uid) {
-          return 'El nombre de usuario ya está en uso';
+          return ErroresPerfil.nombreUsuarioEnUso;
         }
       }
 
@@ -95,9 +92,6 @@ class ControladorPerfil extends ChangeNotifier {
         nombreUsuario: newUsername,
         avatar: avatarSeleccionado,
         // La fecha de creación no la modificamos si ya existe,
-        // pero para 'merge' pasamos serverTimestamp si es nuevo o queremos actualizar.
-        // Aquí no la pasamos al constructor si queremos que el toMap maneje lógica,
-        // pero hemos definido toMap para incluir fecha_creacion.
       );
 
       final dataToSave = nuevoModelo.toMap();
@@ -147,8 +141,6 @@ class ControladorPerfil extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Sign out the current user. Uses injected `authProvider` when available
-  /// which helps tests mock sign-out behavior.
   Future<void> signOut() async {
     final auth = _authProvider == null
         ? FirebaseAuth.instance

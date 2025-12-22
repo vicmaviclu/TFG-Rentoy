@@ -7,38 +7,37 @@ import '../../../../core/constantes/cadenas.dart';
 import '../../../../core/constantes/recursos.dart';
 import '../../../../models/usuario_model.dart';
 
-class JugadorTile extends StatefulWidget {
+class TarjetaJugador extends StatefulWidget {
   final String? nombre;
   final String? uid;
-  final int? avatarIndex;
-  final bool isHost;
-  final VoidCallback? onTap;
-  const JugadorTile({
+  final int? indiceAvatar;
+  final bool esAnfitrion;
+  final VoidCallback? alPulsar;
+  const TarjetaJugador({
     super.key,
     this.nombre,
     this.uid,
-    this.avatarIndex,
-    this.isHost = false,
-    this.onTap,
+    this.indiceAvatar,
+    this.esAnfitrion = false,
+    this.alPulsar,
   });
 
   @override
-  State<JugadorTile> createState() => _JugadorTileState();
+  State<TarjetaJugador> createState() => _TarjetaJugadorState();
 }
 
-class _JugadorTileState extends State<JugadorTile> {
-  String? _displayName;
-  int? _resolvedAvatar;
+class _TarjetaJugadorState extends State<TarjetaJugador> {
+  String? _nombreMostrar;
+  int? _avatarResuelto;
 
   @override
   void initState() {
     super.initState();
-    _displayName = widget.nombre;
-    _tryResolveName();
+    _nombreMostrar = widget.nombre;
+    _intentarResolverNombre();
   }
 
-  Future<void> _tryResolveName() async {
-    // if current name looks like an email and we have uid, try to fetch the proper username
+  Future<void> _intentarResolverNombre() async {
     if (widget.uid != null) {
       try {
         final doc = await FirebaseFirestore.instance
@@ -46,11 +45,11 @@ class _JugadorTileState extends State<JugadorTile> {
             .doc(widget.uid)
             .get();
         if (doc.exists) {
-          final userModel = UsuarioModel.fromDocument(doc);
+          final usuarioModelo = UsuarioModel.fromDocument(doc);
           if (mounted) {
             setState(() {
-              _displayName = userModel.nombreUsuario;
-              _resolvedAvatar = userModel.avatar;
+              _nombreMostrar = usuarioModelo.nombreUsuario;
+              _avatarResuelto = usuarioModelo.avatar;
             });
           }
           return;
@@ -58,42 +57,40 @@ class _JugadorTileState extends State<JugadorTile> {
       } catch (_) {}
     }
 
-    // fallback: if display looks like email, strip domain
-    if ((_displayName ?? '').contains('@')) {
+    // fallback: si parece email, quitamos dominio
+    if ((_nombreMostrar ?? '').contains('@')) {
       if (mounted) {
         setState(() {
-          _displayName = (_displayName ?? '').replaceAll(RegExp(r'@.*'), '');
+          _nombreMostrar = (_nombreMostrar ?? '').replaceAll(
+            RegExp(r'@.*'),
+            '',
+          );
         });
       }
     }
   }
 
   @override
-  void didUpdateWidget(covariant JugadorTile oldWidget) {
+  void didUpdateWidget(covariant TarjetaJugador oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.nombre != oldWidget.nombre || widget.uid != oldWidget.uid) {
-      _displayName = widget.nombre;
-      _tryResolveName();
+      _nombreMostrar = widget.nombre;
+      _intentarResolverNombre();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final display = (_displayName ?? '').isNotEmpty
-        ? _displayName!
+    final textoMostrar = (_nombreMostrar ?? '').isNotEmpty
+        ? _nombreMostrar!
         : TextoPartida.esperando;
 
-    // Check if slot is effectively empty (no name/uid)
-    // In our logic, waiting slots usually have name="" or "Esperando..." depending on upstream
-    // But usually waiting players in the stream have empty name if not joined.
-    // Let's rely on whether we have a valid display name that is NOT the placeholder, OR a valid UID.
+    final bool esHuecoVacio = widget.uid == null || (widget.uid!.isEmpty);
 
-    final bool isEmptySlot = widget.uid == null || (widget.uid!.isEmpty);
-
-    if (isEmptySlot) {
-      // Diseño de "hueco vacío" (Empty Slot)
+    if (esHuecoVacio) {
+      // Diseño de "hueco vacío"
       return GestureDetector(
-        onTap: widget.onTap,
+        onTap: widget.alPulsar,
         child: Container(
           decoration: BoxDecoration(
             color: const Color(
@@ -114,7 +111,7 @@ class _JugadorTileState extends State<JugadorTile> {
           ),
           alignment: Alignment.center,
           child: Text(
-            TextoPartida.esperando, // "Esperando..."
+            TextoPartida.esperando,
             style: EstilosTexto.cuerpo.copyWith(
               color: Colores.blanco70,
               fontStyle: FontStyle.italic,
@@ -125,9 +122,9 @@ class _JugadorTileState extends State<JugadorTile> {
       );
     }
 
-    // Diseño de "Slot ocupado" (Filled Slot)
+    // Diseño de "Hueco ocupado"
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: widget.alPulsar,
       child: Container(
         decoration: BoxDecoration(
           color: Colores.blanco12, // Fondo semi-claro para destacar jugador
@@ -145,7 +142,7 @@ class _JugadorTileState extends State<JugadorTile> {
         child: Row(
           children: [
             // avatar
-            if (_resolvedAvatar != null || widget.avatarIndex != null)
+            if (_avatarResuelto != null || widget.indiceAvatar != null)
               Container(
                 width: 44,
                 height: 44,
@@ -159,12 +156,14 @@ class _JugadorTileState extends State<JugadorTile> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       Recursos.obtenerAvatar(
-                        _resolvedAvatar ?? widget.avatarIndex ?? 1,
+                        _avatarResuelto ?? widget.indiceAvatar ?? 1,
                       ),
                       fit: BoxFit.contain,
                       errorBuilder: (c, e, s) => Center(
                         child: Text(
-                          display.isNotEmpty ? display[0].toUpperCase() : '?',
+                          textoMostrar.isNotEmpty
+                              ? textoMostrar[0].toUpperCase()
+                              : '?',
                           style: EstilosTexto.cuerpo.copyWith(
                             color: Colores.blanco,
                           ),
@@ -179,14 +178,14 @@ class _JugadorTileState extends State<JugadorTile> {
                 radius: 22,
                 backgroundColor: Colores.acento,
                 child: Text(
-                  display.isNotEmpty ? display[0].toUpperCase() : '?',
+                  textoMostrar.isNotEmpty ? textoMostrar[0].toUpperCase() : '?',
                   style: EstilosTexto.cuerpo.copyWith(color: Colores.blanco),
                 ),
               ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                display,
+                textoMostrar,
                 style: EstilosTexto.cuerpoNegrita.copyWith(
                   color: Colores.blanco,
                   fontSize: 16,

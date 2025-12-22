@@ -10,16 +10,16 @@ import '../constantes/recursos.dart';
 /// utilizado en varias páginas (padding, scroll, título del juego).
 class PaginaFondo extends StatelessWidget {
   final Widget child;
-  final bool showTitle;
-  final bool scrollable;
-  final Widget? topRight;
+  final bool mostrarTitulo;
+  final bool conScroll;
+  final Widget? widgetSuperiorDerecha;
 
   const PaginaFondo({
     super.key,
     required this.child,
-    this.showTitle = true,
-    this.scrollable = true,
-    this.topRight,
+    this.mostrarTitulo = true,
+    this.conScroll = true,
+    this.widgetSuperiorDerecha,
   });
 
   @override
@@ -27,7 +27,7 @@ class PaginaFondo extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     Widget content;
-    if (showTitle) {
+    if (mostrarTitulo) {
       content = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -47,7 +47,7 @@ class PaginaFondo extends StatelessWidget {
       content = child;
     }
 
-    if (scrollable) {
+    if (conScroll) {
       content = SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         child: content,
@@ -80,8 +80,8 @@ class PaginaFondo extends StatelessWidget {
               ),
             ),
             Center(child: content),
-            if (topRight != null)
-              Positioned(top: 8, right: 8, child: topRight!),
+            if (widgetSuperiorDerecha != null)
+              Positioned(top: 8, right: 8, child: widgetSuperiorDerecha!),
           ],
         ),
       ),

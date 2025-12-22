@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/pagina_fondo.dart';
+import '../../../core/widgets/plantilla_pantalla_principal.dart';
 import '../controllers/controlador_login.dart';
-import '../widgets/tarjeta_login.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
+import '../../../core/constantes/cadenas.dart';
+import '../../../app/rutas.dart';
+import '../widgets/formulario_login.dart';
+import '../widgets/boton_google.dart';
 
 /// Pantalla de inicio de sesión (presentación y navegación).
 class PantallaLogin extends StatefulWidget {
@@ -28,11 +33,74 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    return PlantillaPantallaPrincipal(
+      mostrarVolver: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 45),
+          Text(
+            TextoComun.nombreApp,
+            style: EstilosTexto.titulo.copyWith(color: Colores.textoPrimario),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            TextoComun.subtitulo,
+            style: EstilosTexto.cuerpo.copyWith(color: Colores.textoSecundario),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
 
-    return PaginaFondo(
-      showTitle: true,
-      child: TarjetaLogin(controller: _controller, size: size),
+          // Form
+          FormularioLogin(controller: _controller),
+
+          const SizedBox(height: 12),
+          Text(
+            'o',
+            style: EstilosTexto.subtitulo.copyWith(
+              color: Colores.textoSecundario,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+
+          // Google Button
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return Center(
+                child: BotonGoogle(
+                  isLoading: _controller.cargando,
+                  onPressed: () async {
+                    final err = await _controller.iniciarSesionConGoogle();
+                    if (err != null && context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(err)));
+                    }
+                  },
+                  fullWidth: false,
+                  label: TextoAuth.continuarConGoogle,
+                  height: 54,
+                  iconSize: 30,
+                  textStyle: EstilosTexto.boton,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // Register Link
+          TextButton(
+            onPressed: _controller.cargando
+                ? null
+                : () => Navigator.of(context).pushNamed(RutasApp.registro),
+            child: const Text(TextoAuth.noTienesCuenta),
+          ),
+        ],
+      ),
     );
   }
-} 
+}

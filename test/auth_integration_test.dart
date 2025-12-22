@@ -23,7 +23,7 @@ void main() {
     // Verifica que un email inválido sea detectado y devuelva el mensaje adecuado
     test('inicio con email inválido devuelve Cadenas.emailInvalido', () async {
       final ctrl = ControladorLogin(
-        signInWithEmail: (e, p) async =>
+        iniciarSesionEmail: (e, p) async =>
             throw FirebaseAuthException(code: 'invalid-email'),
       );
 
@@ -39,7 +39,7 @@ void main() {
       'inicio con contraseña incorrecta devuelve Cadenas.contrasenaIncorrecta',
       () async {
         final ctrl = ControladorLogin(
-          signInWithEmail: (e, p) async =>
+          iniciarSesionEmail: (e, p) async =>
               throw FirebaseAuthException(code: 'wrong-password'),
         );
 
@@ -56,7 +56,7 @@ void main() {
       'registro con contraseña corta devuelve Cadenas.contrasenaCorta',
       () async {
         final ctrl = ControladorLogin(
-          createUserWithEmail: (e, p) async =>
+          crearUsuarioEmail: (e, p) async =>
               throw FirebaseAuthException(code: 'weak-password'),
         );
 
@@ -72,8 +72,8 @@ void main() {
     test('registro y login exitosos devuelven null', () async {
       // Provide fake functions that succeed
       final ctrl = ControladorLogin(
-        createUserWithEmail: (e, p) async => _FakeUserCredential(),
-        signInWithEmail: (e, p) async => _FakeUserCredential(),
+        crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
+        iniciarSesionEmail: (e, p) async => _FakeUserCredential(),
       );
 
       ctrl.controladorCorreo.text = 'ok@example.com';
@@ -93,7 +93,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final ctrl = ControladorLogin(
-        createUserWithEmail: (e, p) async => _FakeUserCredential(),
+        crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
       );
 
       await tester.pumpWidget(
@@ -127,7 +127,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final ctrl = ControladorLogin(
-        createUserWithEmail: (e, p) async => _FakeUserCredential(),
+        crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
       );
 
       final observer = _PopObserver();

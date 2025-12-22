@@ -15,7 +15,6 @@ class ServicioRealtime {
     String? providedName,
     String uid,
   ) async {
-    // If providedName looks like a real username (not an email), keep it
     if (providedName != null &&
         providedName.isNotEmpty &&
         !providedName.contains('@')) {
@@ -39,7 +38,6 @@ class ServicioRealtime {
       }
     } catch (_) {}
 
-    // Fallback to displayName if available and not an email
     final user = FirebaseAuth.instance.currentUser;
     if (user != null &&
         user.displayName != null &&

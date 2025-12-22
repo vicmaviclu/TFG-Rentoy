@@ -10,11 +10,11 @@ class ControladorCrearPartida extends ChangeNotifier {
   final ServicioRealtime _servicio = ServicioRealtime();
   final ControladorPerfil _perfil = ControladorPerfil();
 
-  int maxPlayers = 2;
+  int maxJugadores = 2;
   bool cargando = false;
 
-  /// Nombre a usar como host (obtiene del perfil, o de FirebaseAuth).
-  String get hostName {
+  /// Nombre a usar como anfitrión (obtiene del perfil, o de FirebaseAuth).
+  String get nombreAnfitrion {
     final perfilName = _perfil.controladorNombreUsuario.text.trim();
     if (perfilName.isNotEmpty) return perfilName;
     final user = _perfil.usuario as User?;
@@ -29,17 +29,13 @@ class ControladorCrearPartida extends ChangeNotifier {
 
   /// Crea la sesión y devuelve el id/código.
   Future<String> crearSesion() async {
-    // No esperamos a cargarPerfil explícitamente aquí para evitar bloqueos
-    // si Firestore tarda o no hay conexión. Ya se lanzó en initState y
-    // el servicio maneja su propia resolución de nombre con timeout.
-
-    final nombre = hostName;
+    final nombre = nombreAnfitrion;
     cargando = true;
     notifyListeners();
     try {
       final id = await _servicio.crearSesion(
         hostName: nombre,
-        maxPlayers: maxPlayers,
+        maxPlayers: maxJugadores,
         avatar: _perfil.avatarSeleccionado,
       );
       return id;

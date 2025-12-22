@@ -11,24 +11,24 @@ import '../constantes/recursos.dart';
 class EncabezadoApp extends StatelessWidget {
   const EncabezadoApp({
     super.key,
-    this.logoSize = Tamanos.logoSize,
-    this.title = TextoComun.nombreApp,
-    this.subtitle = TextoComun.subtitulo,
-    this.showSubtitle = true,
-    this.showBackButton = false,
+    this.tamanoLogo = Tamanos.logoSize,
+    this.titulo = TextoComun.nombreApp,
+    this.subtitulo = TextoComun.subtitulo,
+    this.mostrarSubtitulo = true,
+    this.mostrarBotonVolver = false,
   });
 
-  final double logoSize;
-  final String title;
-  final String subtitle;
-  final bool showSubtitle;
-  final bool showBackButton;
+  final double tamanoLogo;
+  final String titulo;
+  final String subtitulo;
+  final bool mostrarSubtitulo;
+  final bool mostrarBotonVolver;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (showBackButton)
+        if (mostrarBotonVolver)
           Align(
             alignment: Alignment.centerLeft,
             child: IconButton(
@@ -37,8 +37,8 @@ class EncabezadoApp extends StatelessWidget {
             ),
           ),
         Container(
-          width: logoSize,
-          height: logoSize,
+          width: tamanoLogo,
+          height: tamanoLogo,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
@@ -52,21 +52,21 @@ class EncabezadoApp extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           child: Image.asset(
             Recursos.logo,
-            width: logoSize,
-            height: logoSize,
+            width: tamanoLogo,
+            height: tamanoLogo,
             fit: BoxFit.cover,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          title,
+          titulo,
           style: EstilosTexto.titulo.copyWith(color: Colores.textoPrimario),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
-        if (showSubtitle)
+        if (mostrarSubtitulo)
           Text(
-            subtitle,
+            subtitulo,
             style: EstilosTexto.cuerpo.copyWith(color: Colores.textoSecundario),
             textAlign: TextAlign.center,
           ),

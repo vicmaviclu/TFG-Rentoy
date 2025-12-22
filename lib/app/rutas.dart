@@ -9,8 +9,6 @@ import '../features/crear_partida/screens/pantalla_crear_partida.dart';
 import '../features/unirse_partida/screens/pantalla_unirse_partida.dart';
 
 /// Rutas globales de la aplicación.
-///
-/// Usamos nombres en español para las rutas principales.
 class RutasApp {
   static const String inicio = '/inicio';
   static const String login = '/login';
@@ -25,7 +23,7 @@ class RutasApp {
     return {
       login: (c) => const PantallaLogin(),
       registro: (c) => const PantallaRegistro(),
-      inicio: (c) => const HomeScreen(),
+      inicio: (c) => const PantallaHome(),
       perfil: (c) => const PantallaPerfil(),
       crearPartida: (c) => const PantallaCrearPartida(),
       unirsePartida: (c) => const PantallaUnirsePartida(),
@@ -35,14 +33,14 @@ class RutasApp {
 
   // Helper: construye el widget de la sala de espera.
   static Widget _salaEsperaWidget(
-    String sessionId,
-    String hostName,
-    int maxPlayers,
+    String idSesion,
+    String nombreAnfitrion,
+    int maxJugadores,
   ) {
     return PantallaSalaEspera(
-      sessionId: sessionId,
-      hostName: hostName,
-      maxPlayers: maxPlayers,
+      idSesion: idSesion,
+      nombreAnfitrion: nombreAnfitrion,
+      maxJugadores: maxJugadores,
     );
   }
 
@@ -50,12 +48,12 @@ class RutasApp {
   static Widget _salaEsperaFromContext(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic>) {
-      final sessionId = args['sessionId']?.toString() ?? '';
-      final hostName = args['hostName']?.toString() ?? '';
-      final maxPlayers = args['maxPlayers'] is int
-          ? args['maxPlayers'] as int
-          : int.tryParse(args['maxPlayers']?.toString() ?? '') ?? 2;
-      return _salaEsperaWidget(sessionId, hostName, maxPlayers);
+      final idSesion = args['idSesion']?.toString() ?? '';
+      final nombreAnfitrion = args['nombreAnfitrion']?.toString() ?? '';
+      final maxJugadores = args['maxJugadores'] is int
+          ? args['maxJugadores'] as int
+          : int.tryParse(args['maxJugadores']?.toString() ?? '') ?? 2;
+      return _salaEsperaWidget(idSesion, nombreAnfitrion, maxJugadores);
     }
     return const SizedBox.shrink();
   }

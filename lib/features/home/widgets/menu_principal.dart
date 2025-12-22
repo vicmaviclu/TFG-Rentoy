@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/rutas.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
 import '../../crear_partida/widgets/crear_partida_overlay.dart';
 
 class MenuPrincipal extends StatelessWidget {
@@ -16,7 +17,12 @@ class MenuPrincipal extends StatelessWidget {
           width: 200,
           height: 50,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(textStyle: EstilosTexto.boton),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colores.secundario,
+              foregroundColor: Colores.textoPrimario,
+              textStyle: EstilosTexto.boton,
+              elevation: 4,
+            ),
             onPressed: () {
               showDialog(
                 context: context,
@@ -31,7 +37,12 @@ class MenuPrincipal extends StatelessWidget {
           width: 200,
           height: 50,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(textStyle: EstilosTexto.boton),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colores.blanco,
+              foregroundColor: Colores.textoPrimario,
+              textStyle: EstilosTexto.boton,
+              elevation: 4,
+            ),
             onPressed: () {
               Navigator.pushNamed(context, RutasApp.unirsePartida);
             },

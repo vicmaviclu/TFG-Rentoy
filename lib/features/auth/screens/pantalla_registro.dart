@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controllers/controlador_login.dart';
 import '../widgets/formulario_registro.dart';
-import '../../../core/widgets/encabezado_app.dart';
 import '../../../app/rutas.dart';
-import '../widgets/tarjeta_auth.dart';
-import '../../../core/widgets/pagina_fondo.dart';
+import '../../../core/widgets/plantilla_pantalla_principal.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/cadenas.dart';
 
 /// Pantalla de registro de usuarios (versión en español del archivo).
@@ -33,33 +32,30 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    return PlantillaPantallaPrincipal(
+      mostrarVolver: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Title
+          Text(
+            TextoAuth.tituloRegistro,
+            style: EstilosTexto.titulo.copyWith(color: Colores.textoPrimario),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
 
-    return PaginaFondo(
-      showTitle: true,
-      child: TarjetaAuth(
-        size: size,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (Platform.isWindows)
-              const EncabezadoApp(
-                title: TextoAuth.tituloRegistro,
-                showBackButton: true,
-              )
-            else
-              const EncabezadoApp(),
-            const SizedBox(height: 16),
-            FormularioRegistro(controller: _controller),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => Navigator.of(context).pushNamed(RutasApp.login),
-              child: const Text(
-                TextoAuth.yaTienesCuenta,
-              ),
-            ),
-          ],
-        ),
+          // Form
+          FormularioRegistro(controller: _controller),
+
+          const SizedBox(height: 16),
+
+          // Login Link
+          TextButton(
+            onPressed: () => Navigator.of(context).pushNamed(RutasApp.login),
+            child: const Text(TextoAuth.yaTienesCuenta),
+          ),
+        ],
       ),
     );
   }

@@ -21,7 +21,7 @@ String mensajeErrorFirebaseAuth(String code) {
     case 'too-many-requests':
       return TextoAuth.demasiadosIntentos;
     default:
-      return TextoComun.errorInesperado; // fallback legible para el usuario
+      return TextoComun.errorInesperado;
   }
 }
 

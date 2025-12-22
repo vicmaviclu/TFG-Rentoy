@@ -10,7 +10,7 @@ class PantallaCrearPartida extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PaginaFondo(
-      showTitle: true,
+      mostrarTitulo: true,
       child: const Center(child: CrearPartidaOverlay()),
     );
   }

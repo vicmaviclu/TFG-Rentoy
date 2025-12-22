@@ -6,20 +6,23 @@ import '../core/constantes/textos.dart';
 class TemaApp {
   static final ThemeData temaClaro = ThemeData(
     useMaterial3: true,
-    // Tema principal: usar `Brightness.light` ya que los colores y el
-    // `scaffoldBackgroundColor` están orientados a un tema claro.
-    colorScheme: ColorScheme.fromSeed(seedColor: Colores.primario, surface: Colores.superficie, brightness: Brightness.light),
+    // Tema principal
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colores.primario,
+      surface: Colores.superficie,
+      brightness: Brightness.light,
+    ),
     scaffoldBackgroundColor: Colores.fondo,
     cardColor: Colores.superficie,
-    // Use GoogleFonts to ensure a single font across the app without
-    // bundling font assets. Merge with `EstilosTexto` for consistency.
-      textTheme: GoogleFonts.interTextTheme(
+
+    textTheme: GoogleFonts.interTextTheme(
       const TextTheme(
         headlineLarge: EstilosTexto.titulo,
         titleLarge: EstilosTexto.subtitulo,
         bodyLarge: EstilosTexto.cuerpo,
       ),
     ),
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colores.secundario,
@@ -28,6 +31,7 @@ class TemaApp {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
     ),
+
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: Colores.textoSecundario,

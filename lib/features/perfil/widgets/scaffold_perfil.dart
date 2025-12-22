@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Clean imports — only used symbols are imported
-import '../../../core/widgets/pagina_fondo.dart';
-import '../../auth/widgets/tarjeta_auth.dart';
+import '../../../core/widgets/plantilla_pantalla_principal.dart';
 import '../controllers/controlador_perfil.dart';
 import 'formulario_perfil.dart';
 
@@ -29,22 +28,9 @@ class _PerfilScaffoldState extends State<PerfilScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return PaginaFondo(
-      showTitle: false,
-      scrollable: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Removed inline logo to avoid extra scrolling; keep compact layout
-          const SizedBox(height: 6),
-          TarjetaAuth(
-            size: size,
-            child: PerfilForm(controlador: widget.controlador),
-          ),
-        ],
-      ),
+    return PlantillaPantallaPrincipal(
+      mostrarVolver: true,
+      child: PerfilForm(controlador: widget.controlador),
     );
   }
 }

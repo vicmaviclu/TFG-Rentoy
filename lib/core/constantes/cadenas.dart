@@ -11,10 +11,13 @@ class TextoComun {
   static const String reintentar = 'Reintentar';
   static const String accionExitosa = 'Acción completada con éxito';
   static const String campoRequerido = 'Este campo es obligatorio';
+  static const String proximamente = 'Contenido próximamente';
 
   // Botones y acciones generales
   static const String aceptar = 'Aceptar';
   static const String cancelar = 'Cancelar';
+  static const String si = 'Sí';
+  static const String no = 'No';
   static const String guardar = 'Guardar';
   static const String editar = 'Editar';
   static const String continuar = 'Continuar';
@@ -79,9 +82,15 @@ class TextoPartida {
   static const String idCopiado = 'ID copiado al portapapeles';
   static const String pinCopiado = 'PIN copiado al portapapeles';
   static const String esperandoDatos = 'Esperando datos...';
-  static const String invitarJugadores = 'Invitar jugadores';
+  static const String invitarJugadores = 'Invitar';
   static const String esperando = 'Esperando...';
   static const String numeroJugadores = 'Número de jugadores';
+  static const String introducePin = 'Introduce el PIN de la partida';
+  static const String equipo1 = 'Equipo 1';
+  static const String equipo2 = 'Equipo 2';
+  static const String cancelarPartida = 'Cancelar partida';
+  static const String confirmarCancelarPartida =
+      'Si sales, la partida se eliminará. ¿Continuar?';
 }
 
 /// Textos relacionados con el perfil de usuario.
@@ -99,6 +108,7 @@ class TextoPerfil {
   static const String telefono = 'Teléfono';
   static const String direccion = 'Dirección';
   static const String fechaNacimiento = 'Fecha de nacimiento';
+  static const String siguienteAvatar = 'Siguiente avatar';
 }
 
 /// Textos legales y ayuda.

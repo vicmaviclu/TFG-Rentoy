@@ -32,7 +32,7 @@ class SwitchEstadoAuth extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.active) {
           final user = snapshot.data;
           if (user == null) return const PantallaLogin();
-          return const HomeScreen();
+          return const PantallaHome();
         }
         return const Scaffold(body: Center(child: SplashScreen()));
       },
