@@ -69,6 +69,7 @@ class TextoPartida {
   static const String iniciarPartida = 'Iniciar partida';
   static const String btnCrearPartida = 'Crear Partida';
   static const String btnUnirsePartida = 'Unirse a Partida';
+  static const String btnBuscar = 'Buscar';
   static const String empezarPartida = 'Empezar';
 
   // Títulos de pantalla

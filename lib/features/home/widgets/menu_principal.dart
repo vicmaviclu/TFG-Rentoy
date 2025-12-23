@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../app/rutas.dart';
+
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../crear_partida/widgets/crear_partida_overlay.dart';
+import '../../unirse_partida/widgets/unirse_partida_overlay.dart';
 
 class MenuPrincipal extends StatelessWidget {
   const MenuPrincipal({super.key});
@@ -44,7 +45,10 @@ class MenuPrincipal extends StatelessWidget {
               elevation: 4,
             ),
             onPressed: () {
-              Navigator.pushNamed(context, RutasApp.unirsePartida);
+              showDialog(
+                context: context,
+                builder: (_) => const UnirsePartidaOverlay(),
+              );
             },
             child: Text(TextoPartida.btnUnirsePartida),
           ),

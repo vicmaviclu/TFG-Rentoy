@@ -114,11 +114,7 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
     try {
       await _controlador.tomarHueco(widget.idSesion, hueco);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(TextoComun.errorInesperado)),
-        );
-      }
+      // Ignorar error/feedback visual
     }
   }
 

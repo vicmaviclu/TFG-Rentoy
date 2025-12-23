@@ -212,13 +212,27 @@ class ServicioRealtime {
     }
 
     int slot = 0;
+    bool alreadyIn = false;
+
     for (var i = 1; i <= maxPlayers; i++) {
       final key = 'jugador $i';
       final val = players.containsKey(key) ? players[key] : null;
-      if (val == null || (val is String && val.isEmpty)) {
-        slot = i;
-        break;
+
+      // Check if this slot belongs to current user
+      if (val is Map && val['uid'] == user.uid) {
+        alreadyIn = true;
+        break; // Already joined, no need to add again
       }
+
+      // Find first empty slot
+      if (slot == 0 && (val == null || (val is String && val.isEmpty))) {
+        slot = i;
+      }
+    }
+
+    if (alreadyIn) {
+      // If already in, just return success (idempotent)
+      return;
     }
 
     if (slot == 0) {
@@ -300,7 +314,21 @@ class ServicioRealtime {
       }
     } catch (_) {}
 
-    // remove any existing slot for this uid (handle old map entries and string entries)
+    // 1. Check if target slot is occupied (BEFORE removing current slot)
+    final targetKey = 'jugador $slot';
+    final targetVal = players.containsKey(targetKey)
+        ? players[targetKey]
+        : null;
+
+    if (targetVal != null) {
+      if (targetVal is Map && targetVal['uid'] != null) {
+        throw Exception('El hueco ya está ocupado');
+      } else if (targetVal is String && targetVal.isNotEmpty) {
+        throw Exception('El hueco ya está ocupado');
+      }
+    }
+
+    // 2. Remove any existing slot for this uid (now safe to do)
     for (var i = 1; i <= maxPlayers; i++) {
       final key = 'jugador $i';
       final val = players.containsKey(key) ? players[key] : null;
@@ -311,11 +339,33 @@ class ServicioRealtime {
       }
     }
 
-    final targetKey = 'jugador $slot';
     await ref.child('jugadores/$targetKey').set({
       'name': resolvedName,
       'avatar': avatarIndex,
       'uid': user.uid,
     });
+  }
+
+  /// Busca una sesión por su PIN y devuelve un Map con {id, anfitrion, maxJugadores}.
+  /// Lanza excepción si no existe.
+  Future<Map<String, dynamic>> buscarSesionPorPin(String pin) async {
+    final snapshot = await _db
+        .ref('sessions')
+        .orderByChild('pin')
+        .equalTo(pin)
+        .limitToFirst(1)
+        .get();
+
+    if (!snapshot.exists || snapshot.children.isEmpty) {
+      throw Exception('No se encontró ninguna partida con ese PIN.');
+    }
+
+    final snap = snapshot.children.first;
+    final val = snap.value as Map?;
+    final id = snap.key!;
+    final anfitrion = val?['anfitrion']?.toString() ?? 'Anfitrión';
+    final maxJugadores = (val?['maxJugadores'] as int?) ?? 2;
+
+    return {'id': id, 'anfitrion': anfitrion, 'maxJugadores': maxJugadores};
   }
 }
