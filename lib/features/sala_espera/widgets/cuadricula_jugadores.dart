@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/usuario_model.dart';
 import 'tarjeta_jugador.dart';
 
+/// Cuadrícula mostrando los jugadores conectados.
 class CuadriculaJugadores extends StatelessWidget {
   final Stream<List<UsuarioModel>> streamJugadores;
   final int maxJugadores;
@@ -32,6 +33,7 @@ class CuadriculaJugadores extends StatelessWidget {
         final int filas = (maxJugadores / 2).ceil();
 
         return Column(
+          // Genera filas de 2 jugadores
           children: List.generate(filas, (indiceFila) {
             final indice1 = indiceFila * 2;
             final indice2 = indice1 + 1;

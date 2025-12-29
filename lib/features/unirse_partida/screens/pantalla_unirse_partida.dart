@@ -6,6 +6,7 @@ import '../../../core/widgets/plantilla_pantalla_principal.dart';
 import '../controllers/controlador_unirse_partida.dart';
 import '../../../app/rutas.dart';
 
+/// Pantalla para unirse a una partida existente.
 class PantallaUnirsePartida extends StatefulWidget {
   const PantallaUnirsePartida({super.key});
 
@@ -71,6 +72,7 @@ class _PantallaUnirsePartidaState extends State<PantallaUnirsePartida> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Título
             Text(
               TextoPartida.tituloUnirsePartida,
               style: EstilosTexto.tituloMedio.copyWith(
@@ -80,6 +82,7 @@ class _PantallaUnirsePartidaState extends State<PantallaUnirsePartida> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
+            // Campo de introducción de PIN
             TextField(
               controller: _pinCtrl,
               decoration: InputDecoration(
@@ -106,6 +109,7 @@ class _PantallaUnirsePartidaState extends State<PantallaUnirsePartida> {
               ),
             ),
             const SizedBox(height: 20),
+            // Botón de unión
             SizedBox(
               height: 50,
               child: ElevatedButton(

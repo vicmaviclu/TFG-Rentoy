@@ -3,7 +3,7 @@ import '../controllers/controlador_login.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 
-/// Formulario para inicio de sesión (correo + contraseña).
+/// Formulario de inicio de sesión.
 class FormularioLogin extends StatefulWidget {
   final ControladorLogin controller;
 
@@ -23,6 +23,7 @@ class _FormularioLoginState extends State<FormularioLogin> {
       builder: (context, _) {
         return Column(
           children: [
+            // Campo de correo electrónico
             TextField(
               controller: controller.controladorCorreo,
               decoration: InputDecoration(
@@ -34,6 +35,7 @@ class _FormularioLoginState extends State<FormularioLogin> {
               autofillHints: const [AutofillHints.email],
             ),
             const SizedBox(height: 8),
+            // Campo de contraseña
             TextField(
               controller: controller.controladorContrasena,
               decoration: InputDecoration(
@@ -55,6 +57,7 @@ class _FormularioLoginState extends State<FormularioLogin> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                // Botón de iniciar sesión
                 onPressed: controller.cargando ? null : _performLogin,
                 child: controller.cargando
                     ? const SizedBox(

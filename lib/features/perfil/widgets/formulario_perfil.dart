@@ -5,6 +5,7 @@ import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
 import '../controllers/controlador_perfil.dart';
 
+/// Formulario para editar el perfil de usuario.
 class PerfilForm extends StatefulWidget {
   final ControladorPerfil controlador;
   const PerfilForm({required this.controlador, super.key});
@@ -49,6 +50,7 @@ class _PerfilFormState extends State<PerfilForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Título de la aplicación
             Text(
               TextoComun.nombreApp,
               style: EstilosTexto.titulo.copyWith(
@@ -59,6 +61,7 @@ class _PerfilFormState extends State<PerfilForm> {
             ),
             const SizedBox(height: 10),
 
+            // Visualización del avatar seleccionado
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -102,7 +105,7 @@ class _PerfilFormState extends State<PerfilForm> {
 
             const SizedBox(height: 12),
 
-            // Controls
+            // Botones para cambiar avatar
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -130,7 +133,7 @@ class _PerfilFormState extends State<PerfilForm> {
 
             const SizedBox(height: 18),
 
-            // Username
+            // Campo de nombre de usuario
             TextFormField(
               controller: c.controladorNombreUsuario,
               style: fieldStyle,
@@ -139,7 +142,7 @@ class _PerfilFormState extends State<PerfilForm> {
 
             const SizedBox(height: 18),
 
-            // Email (read-only display) — use same filled field style and mark disabled
+            // Campo de correo electrónico (solo lectura)
             TextFormField(
               controller: c.controladorCorreo,
               readOnly: true,
@@ -154,7 +157,7 @@ class _PerfilFormState extends State<PerfilForm> {
 
             const SizedBox(height: 18),
 
-            // Password
+            // Campo para nueva contraseña
             TextFormField(
               controller: c.controladorContrasena,
               style: fieldStyle,
@@ -164,10 +167,11 @@ class _PerfilFormState extends State<PerfilForm> {
 
             const SizedBox(height: 22),
 
-            // Actions
+            // Acciones: Guardar cambios y Cerrar sesión
             if (c.cargando)
               const Center(child: CircularProgressIndicator())
             else ...[
+              // Botón para guardar cambios
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
@@ -206,6 +210,7 @@ class _PerfilFormState extends State<PerfilForm> {
 
               const SizedBox(height: 12),
 
+              // Botón de cerrar sesión
               Center(
                 child: OutlinedButton(
                   onPressed: () async {

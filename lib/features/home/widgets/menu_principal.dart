@@ -6,6 +6,7 @@ import '../../../core/constantes/colores.dart';
 import '../../crear_partida/widgets/crear_partida_overlay.dart';
 import '../../unirse_partida/widgets/unirse_partida_overlay.dart';
 
+/// Botones principales del menú Home.
 class MenuPrincipal extends StatelessWidget {
   const MenuPrincipal({super.key});
 
@@ -14,6 +15,7 @@ class MenuPrincipal extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Botón crear partida
         SizedBox(
           width: 200,
           height: 50,
@@ -34,6 +36,7 @@ class MenuPrincipal extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // Botón unirse a partida
         SizedBox(
           width: 200,
           height: 50,

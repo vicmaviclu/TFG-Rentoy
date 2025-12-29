@@ -41,6 +41,7 @@ class ControladorPerfil extends ChangeNotifier {
 
   dynamic get usuario => _userProvider();
 
+  // Carga los datos del usuario desde Firestore
   Future<void> cargarPerfil() async {
     final u = usuario;
     if (u == null) {
@@ -58,6 +59,7 @@ class ControladorPerfil extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Guarda los cambios del perfil en Firestore y Auth
   Future<String?> guardarPerfil() async {
     final u = usuario;
     if (u == null) {
@@ -141,6 +143,7 @@ class ControladorPerfil extends ChangeNotifier {
     super.dispose();
   }
 
+  // Cierra la sesión del usuario actual
   Future<void> signOut() async {
     final auth = _authProvider == null
         ? FirebaseAuth.instance

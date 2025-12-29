@@ -3,7 +3,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 
-/// Selector simple de avatar: muestra círculo con número y botones para cambiar.
+/// Selector simple de avatar.
 class AvatarSelector extends StatelessWidget {
   const AvatarSelector({
     super.key,
@@ -18,6 +18,7 @@ class AvatarSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Visualización del número de avatar
         Container(
           width: 72,
           height: 72,
@@ -33,6 +34,7 @@ class AvatarSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        // Controles para cambiar avatar
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

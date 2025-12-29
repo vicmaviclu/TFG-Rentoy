@@ -3,13 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../perfil/controllers/controlador_perfil.dart';
 
+/// Controlador para unirse a partidas existentes.
 class ControladorUnirsePartida extends ChangeNotifier {
   final ServicioRealtime _servicio = ServicioRealtime();
   final ControladorPerfil _perfil = ControladorPerfil();
 
   bool cargando = false;
 
-  /// Nombre del jugador (obtenido del perfil o FirebaseUser).
+  // Obtiene el nombre del jugador
   String get nombreJugador {
     final perfilName = _perfil.controladorNombreUsuario.text.trim();
     if (perfilName.isNotEmpty) return perfilName;
@@ -22,7 +23,7 @@ class ControladorUnirsePartida extends ChangeNotifier {
 
   Future<void> cargarPerfil() => _perfil.cargarPerfil();
 
-  /// Se une a la sesión mediante PIN. Retorna datos de la sesión {id, anfitrion, maxJugadores}.
+  // Busca una sesión por PIN y se une a ella
   Future<Map<String, dynamic>> unirsePorPin(String pin) async {
     cargando = true;
     notifyListeners();

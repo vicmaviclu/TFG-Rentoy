@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controllers/controlador_perfil.dart';
 import '../widgets/scaffold_perfil.dart';
 
+/// Pantalla de perfil de usuario.
 class PantallaPerfil extends StatefulWidget {
   const PantallaPerfil({super.key});
 
@@ -21,6 +22,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
 
   @override
   Widget build(BuildContext context) {
+    // Estructura principal del perfil
     return PerfilScaffold(controlador: controlador);
   }
 }

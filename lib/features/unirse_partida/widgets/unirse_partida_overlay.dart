@@ -7,6 +7,7 @@ import '../../../core/widgets/contenedor_principal.dart';
 import '../../../app/rutas.dart';
 import '../controllers/controlador_unirse_partida.dart';
 
+/// Contenido del modal para unirse a partida.
 class UnirsePartidaOverlay extends StatefulWidget {
   const UnirsePartidaOverlay({super.key});
 
@@ -83,7 +84,7 @@ class _UnirsePartidaOverlayState extends State<UnirsePartidaOverlay> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Encabezado
+              // Título y botón cerrar
               Row(
                 children: [
                   Expanded(
@@ -101,8 +102,7 @@ class _UnirsePartidaOverlayState extends State<UnirsePartidaOverlay> {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Input PIN
+              // Campo para introducir PIN
               TextField(
                 controller: _pinCtrl,
                 decoration: InputDecoration(
@@ -129,8 +129,7 @@ class _UnirsePartidaOverlayState extends State<UnirsePartidaOverlay> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Button Buscar
+              // Botón para buscar y unirse
               SizedBox(
                 height: 50,
                 child: ElevatedButton.icon(

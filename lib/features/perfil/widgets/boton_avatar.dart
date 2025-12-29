@@ -7,9 +7,7 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/recursos.dart';
 
-/// Widget que muestra el avatar del usuario en un CircleAvatar y reacciona
-/// a cambios en Firestore en tiempo real. Si no hay avatar en la base de datos
-/// muestra una letra por defecto.
+/// Botón circular que muestra el avatar del usuario.
 class BotonAvatar extends StatelessWidget {
   final double radius;
   final VoidCallback? onTap;
@@ -19,6 +17,7 @@ class BotonAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
+      // Avatar por defecto si no hay usuario
       return GestureDetector(
         onTap: onTap,
         child: CircleAvatar(
@@ -32,6 +31,7 @@ class BotonAvatar extends StatelessWidget {
     final docRef = FirebaseFirestore.instance
         .collection('usuarios')
         .doc(user.uid);
+    // Escucha cambios en el avatar del usuario
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: docRef.snapshots(),
       builder: (context, snap) {
@@ -77,7 +77,7 @@ class BotonAvatar extends StatelessWidget {
           );
         }
 
-        // loading / no data
+        // Estado de carga o sin datos
         return GestureDetector(
           onTap: onTap,
           child: CircleAvatar(

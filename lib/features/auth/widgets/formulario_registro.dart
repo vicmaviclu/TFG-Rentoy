@@ -4,7 +4,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 import '../controllers/controlador_login.dart';
 
-/// Formulario para la pantalla de registro (versión en español).
+/// Formulario de registro de usuario.
 class FormularioRegistro extends StatefulWidget {
   final ControladorLogin controller;
 
@@ -33,6 +33,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Campo de correo electrónico
             TextField(
               controller: widget.controller.controladorCorreo,
               decoration: InputDecoration(
@@ -44,6 +45,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
               autofillHints: const [AutofillHints.email],
             ),
             const SizedBox(height: 8),
+            // Campo de nombre de usuario
             TextField(
               controller: _usuarioController,
               decoration: InputDecoration(
@@ -53,6 +55,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 8),
+            // Campo de contraseña
             TextField(
               controller: widget.controller.controladorContrasena,
               decoration: InputDecoration(
@@ -64,6 +67,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
               autofillHints: const [AutofillHints.newPassword],
             ),
             const SizedBox(height: 8),
+            // Campo de confirmar contraseña
             TextField(
               controller: _confirmPasswordController,
               decoration: InputDecoration(
@@ -75,6 +79,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
               autofillHints: const [AutofillHints.newPassword],
             ),
             const SizedBox(height: 16),
+            // Botón de registro
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

@@ -10,7 +10,7 @@ import '../../../core/widgets/encabezado_app.dart';
 import '../../../app/rutas.dart';
 import 'tarjeta_auth.dart';
 
-/// Tarjeta de login reutilizable (versión en español).
+/// Tarjeta de login completa.
 class TarjetaLogin extends StatelessWidget {
   const TarjetaLogin({super.key, required this.controller, required this.size});
 
@@ -24,8 +24,10 @@ class TarjetaLogin extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Encabezado de la aplicación
           const EncabezadoApp(),
           const SizedBox(height: 6),
+          // Formulario de login
           FormularioLogin(controller: controller),
           const SizedBox(height: 5),
           Text(
@@ -41,6 +43,7 @@ class TarjetaLogin extends StatelessWidget {
             animation: controller,
             builder: (context, _) {
               return Center(
+                // Botón de Google
                 child: BotonGoogle(
                   isLoading: controller.cargando,
                   onPressed: () async {
@@ -61,6 +64,7 @@ class TarjetaLogin extends StatelessWidget {
             },
           ),
           const SizedBox(height: 6),
+          // Enlace a registro
           TextButton(
             onPressed: controller.cargando
                 ? null

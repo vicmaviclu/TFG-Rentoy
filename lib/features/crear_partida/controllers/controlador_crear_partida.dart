@@ -4,8 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../perfil/controllers/controlador_perfil.dart';
 
-/// Controlador que encapsula la lógica de crear una partida. Obtiene el
-/// nombre del perfil (si existe) y delega la creación en `ServicioRealtime`.
+/// Controlador para la creación de partidas.
 class ControladorCrearPartida extends ChangeNotifier {
   final ServicioRealtime _servicio = ServicioRealtime();
   final ControladorPerfil _perfil = ControladorPerfil();
@@ -13,7 +12,7 @@ class ControladorCrearPartida extends ChangeNotifier {
   int maxJugadores = 2;
   bool cargando = false;
 
-  /// Nombre a usar como anfitrión (obtiene del perfil, o de FirebaseAuth).
+  // Obtiene el nombre del anfitrión desde el perfil o Auth
   String get nombreAnfitrion {
     final perfilName = _perfil.controladorNombreUsuario.text.trim();
     if (perfilName.isNotEmpty) return perfilName;
@@ -24,10 +23,10 @@ class ControladorCrearPartida extends ChangeNotifier {
         : 'Jugador';
   }
 
-  /// Precarga perfil (intenta cargar valores guardados en Firestore).
+  // Carga los datos del perfil de usuario
   Future<void> cargarPerfil() => _perfil.cargarPerfil();
 
-  /// Crea la sesión y devuelve el id/código.
+  // Crea una nueva sesión de juego y retorna su ID
   Future<String> crearSesion() async {
     final nombre = nombreAnfitrion;
     cargando = true;

@@ -6,6 +6,7 @@ import '../../../core/servicios/servicio_realtime.dart';
 import '../../../models/sesion_model.dart';
 import '../../../models/usuario_model.dart';
 
+/// Controlador para la lógica de la sala de espera.
 class ControladorSalaEspera {
   final ServicioRealtime _servicio;
   final FirebaseAuth _auth;
@@ -14,6 +15,7 @@ class ControladorSalaEspera {
     : _servicio = servicio ?? ServicioRealtime(),
       _auth = auth ?? FirebaseAuth.instance;
 
+  // Verifica si el usuario actual es el anfitrión
   bool esAnfitrion(String nombreAnfitrion) {
     final usuario = _auth.currentUser;
     return usuario != null && nombreAnfitrion == usuario.displayName;
@@ -72,7 +74,7 @@ class ControladorSalaEspera {
     }).asBroadcastStream();
   }
 
-  /// Pide al servicio que tome un hueco específico (delegado)
+  // Intenta ocupar un hueco específico en la sala
   Future<void> tomarHueco(String idSesion, int hueco) async {
     try {
       return await _servicio.tomarHueco(idSesion, hueco);
@@ -85,7 +87,7 @@ class ControladorSalaEspera {
   Stream<DatabaseEvent> streamEventoSesion(String idSesion) =>
       _servicio.streamSesion(idSesion).asBroadcastStream();
 
-  /// Pide al servicio cancelar la sesion (eliminar)
+  // Cancela y elimina la sesión actual
   Future<void> cancelarSesion(String idSesion) async {
     try {
       await _servicio.cancelarSesion(idSesion);
@@ -94,12 +96,12 @@ class ControladorSalaEspera {
     }
   }
 
-  /// Pide al servicio que haga salir al usuario de la sesion (eliminar su entrada)
+  // Retira al usuario actual de la sesión
   Future<void> salirDeSesion(String idSesion) async {
     try {
       await _servicio.salirDeSesion(idSesion);
     } catch (e) {
-      rethrow; // Let the UI handle the error (showing snackbar etc)
+      rethrow;
     }
   }
 }

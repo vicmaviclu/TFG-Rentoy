@@ -9,10 +9,7 @@ import '../../../core/constantes/errores.dart';
 typedef AuthEmailFn =
     Future<UserCredential> Function(String email, String password);
 
-/// Controlador para la pantalla de inicio de sesión.
-///
-/// Contiene los `TextEditingController` para los campos, el estado de carga
-/// y los métodos que delegan en `ServicioAutenticacion`/Firebase para autenticación.
+/// Controlador para gestión de autenticación (Login/Registro).
 class ControladorLogin extends ChangeNotifier {
   final TextEditingController controladorCorreo = TextEditingController();
   final TextEditingController controladorContrasena = TextEditingController();
@@ -52,13 +49,13 @@ class ControladorLogin extends ChangeNotifier {
     super.dispose();
   }
 
+  // Actualiza el estado de carga y notifica a la vista
   void _setCargando(bool v) {
     _cargando = v;
     if (!_disposed) notifyListeners();
   }
 
-  /// Intenta iniciar sesión con Google. Devuelve `null` si tuvo éxito,
-  /// o un mensaje de error en caso contrario.
+  /// Inicia sesión usando el proveedor de Google.
   Future<String?> iniciarSesionConGoogle() async {
     _setCargando(true);
     try {
@@ -71,8 +68,7 @@ class ControladorLogin extends ChangeNotifier {
     }
   }
 
-  /// Intenta iniciar sesión con email/contraseña. Devuelve `null` si ok,
-  /// o un texto con el error.
+  /// Inicia sesión con correo y contraseña.
   Future<String?> iniciarSesionConEmail() async {
     _setCargando(true);
     try {
@@ -92,7 +88,7 @@ class ControladorLogin extends ChangeNotifier {
     }
   }
 
-  /// Intenta registrar un nuevo usuario con email/contraseña.
+  /// Registra un nuevo usuario y guarda sus datos en Firestore.
   Future<String?> registrarConEmail() async {
     _setCargando(true);
     try {

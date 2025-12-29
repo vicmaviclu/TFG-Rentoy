@@ -3,6 +3,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
 
+/// Encabezado con los nombres de los equipos.
 class EncabezadoEquipos extends StatelessWidget {
   const EncabezadoEquipos({super.key});
 
@@ -13,6 +14,7 @@ class EncabezadoEquipos extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
+            // Título Equipo 1
             child: Center(
               child: Text(
                 TextoPartida.equipo1,
@@ -25,6 +27,7 @@ class EncabezadoEquipos extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Expanded(
+            // Título Equipo 2
             child: Center(
               child: Text(
                 TextoPartida.equipo2,

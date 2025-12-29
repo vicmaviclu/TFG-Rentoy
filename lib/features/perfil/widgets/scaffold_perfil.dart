@@ -5,6 +5,7 @@ import '../../../core/widgets/plantilla_pantalla_principal.dart';
 import '../controllers/controlador_perfil.dart';
 import 'formulario_perfil.dart';
 
+/// Estructura principal de la pantalla de perfil.
 class PerfilScaffold extends StatefulWidget {
   final ControladorPerfil controlador;
   const PerfilScaffold({required this.controlador, super.key});
@@ -29,6 +30,7 @@ class _PerfilScaffoldState extends State<PerfilScaffold> {
   @override
   Widget build(BuildContext context) {
     return PlantillaPantallaPrincipal(
+      // Plantilla con botón de volver
       mostrarVolver: true,
       child: PerfilForm(controlador: widget.controlador),
     );

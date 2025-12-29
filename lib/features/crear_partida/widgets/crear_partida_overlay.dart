@@ -9,6 +9,7 @@ import '../../../core/constantes/errores.dart';
 import '../../../app/rutas.dart';
 import '../../../core/widgets/contenedor_principal.dart';
 
+/// Contenido del modal para crear partida.
 class CrearPartidaOverlay extends StatefulWidget {
   const CrearPartidaOverlay({super.key});
 
@@ -82,6 +83,7 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Título y botón cerrar
               Row(
                 children: [
                   Expanded(
@@ -94,14 +96,12 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colores.blanco,
-                    ), // Color blanco añadido
+                    icon: const Icon(Icons.close, color: Colores.blanco),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
+              // Información del anfitrión
               Text(
                 '${TextoPerfil.nombre}: ${_ctrl.nombreAnfitrion}',
                 style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
@@ -112,6 +112,7 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                 style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
               ),
               const SizedBox(height: 8),
+              // Selector de jugadores
               Row(
                 children: [2, 4, 6].map((n) {
                   final selected = _ctrl.maxJugadores == n;
@@ -133,6 +134,7 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                 }).toList(),
               ),
               const SizedBox(height: 16),
+              // Botón crear partida
               SizedBox(
                 height: 46,
                 child: ElevatedButton(

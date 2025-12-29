@@ -8,7 +8,7 @@ import '../../../app/rutas.dart';
 import '../widgets/formulario_login.dart';
 import '../widgets/boton_google.dart';
 
-/// Pantalla de inicio de sesión (presentación y navegación).
+/// Pantalla de inicio de sesión.
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
 
@@ -52,7 +52,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
           ),
           const SizedBox(height: 16),
 
-          // Form
+          // Formulario
           FormularioLogin(controller: _controller),
 
           const SizedBox(height: 12),
@@ -66,7 +66,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
           ),
           const SizedBox(height: 8),
 
-          // Google Button
+          // Botón de Google
           AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
@@ -92,7 +92,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
           ),
           const SizedBox(height: 12),
 
-          // Register Link
+          // Enlace al registro
           TextButton(
             onPressed: _controller.cargando
                 ? null

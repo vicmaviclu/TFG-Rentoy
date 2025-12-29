@@ -5,6 +5,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
 
+/// Panel de información de la sala (PIN, Anfitrión).
 class InfoSala extends StatefulWidget {
   final Stream<DatabaseEvent> streamSesion;
   final String nombreAnfitrion;
@@ -60,6 +61,7 @@ class _InfoSalaState extends State<InfoSala> {
 
         return Column(
           children: [
+            // Título de la sala
             Text(
               TextoPartida.salaEspera,
               style: EstilosTexto.tituloMedio.copyWith(
@@ -76,8 +78,9 @@ class _InfoSalaState extends State<InfoSala> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
+            // Nombre del anfitrión
             Text(
-              "Partida de $anfitrionDb", // TODO: Usar constante si es posible, aunque esto es dinámico
+              "Partida de $anfitrionDb",
               style: EstilosTexto.subtitulo.copyWith(
                 color: Colores.blanco70,
                 fontSize: 16,
@@ -86,6 +89,7 @@ class _InfoSalaState extends State<InfoSala> {
             ),
             const SizedBox(height: 12),
             if (pin.isNotEmpty)
+              // Muestra el PIN copiable
               GestureDetector(
                 onTap: () => _copiarPin(context, pin),
                 child: Container(
@@ -123,7 +127,6 @@ class _InfoSalaState extends State<InfoSala> {
                         onTap: () => _copiarPin(context, pin),
                       ),
                       const SizedBox(width: 8),
-                      // Usar Colores.textoPrimario para el icono
                       const Icon(
                         Icons.copy,
                         size: 18,

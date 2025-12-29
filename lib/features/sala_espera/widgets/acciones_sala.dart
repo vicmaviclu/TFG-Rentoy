@@ -3,6 +3,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
 
+/// Botones de acción en la sala de espera.
 class AccionesSala extends StatelessWidget {
   final bool salaLlena;
   final VoidCallback? alInvitar;
@@ -22,6 +23,7 @@ class AccionesSala extends StatelessWidget {
         Expanded(
           child: SizedBox(
             height: 56,
+            // Botón para invitar amigos
             child: ElevatedButton.icon(
               icon: const Icon(Icons.person_add_alt_1_outlined),
               label: Text(
@@ -40,6 +42,7 @@ class AccionesSala extends StatelessWidget {
         Expanded(
           child: SizedBox(
             height: 56,
+            // Botón para empezar partida
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: salaLlena

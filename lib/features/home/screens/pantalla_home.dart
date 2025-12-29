@@ -6,7 +6,7 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/widgets/plantilla_pantalla_principal.dart';
 import '../widgets/menu_principal.dart';
 
-/// Pantalla principal que se muestra después de iniciar sesión.
+/// Pantalla principal tras iniciar sesión.
 class PantallaHome extends StatelessWidget {
   const PantallaHome({super.key});
 
@@ -20,6 +20,7 @@ class PantallaHome extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 45),
+          // Título de bienvenida
           Text(
             TextoAuth.bienvenido,
             style: EstilosTexto.tituloGrande.copyWith(color: Colores.blanco),
@@ -27,12 +28,14 @@ class PantallaHome extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (user != null) ...[
+            // Información del usuario
             Text(
               user.email ?? user.uid,
               style: EstilosTexto.tituloMedio.copyWith(color: Colores.blanco70),
             ),
             const SizedBox(height: 20),
           ],
+          // Menú principal
           const MenuPrincipal(),
         ],
       ),

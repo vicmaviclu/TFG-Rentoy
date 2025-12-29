@@ -12,6 +12,7 @@ import '../widgets/encabezado_equipos.dart';
 import '../widgets/cuadricula_jugadores.dart';
 import '../widgets/acciones_sala.dart';
 
+/// Pantalla de sala de espera.
 class PantallaSalaEspera extends StatefulWidget {
   final String idSesion;
   final String nombreAnfitrion;

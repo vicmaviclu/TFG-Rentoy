@@ -7,7 +7,7 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/cadenas.dart';
 
-/// Pantalla de registro de usuarios (versión en español del archivo).
+/// Pantalla de registro de nuevos usuarios.
 class PantallaRegistro extends StatefulWidget {
   const PantallaRegistro({super.key});
 
@@ -37,7 +37,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Title
+          // Título
           Text(
             TextoAuth.tituloRegistro,
             style: EstilosTexto.titulo.copyWith(color: Colores.textoPrimario),
@@ -45,12 +45,12 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
           ),
           const SizedBox(height: 16),
 
-          // Form
+          // Formulario de registro
           FormularioRegistro(controller: _controller),
 
           const SizedBox(height: 16),
 
-          // Login Link
+          // Enlace al inicio de sesión
           TextButton(
             onPressed: () => Navigator.of(context).pushNamed(RutasApp.login),
             child: const Text(TextoAuth.yaTienesCuenta),

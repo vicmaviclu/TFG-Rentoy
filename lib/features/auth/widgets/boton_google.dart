@@ -5,11 +5,7 @@ import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/recursos.dart';
 
-/// Botón presentacional para iniciar sesión con Google.
-///
-/// La lógica real de autenticación debe residir en un controlador/servicio
-/// y ser invocada mediante `onPressed`. El parámetro `isLoading` controla
-/// el estado visual de carga.
+/// Botón para iniciar sesión con Google.
 class BotonGoogle extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
@@ -44,6 +40,7 @@ class BotonGoogle extends StatelessWidget {
     final double resolvedIconSize = iconSize ?? 30.0;
     final double resolvedHeight = height ?? Tamanos.buttonHeight;
     final btn = ElevatedButton.icon(
+      // Icono de carga o logo de Google
       icon: isLoading
           ? SizedBox(
               width: resolvedIconSize,
@@ -58,6 +55,7 @@ class BotonGoogle extends StatelessWidget {
               height: resolvedIconSize,
               width: resolvedIconSize,
             ),
+      // Etiqueta del botón
       label: Text(
         isLoading ? TextoAuth.iniciando : label,
         style:

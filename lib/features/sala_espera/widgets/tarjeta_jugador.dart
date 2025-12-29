@@ -7,6 +7,7 @@ import '../../../../core/constantes/cadenas.dart';
 import '../../../../core/constantes/recursos.dart';
 import '../../../../models/usuario_model.dart';
 
+/// Tarjeta individual de un jugador en la sala.
 class TarjetaJugador extends StatefulWidget {
   final String? nombre;
   final String? uid;
@@ -88,7 +89,7 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
     final bool esHuecoVacio = widget.uid == null || (widget.uid!.isEmpty);
 
     if (esHuecoVacio) {
-      // Diseño de "hueco vacío"
+      // Estado: Hueco vacío (esperando jugador)
       return GestureDetector(
         onTap: widget.alPulsar,
         child: Container(
@@ -122,7 +123,7 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
       );
     }
 
-    // Diseño de "Hueco ocupado"
+    // Estado: Hueco ocupado (muestra jugador)
     return GestureDetector(
       onTap: widget.alPulsar,
       child: Container(
