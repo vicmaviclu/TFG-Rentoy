@@ -368,4 +368,20 @@ class ServicioRealtime {
 
     return {'id': id, 'anfitrion': anfitrion, 'maxJugadores': maxJugadores};
   }
+
+  /// Actualiza el estado de la sesión (ej. 'playing', 'finished')
+  Future<void> actualizarEstadoSesion(
+    String sessionId,
+    String nuevoEstado,
+  ) async {
+    await referenciaSesion(sessionId).update({'estado': nuevoEstado});
+
+    // También actualizar en Firestore
+    final firestore = FirebaseFirestore.instance;
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    final partidaSnap = await partidaDoc.get();
+    if (partidaSnap.exists) {
+      await partidaDoc.update({'estado': nuevoEstado});
+    }
+  }
 }

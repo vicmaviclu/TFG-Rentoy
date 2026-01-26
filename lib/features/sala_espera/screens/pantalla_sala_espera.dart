@@ -10,7 +10,9 @@ import '../../../models/usuario_model.dart';
 import '../widgets/info_sala.dart';
 import '../widgets/encabezado_equipos.dart';
 import '../widgets/cuadricula_jugadores.dart';
+import 'dart:async';
 import '../widgets/acciones_sala.dart';
+import '../../partida/screens/pantalla_partida.dart';
 
 /// Pantalla de sala de espera.
 class PantallaSalaEspera extends StatefulWidget {
@@ -35,6 +37,7 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
   // Streams cacheados
   late Stream<List<UsuarioModel>> _streamJugadores;
   late Stream<DatabaseEvent> _streamSesion;
+  StreamSubscription? _subSesion;
 
   @override
   void initState() {
@@ -47,6 +50,26 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
       widget.maxJugadores,
     );
     _streamSesion = _controlador.streamEventoSesion(widget.idSesion);
+    _subSesion = _streamSesion.listen((event) {
+      if (!mounted) return;
+      final val = event.snapshot.value as Map?;
+      if (val != null && val['estado'] == 'playing') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => PantallaPartida(
+              idSesion: widget.idSesion,
+              maxJugadores: widget.maxJugadores,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subSesion?.cancel();
+    super.dispose();
   }
 
   @override
@@ -98,8 +121,17 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
                     // TODO: Implementar invitación
                   },
                   alEmpezar: salaLlena
-                      ? () {
-                          // TODO: Implementar empezar partida
+                      ? () async {
+                          try {
+                            await _controlador.empezarPartida(widget.idSesion);
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(TextoComun.errorInesperado),
+                              ),
+                            );
+                          }
                         }
                       : null,
                 );

@@ -104,4 +104,13 @@ class ControladorSalaEspera {
       rethrow;
     }
   }
+
+  // Actualiza el estado de la sesión a 'playing'
+  Future<void> empezarPartida(String idSesion) async {
+    try {
+      await _servicio.actualizarEstadoSesion(idSesion, 'playing');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
