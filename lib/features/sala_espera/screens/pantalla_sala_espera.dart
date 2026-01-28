@@ -12,7 +12,8 @@ import '../widgets/encabezado_equipos.dart';
 import '../widgets/cuadricula_jugadores.dart';
 import 'dart:async';
 import '../widgets/acciones_sala.dart';
-import '../../partida/screens/pantalla_partida.dart';
+// import '../../partida/screens/pantalla_partida.dart'; // No longer needed directly
+import '../../../app/rutas.dart';
 
 /// Pantalla de sala de espera.
 class PantallaSalaEspera extends StatefulWidget {
@@ -54,13 +55,12 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
       if (!mounted) return;
       final val = event.snapshot.value as Map?;
       if (val != null && val['estado'] == 'playing') {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => PantallaPartida(
-              idSesion: widget.idSesion,
-              maxJugadores: widget.maxJugadores,
-            ),
-          ),
+        Navigator.of(context).pushReplacementNamed(
+          RutasApp.partida,
+          arguments: {
+            'idSesion': widget.idSesion,
+            'maxJugadores': widget.maxJugadores,
+          },
         );
       }
     });

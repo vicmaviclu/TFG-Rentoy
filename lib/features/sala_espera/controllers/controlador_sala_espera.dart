@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../../../models/baraja_model.dart';
+import '../../../models/carta_model.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../models/sesion_model.dart';
 import '../../../models/usuario_model.dart';
@@ -105,10 +107,61 @@ class ControladorSalaEspera {
     }
   }
 
-  // Actualiza el estado de la sesión a 'playing'
-  Future<void> empezarPartida(String idSesion) async {
+  // Actualiza el estado de la sesión a 'playing' e inicializa datos de partida
+  Future<void> empezarPartida(
+    String idSesion, {
+    int puntosObjetivo = 21,
+  }) async {
     try {
-      await _servicio.actualizarEstadoSesion(idSesion, 'playing');
+      // 1. Obtener estado actual de la sesión (para saber jugadores)
+      // Usamos `first` para obtener el valor actual del stream y cerrarlo implícitamente
+      final evento = await _servicio.streamSesion(idSesion).first;
+      final val = evento.snapshot.value;
+      if (val == null || val is! Map) {
+        throw Exception('No se pudo obtener información de la sesión');
+      }
+
+      final sesion = SesionModel.fromMap(val, idSesion);
+      // Calcular maxJugadores real basado en los que hay o el config
+      final maxJugadores = sesion.maxJugadores;
+
+      // 2. Preparar baraja
+      final baraja = Baraja();
+      baraja.barajar();
+
+      // 3. Estructura para las manos
+      final manosTemp = <String, List<Carta>>{};
+
+      // Inicializar listas vacías para jugadores presentes
+      for (var i = 1; i <= maxJugadores; i++) {
+        manosTemp['jugador $i'] = [];
+      }
+
+      // 4. Repartir 3 cartas, una a una
+      for (var ronda = 0; ronda < 3; ronda++) {
+        for (var i = 1; i <= maxJugadores; i++) {
+          if (baraja.cartas.isNotEmpty) {
+            manosTemp['jugador $i']?.add(baraja.cartas.removeAt(0));
+          }
+        }
+      }
+
+      // 5. Preparar Updates
+      final updates = <String, dynamic>{
+        'estado': 'playing', // 'playing' según lo que espera el listener
+        'rondas/actual': 1,
+        'puntos/objetivo': puntosObjetivo,
+        'puntos/equipo1': 0,
+        'puntos/equipo2': 0,
+      };
+
+      // Añadir manos
+      manosTemp.forEach((key, cartas) {
+        updates['jugadores/$key/mano'] = cartas.map((c) => c.toMap()).toList();
+      });
+
+      // 6. Enviar a Servicio
+      await _servicio.iniciarPartida(idSesion, updates);
     } catch (e) {
       rethrow;
     }

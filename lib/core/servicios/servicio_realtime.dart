@@ -384,4 +384,38 @@ class ServicioRealtime {
       await partidaDoc.update({'estado': nuevoEstado});
     }
   }
+
+  /// Inicia la partida recibiendo el mapa de actualizaciones ya calculado.
+  /// (El controlador se encarga de barajar y repartir).
+  Future<void> iniciarPartida(
+    String sessionId,
+    Map<String, dynamic> updates,
+  ) async {
+    // 1. Actualizar Realtime Database
+    await referenciaSesion(sessionId).update(updates);
+
+    // 2. Actualizar Firestore (Espejo parcial)
+    // Extraemos info relevante para Firestore si existe en updates
+    final nuevoEstado = updates['estado'];
+    final puntos = updates['puntos'];
+    final ronda = updates['rondas/actual']; // Cuidado con la clave anidada
+
+    if (nuevoEstado != null) {
+      final firestore = FirebaseFirestore.instance;
+      final partidaDoc = firestore.collection('partidas').doc(sessionId);
+      final partidaSnap = await partidaDoc.get();
+
+      if (partidaSnap.exists) {
+        final dataFirestore = <String, dynamic>{'estado': nuevoEstado};
+        if (puntos != null) {
+          dataFirestore['puntos'] = puntos;
+        }
+        if (ronda != null) {
+          dataFirestore['rondaActual'] = ronda;
+        }
+
+        await partidaDoc.update(dataFirestore);
+      }
+    }
+  }
 }
