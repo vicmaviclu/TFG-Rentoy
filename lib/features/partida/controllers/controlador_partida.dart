@@ -34,6 +34,12 @@ class ControladorPartida {
           ? sesion['maxJugadores'] as int
           : int.tryParse(sesion['maxJugadores']?.toString() ?? '') ?? 4;
 
+      // Obtener ronda actual para buscar las manos
+      final rondaActual =
+          (sesion['rondas'] != null && sesion['rondas']['actual'] != null)
+          ? sesion['rondas']['actual']
+          : null;
+
       List<UsuarioModel> lista = [];
 
       for (var i = 1; i <= maxJugadores; i++) {
@@ -43,9 +49,26 @@ class ControladorPartida {
         final v = jugadoresMap[clave];
         if (v == null) continue;
 
+        // Buscar mano en rondas/x/jugador i
+        List<dynamic>? manoRaw;
+        if (rondaActual != null &&
+            sesion['rondas'] != null &&
+            sesion['rondas'][rondaActual.toString()] != null) {
+          final rondaData = sesion['rondas'][rondaActual.toString()];
+          if (rondaData[clave] != null) {
+            manoRaw = rondaData[clave];
+          }
+        }
+
         if (v is String) {
           lista.add(
-            UsuarioModel(uid: '', email: '', nombreUsuario: v, avatar: 1),
+            UsuarioModel(
+              uid: '',
+              email: '',
+              nombreUsuario: v,
+              avatar: 1,
+              mano: manoRaw,
+            ),
           );
         } else if (v is Map) {
           lista.add(
@@ -56,6 +79,7 @@ class ControladorPartida {
               avatar: (v['avatar'] is int)
                   ? v['avatar'] as int
                   : int.tryParse(v['avatar']?.toString() ?? '') ?? 1,
+              mano: manoRaw,
             ),
           );
         }

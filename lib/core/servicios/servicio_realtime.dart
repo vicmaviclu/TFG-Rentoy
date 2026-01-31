@@ -369,7 +369,7 @@ class ServicioRealtime {
     return {'id': id, 'anfitrion': anfitrion, 'maxJugadores': maxJugadores};
   }
 
-  /// Actualiza el estado de la sesión (ej. 'playing', 'finished')
+  /// Actualiza el estado de la sesión (ej. 'jugando', 'finalizada')
   Future<void> actualizarEstadoSesion(
     String sessionId,
     String nuevoEstado,

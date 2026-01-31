@@ -104,12 +104,8 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                   ),
                 ),
 
-                const Spacer(),
-
-                // Mesa en medio
-                const Expanded(flex: 2, child: Center(child: MesaJuego())),
-
-                const Spacer(),
+                // Mesa en medio (Ocupa todo el espacio disponible)
+                Expanded(child: MesaJuego()),
 
                 // Mi Equipo (Abajo)
                 Padding(

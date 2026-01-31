@@ -20,6 +20,7 @@ class ContenedorEquipo extends StatelessWidget {
         return AvatarJugadorPartida(
           nombre: usuario.nombreUsuario,
           avatar: usuario.avatar,
+          mano: usuario.mano,
           esMiJugador: usuario.uid == miUid,
         );
       }).toList(),

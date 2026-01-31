@@ -107,7 +107,7 @@ class ControladorSalaEspera {
     }
   }
 
-  // Actualiza el estado de la sesión a 'playing' e inicializa datos de partida
+  // Actualiza el estado de la sesión a 'jugando' e inicializa datos de partida
   Future<void> empezarPartida(
     String idSesion, {
     int puntosObjetivo = 21,
@@ -148,16 +148,18 @@ class ControladorSalaEspera {
 
       // 5. Preparar Updates
       final updates = <String, dynamic>{
-        'estado': 'playing', // 'playing' según lo que espera el listener
+        'estado': 'jugando', // 'jugando' según lo que espera el listener
         'rondas/actual': 1,
         'puntos/objetivo': puntosObjetivo,
         'puntos/equipo1': 0,
         'puntos/equipo2': 0,
+        // Inicializar puntos de la ronda 1
+        'rondas/1/puntos': 1,
       };
 
-      // Añadir manos
+      // Añadir manos a la ronda 1
       manosTemp.forEach((key, cartas) {
-        updates['jugadores/$key/mano'] = cartas.map((c) => c.toMap()).toList();
+        updates['rondas/1/$key'] = cartas.map((c) => c.toMap()).toList();
       });
 
       // 6. Enviar a Servicio

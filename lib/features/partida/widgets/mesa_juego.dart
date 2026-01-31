@@ -9,9 +9,11 @@ class MesaJuego extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+
+      // Sin height fijo para que ocupe todo el espacio del Expanded
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colores.primario.withOpacity(0.5), // Or a felt color
+        color: Colores.primario.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colores.blanco24, width: 4),
         boxShadow: [
@@ -24,7 +26,7 @@ class MesaJuego extends StatelessWidget {
       ),
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(40.0),
           child: Text(
             'Mesa de Juego',
             style: EstilosTexto.tituloMedio.copyWith(color: Colores.blanco70),

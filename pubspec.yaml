@@ -69,6 +69,10 @@ flutter:
     - assets/images/simbolo_google.png
     - assets/images/logo_rentoy.jpg
     - assets/images/avatares/
+    - assets/images/cartas/bastos/
+    - assets/images/cartas/copas/
+    - assets/images/cartas/espadas/
+    - assets/images/cartas/oros/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

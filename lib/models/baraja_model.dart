@@ -47,7 +47,7 @@ class Baraja {
 
   /// Genera la ruta al asset
   String _obtenerRutaImagen(String palo, String prefijo, int numero) {
-    return 'Assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
+    return 'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
   }
 
   void barajar() {

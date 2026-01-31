@@ -6,6 +6,7 @@ class UsuarioModel {
   final String nombreUsuario;
   final int avatar;
   final DateTime? fechaCreacion;
+  final List<dynamic>? mano;
 
   UsuarioModel({
     required this.uid,
@@ -13,6 +14,7 @@ class UsuarioModel {
     required this.nombreUsuario,
     required this.avatar,
     this.fechaCreacion,
+    this.mano,
   });
 
   /// Crea una copia del modelo con campos modificados
@@ -29,6 +31,7 @@ class UsuarioModel {
       nombreUsuario: nombreUsuario ?? this.nombreUsuario,
       avatar: avatar ?? this.avatar,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+      mano: mano ?? this.mano,
     );
   }
 
