@@ -418,4 +418,64 @@ class ServicioRealtime {
       }
     }
   }
+
+  /// Juega una carta: marca usada, actualiza carta ganadora, pasa turno.
+  Future<void> jugarCarta({
+    required String sessionId,
+    required String rondaId,
+    required String jugadorKey,
+    required int cartaIndex,
+    required Map<String, dynamic> cartaData,
+    required int nuevoTurno,
+  }) async {
+    final ref = referenciaSesion(sessionId);
+
+    // Estructura de actualización
+    final cardPath = 'rondas/$rondaId/$jugadorKey/$cartaIndex/usada';
+
+    // Almacenamos quién ganó (por ahora, el que tiró último, simplificado)
+    // TODO: Lógica real de quién gana la baza
+    final winningPath = 'rondas/$rondaId/carta_ganadora';
+
+    final turnoPath = 'rondas/$rondaId/turno';
+
+    // Guardar info completa de la carta ganadora
+    final dataGanadora = {
+      'carta': cartaData,
+      'jugador': jugadorKey,
+      'equipo': (jugadorKey == 'jugador 1' || jugadorKey == 'jugador 3')
+          ? 1
+          : 2, // Simplificado, asumir orden estándar
+    };
+
+    await ref.update({
+      cardPath: true,
+      winningPath: dataGanadora,
+      turnoPath: nuevoTurno,
+    });
+  }
+
+  /// Limpia la mesa (no se usa si no hay mesa global, pero útil para resetear carta ganadora)
+  Future<void> limpiarCartaGanadora(String sessionId, String rondaId) async {
+    await referenciaSesion(
+      sessionId,
+    ).child('rondas/$rondaId/carta_ganadora').remove();
+  }
+
+  /// Escucha la carta ganadora de la ronda actual
+  Stream<Map<String, dynamic>> streamCartaGanadora(
+    String sessionId,
+    String rondaId,
+  ) {
+    if (rondaId.isEmpty) return Stream.value({});
+    return referenciaSesion(
+      sessionId,
+    ).child('rondas/$rondaId/carta_ganadora').onValue.map((event) {
+      final val = event.snapshot.value;
+      if (val != null && val is Map) {
+        return Map<String, dynamic>.from(val);
+      }
+      return {};
+    });
+  }
 }

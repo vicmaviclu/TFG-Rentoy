@@ -27,6 +27,8 @@ class _PantallaPartidaState extends State<PantallaPartida> {
   late ControladorPartida _controlador;
   late Stream<List<UsuarioModel>> _streamJugadores;
   late String _miUid;
+  String? _miKey;
+  int? _cartaSeleccionadaIndex;
 
   @override
   void initState() {
@@ -34,10 +36,69 @@ class _PantallaPartidaState extends State<PantallaPartida> {
     _controlador = ControladorPartida(servicio: ServicioRealtime());
     _miUid = _controlador.obtenerMiUid();
     _streamJugadores = _controlador.streamJugadores(widget.idSesion);
+
+    // Obtener mi key (jugador 1, etc)
+    _controlador.obtenerMiKeyJugador(widget.idSesion).then((key) {
+      if (mounted) {
+        setState(() {
+          _miKey = key;
+        });
+      }
+    });
+  }
+
+  void _onSeleccionarCarta(int index) {
+    setState(() {
+      if (_cartaSeleccionadaIndex == index) {
+        _cartaSeleccionadaIndex = null;
+      } else {
+        _cartaSeleccionadaIndex = index;
+      }
+    });
+  }
+
+  void _ejecutarLanzamiento(List<UsuarioModel> jugadores) {
+    if (_cartaSeleccionadaIndex == null) return;
+
+    final yo = jugadores.firstWhere(
+      (u) => u.uid == _miUid,
+      orElse: () =>
+          UsuarioModel(uid: '', nombreUsuario: '', avatar: 0, mano: []),
+    );
+
+    // Null safety checks
+    final mano = yo.mano;
+    if (mano == null || mano.isEmpty || _cartaSeleccionadaIndex! >= mano.length)
+      return;
+
+    final cartaRaw = mano[_cartaSeleccionadaIndex!];
+    if (cartaRaw is! Map) return;
+
+    final cartaMap = Map<String, dynamic>.from(cartaRaw);
+
+    _controlador
+        .jugarCarta(widget.idSesion, _cartaSeleccionadaIndex!, cartaMap)
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              _cartaSeleccionadaIndex = null;
+            });
+          }
+        })
+        .catchError((e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error al lanzar carta: $e")),
+            );
+          }
+        });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Por ahora solo Jugador 1 puede jugar.
+    final bool esMiTurno = (_miKey == 'jugador 1');
+
     return PaginaFondo(
       conScroll: false,
       mostrarTitulo: false,
@@ -85,6 +146,9 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                 ? TextoPartida.equipo1
                 : TextoPartida.equipo2;
 
+            // Lógica para mostrar botón
+            final mostrarBoton = esMiTurno && _cartaSeleccionadaIndex != null;
+
             return Column(
               children: [
                 // Equipo Rival (Arriba)
@@ -99,20 +163,40 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ContenedorEquipo(jugadores: equipoArriba, miUid: _miUid),
+                      ContenedorEquipo(
+                        jugadores: equipoArriba,
+                        miUid: _miUid,
+                        // Rivales no seleccionan carta visualmente para mi
+                        cartaSeleccionadaIndex: null,
+                        onSeleccionar: null,
+                        esMiTurno: false,
+                      ),
                     ],
                   ),
                 ),
 
                 // Mesa en medio (Ocupa todo el espacio disponible)
-                Expanded(child: MesaJuego()),
+                Expanded(
+                  child: MesaJuego(
+                    controlador: _controlador,
+                    idSesion: widget.idSesion,
+                    mostrarBotonLanzar: mostrarBoton,
+                    onLanzar: () => _ejecutarLanzamiento(jugadores),
+                  ),
+                ),
 
                 // Mi Equipo (Abajo)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      ContenedorEquipo(jugadores: equipoAbajo, miUid: _miUid),
+                      ContenedorEquipo(
+                        jugadores: equipoAbajo,
+                        miUid: _miUid,
+                        cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
+                        onSeleccionar: _onSeleccionarCarta,
+                        esMiTurno: esMiTurno,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         tituloEquipoAbajo,
