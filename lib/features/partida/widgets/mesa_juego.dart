@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/recursos.dart';
 import '../controllers/controlador_partida.dart';
 
 class MesaJuego extends StatelessWidget {
@@ -53,7 +55,7 @@ class MesaJuego extends StatelessWidget {
                   Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'Mesa de Juego',
+                      TextoPartida.mesaDeJuego,
                       style: EstilosTexto.tituloMedio.copyWith(
                         color: Colores.blanco24,
                       ),
@@ -80,19 +82,15 @@ class MesaJuego extends StatelessWidget {
                           final numero = carta['numero']?.toString() ?? '0';
                           final palo = carta['palo']?.toString() ?? '';
 
-                          if (numero == '0' || palo.isEmpty)
-                            return const SizedBox.shrink();
-
-                          final prefijo = palo[0];
-                          final path =
-                              'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
+                          final path = Recursos.obtenerCarta(palo, numero);
+                          if (path.isEmpty) return const SizedBox.shrink();
 
                           return Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "Ganando: $jugador",
+                                  "${TextoPartida.ganando}$jugador",
                                   style: EstilosTexto.caption.copyWith(
                                     color: Colores.blanco,
                                   ),
@@ -152,7 +150,7 @@ class MesaJuego extends StatelessWidget {
                   ),
                   onPressed: onLanzar,
                   child: const Text(
-                    'LANZAR',
+                    TextoPartida.btnLanzar,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,

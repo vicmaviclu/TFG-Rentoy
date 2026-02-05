@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/servicios/servicio_autenticacion.dart';
 import '../../../core/constantes/errores.dart';
+import '../../../core/constantes/cadenas.dart';
 
 // Typedef para las funciones de autenticación por email/contraseña.
 // Hace el código más legible y facilita el uso en parámetros y mocks.
@@ -98,7 +99,7 @@ class ControladorLogin extends ChangeNotifier {
       if (email.isEmpty || !email.contains('@'))
         return ErroresValidacion.emailInvalido;
       if (pass.length < 6) return ErroresValidacion.contrasenaCorta;
-      if (username.isEmpty) return 'Introduce un nombre de usuario';
+      if (username.isEmpty) return TextoAuth.introducirUsuario;
 
       // Comprobar si el nombre de usuario ya existe en la colección 'usuarios'
       final existente = await FirebaseFirestore.instance
@@ -107,7 +108,7 @@ class ControladorLogin extends ChangeNotifier {
           .limit(1)
           .get();
       if (existente.docs.isNotEmpty) {
-        return 'El nombre de usuario ya está en uso';
+        return TextoAuth.usuarioEnUso;
       }
 
       // Crear el usuario en Firebase Auth

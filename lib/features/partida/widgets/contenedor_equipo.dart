@@ -5,7 +5,7 @@ import 'avatar_jugador_partida.dart';
 class ContenedorEquipo extends StatelessWidget {
   final List<UsuarioModel> jugadores;
   final String miUid;
-  // New props for selection
+  // Nuevas propiedades para la selección
   final int? cartaSeleccionadaIndex;
   final Function(int)? onSeleccionar;
   final bool esMiTurno;

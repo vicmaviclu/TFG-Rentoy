@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import '../../models/usuario_model.dart';
+import '../../models/baraja_model.dart';
+import '../../models/carta_model.dart';
 
 class ServicioRealtime {
   final FirebaseDatabase _db = FirebaseDatabase.instance;
@@ -477,5 +479,63 @@ class ServicioRealtime {
       }
       return {};
     });
+  }
+
+  /// Inicia la siguiente ronda: reparte cartas y actualiza marcadores
+  Future<void> iniciarSiguienteRonda({
+    required String sessionId,
+    required int proximaRonda,
+    required int maxJugadores,
+    required Map<String, int> nuevosPuntos, // { 'equipo1': x, 'equipo2': y }
+  }) async {
+    // 1. Generar nueva baraja y repartir
+    final baraja = Baraja();
+    baraja.barajar();
+
+    final manosTemp = <String, List<Carta>>{};
+    for (var i = 1; i <= maxJugadores; i++) {
+      manosTemp['jugador $i'] = [];
+    }
+
+    // Repartir 3 cartas a cada uno
+    for (var r = 0; r < 3; r++) {
+      for (var i = 1; i <= maxJugadores; i++) {
+        if (baraja.cartas.isNotEmpty) {
+          manosTemp['jugador $i']?.add(baraja.cartas.removeAt(0));
+        }
+      }
+    }
+
+    // 2. Preparar updates
+    final updates = <String, dynamic>{
+      'rondas/actual': proximaRonda,
+      'rondas/$proximaRonda/puntos': 1, // Puntos base de la nueva ronda
+      'rondas/$proximaRonda/turno': 1, // Reset turno
+      // Actualizar marcadores globales
+      'puntos/equipo1': nuevosPuntos['equipo1'],
+      'puntos/equipo2': nuevosPuntos['equipo2'],
+    };
+
+    // Añadir nuevas manos
+    manosTemp.forEach((key, cartas) {
+      updates['rondas/$proximaRonda/$key'] = cartas
+          .map((c) => c.toMap())
+          .toList();
+    });
+
+    // 3. Ejecutar actualización atómica
+    await referenciaSesion(sessionId).update(updates);
+
+    // 4. Actualizar Firestore (espejo)
+    final firestore = FirebaseFirestore.instance;
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    final partidaSnap = await partidaDoc.get();
+
+    if (partidaSnap.exists) {
+      await partidaDoc.update({
+        'rondaActual': proximaRonda,
+        'puntos': nuevosPuntos,
+      });
+    }
   }
 }

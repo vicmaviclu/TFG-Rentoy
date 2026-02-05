@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../../../models/baraja_model.dart';
 import '../../../models/carta_model.dart';
 import '../../../core/servicios/servicio_realtime.dart';
+import '../../../core/constantes/cadenas.dart';
 import '../../../models/sesion_model.dart';
 import '../../../models/usuario_model.dart';
 
@@ -118,7 +119,7 @@ class ControladorSalaEspera {
       final evento = await _servicio.streamSesion(idSesion).first;
       final val = evento.snapshot.value;
       if (val == null || val is! Map) {
-        throw Exception('No se pudo obtener información de la sesión');
+        throw Exception(TextoPartida.errorSesionInfo);
       }
 
       final sesion = SesionModel.fromMap(val, idSesion);
@@ -148,7 +149,8 @@ class ControladorSalaEspera {
 
       // 5. Preparar Updates
       final updates = <String, dynamic>{
-        'estado': 'jugando', // 'jugando' según lo que espera el listener
+        'estado': TextoPartida
+            .estadoJugando, // 'jugando' según lo que espera el listener
         'rondas/actual': 1,
         'puntos/objetivo': puntosObjetivo,
         'puntos/equipo1': 0,

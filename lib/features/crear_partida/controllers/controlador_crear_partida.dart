@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/servicios/servicio_realtime.dart';
+import '../../../core/constantes/cadenas.dart';
 import '../../perfil/controllers/controlador_perfil.dart';
 
 /// Controlador para la creación de partidas.
@@ -17,10 +18,10 @@ class ControladorCrearPartida extends ChangeNotifier {
     final perfilName = _perfil.controladorNombreUsuario.text.trim();
     if (perfilName.isNotEmpty) return perfilName;
     final user = _perfil.usuario as User?;
-    if (user == null) return 'Jugador';
+    if (user == null) return TextoPerfil.jugadorDefecto;
     return user.displayName?.trim().isNotEmpty == true
         ? user.displayName!
-        : 'Jugador';
+        : TextoPerfil.jugadorDefecto;
   }
 
   // Carga los datos del perfil de usuario

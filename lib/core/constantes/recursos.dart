@@ -13,4 +13,13 @@ class Recursos {
     }
     return 'assets/images/avatares/avatar $index.png';
   }
+
+  static String obtenerCarta(String palo, dynamic numero) {
+    if (palo.isEmpty) return '';
+    final numStr = numero.toString();
+    if (numStr == '0') return '';
+
+    final prefijo = palo[0];
+    return 'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numStr.png';
+  }
 }

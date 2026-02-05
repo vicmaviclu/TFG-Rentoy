@@ -57,27 +57,11 @@ class _PantallaPartidaState extends State<PantallaPartida> {
     });
   }
 
-  void _ejecutarLanzamiento(List<UsuarioModel> jugadores) {
+  void _ejecutarLanzamiento() {
     if (_cartaSeleccionadaIndex == null) return;
 
-    final yo = jugadores.firstWhere(
-      (u) => u.uid == _miUid,
-      orElse: () =>
-          UsuarioModel(uid: '', nombreUsuario: '', avatar: 0, mano: []),
-    );
-
-    // Null safety checks
-    final mano = yo.mano;
-    if (mano == null || mano.isEmpty || _cartaSeleccionadaIndex! >= mano.length)
-      return;
-
-    final cartaRaw = mano[_cartaSeleccionadaIndex!];
-    if (cartaRaw is! Map) return;
-
-    final cartaMap = Map<String, dynamic>.from(cartaRaw);
-
     _controlador
-        .jugarCarta(widget.idSesion, _cartaSeleccionadaIndex!, cartaMap)
+        .jugarCarta(widget.idSesion, _cartaSeleccionadaIndex!)
         .then((_) {
           if (mounted) {
             setState(() {
@@ -88,7 +72,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
         .catchError((e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error al lanzar carta: $e")),
+              SnackBar(content: Text("${TextoPartida.errorLanzarCarta}$e")),
             );
           }
         });
@@ -96,119 +80,117 @@ class _PantallaPartidaState extends State<PantallaPartida> {
 
   @override
   Widget build(BuildContext context) {
-    // Por ahora solo Jugador 1 puede jugar.
-    final bool esMiTurno = (_miKey == 'jugador 1');
-
     return PaginaFondo(
       conScroll: false,
       mostrarTitulo: false,
       child: SizedBox.expand(
-        child: StreamBuilder<List<UsuarioModel>>(
-          stream: _streamJugadores,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: StreamBuilder<int>(
+          stream: _controlador.streamTurnoActual(widget.idSesion),
+          builder: (context, snapshotTurno) {
+            final turnoActual = snapshotTurno.data ?? 1;
 
-            final jugadores = snapshot.data ?? [];
-            if (jugadores.isEmpty) {
-              return const Center(child: Text(TextoPartida.esperandoDatos));
-            }
+            final bool esMiTurno = _controlador.esMiTurno(_miKey, turnoActual);
 
-            // Separar equipos
-            List<UsuarioModel> equipo1 = [];
-            List<UsuarioModel> equipo2 = [];
-            int miIndice = -1;
+            return StreamBuilder<List<UsuarioModel>>(
+              stream: _streamJugadores,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            for (int i = 0; i < jugadores.length; i++) {
-              if (jugadores[i].uid == _miUid) {
-                miIndice = i;
-              }
-              // Lógica par/impar para equipos
-              if (i % 2 == 0) {
-                equipo1.add(jugadores[i]);
-              } else {
-                equipo2.add(jugadores[i]);
-              }
-            }
+                final jugadores = snapshot.data ?? [];
+                if (jugadores.isEmpty) {
+                  return const Center(child: Text(TextoPartida.esperandoDatos));
+                }
 
-            // Determinar qué equipo va abajo (mi equipo)
-            bool soyEquipo1 = (miIndice != -1 && miIndice % 2 == 0);
+                // Usar controlador para organizar equipos
+                final equipos = _controlador.organizarEquipos(
+                  jugadores,
+                  _miUid,
+                );
+                final equipoAbajo = equipos['abajo']!;
+                final equipoArriba = equipos['arriba']!;
 
-            // Si no me encuentro (espectador o error), defecto Equipo 1 abajo
-            List<UsuarioModel> equipoAbajo = soyEquipo1 ? equipo1 : equipo2;
-            List<UsuarioModel> equipoArriba = soyEquipo1 ? equipo2 : equipo1;
+                // Determinar títulos según mi equipo
+                // Si mi equipo es "equipo1" (porque soy par/impar adecuado), los rivales son "equipo2".
+                // Pero `organizarEquipos` ya nos da [mi equipo, rivales].
+                // Necesitamos saber QUÉ nombre ponerle.
+                // Si estoy en equipo1, mi equipo se llama Equipo 1.
+                bool soyEquipo1 = _controlador.soyEquipo1(jugadores, _miUid);
 
-            String tituloEquipoArriba = soyEquipo1
-                ? TextoPartida.equipo2
-                : TextoPartida.equipo1;
-            String tituloEquipoAbajo = soyEquipo1
-                ? TextoPartida.equipo1
-                : TextoPartida.equipo2;
+                String tituloEquipoArriba = soyEquipo1
+                    ? TextoPartida.equipo2
+                    : TextoPartida.equipo1;
+                String tituloEquipoAbajo = soyEquipo1
+                    ? TextoPartida.equipo1
+                    : TextoPartida.equipo2;
 
-            // Lógica para mostrar botón
-            final mostrarBoton = esMiTurno && _cartaSeleccionadaIndex != null;
+                // Lógica para mostrar botón
+                final mostrarBoton =
+                    esMiTurno && _cartaSeleccionadaIndex != null;
 
-            return Column(
-              children: [
-                // Equipo Rival (Arriba)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        tituloEquipoArriba,
-                        style: EstilosTexto.subtitulo.copyWith(
-                          color: Colores.blanco70,
-                        ),
+                return Column(
+                  children: [
+                    // Equipo Rival (Arriba)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            tituloEquipoArriba,
+                            style: EstilosTexto.subtitulo.copyWith(
+                              color: Colores.blanco70,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ContenedorEquipo(
+                            jugadores: equipoArriba,
+                            miUid: _miUid,
+                            // Rivales no seleccionan carta visualmente para mi
+                            cartaSeleccionadaIndex: null,
+                            onSeleccionar: null,
+                            esMiTurno: false,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      ContenedorEquipo(
-                        jugadores: equipoArriba,
-                        miUid: _miUid,
-                        // Rivales no seleccionan carta visualmente para mi
-                        cartaSeleccionadaIndex: null,
-                        onSeleccionar: null,
-                        esMiTurno: false,
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                // Mesa en medio (Ocupa todo el espacio disponible)
-                Expanded(
-                  child: MesaJuego(
-                    controlador: _controlador,
-                    idSesion: widget.idSesion,
-                    mostrarBotonLanzar: mostrarBoton,
-                    onLanzar: () => _ejecutarLanzamiento(jugadores),
-                  ),
-                ),
+                    // Mesa en medio (Ocupa todo el espacio disponible)
+                    Expanded(
+                      child: MesaJuego(
+                        controlador: _controlador,
+                        idSesion: widget.idSesion,
+                        mostrarBotonLanzar: mostrarBoton,
+                        onLanzar: () => _ejecutarLanzamiento(),
+                      ),
+                    ),
 
-                // Mi Equipo (Abajo)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      ContenedorEquipo(
-                        jugadores: equipoAbajo,
-                        miUid: _miUid,
-                        cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
-                        onSeleccionar: _onSeleccionarCarta,
-                        esMiTurno: esMiTurno,
+                    // Mi Equipo (Abajo)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          ContenedorEquipo(
+                            jugadores: equipoAbajo,
+                            miUid: _miUid,
+                            cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
+                            onSeleccionar: _onSeleccionarCarta,
+                            esMiTurno: esMiTurno,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            tituloEquipoAbajo,
+                            style: EstilosTexto.subtitulo.copyWith(
+                              color: Colores.secundario,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        tituloEquipoAbajo,
-                        style: EstilosTexto.subtitulo.copyWith(
-                          color: Colores.secundario,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              },
             );
           },
         ),

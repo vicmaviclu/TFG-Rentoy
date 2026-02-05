@@ -54,7 +54,7 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
     _subSesion = _streamSesion.listen((event) {
       if (!mounted) return;
       final val = event.snapshot.value as Map?;
-      if (val != null && val['estado'] == 'jugando') {
+      if (val != null && val['estado'] == TextoPartida.estadoJugando) {
         Navigator.of(context).pushReplacementNamed(
           RutasApp.partida,
           arguments: {

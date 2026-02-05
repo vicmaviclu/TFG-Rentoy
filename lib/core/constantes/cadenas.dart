@@ -29,6 +29,7 @@ class TextoComun {
   static const String ajustes = 'Ajustes';
   static const String idioma = 'Idioma';
   static const String notificaciones = 'Notificaciones';
+  static const String funcionalidadPendiente = 'Funcionalidad próximamente';
 }
 
 /// Textos relacionados con la autenticación (Login, Registro).
@@ -61,6 +62,8 @@ class TextoAuth {
   static const String noTienesCuenta = '¿No tienes cuenta? Regístrate';
   static const String yaTienesCuenta = '¿Ya tienes cuenta? Inicia sesión';
   static const String registroCompletado = 'Registro completado';
+  static const String introducirUsuario = 'Introduce un nombre de usuario';
+  static const String usuarioEnUso = 'El nombre de usuario ya está en uso';
 }
 
 /// Textos relacionados con la partida (Crear, Unirse, Sala de espera).
@@ -92,6 +95,23 @@ class TextoPartida {
   static const String cancelarPartida = 'Cancelar partida';
   static const String confirmarCancelarPartida =
       'Si sales, la partida se eliminará. ¿Continuar?';
+
+  // Errores de partida
+  static const String errorNoEsTuTurno = 'No es tu turno';
+  static const String errorRondaNoActiva = 'No hay ronda activa';
+  static const String errorCartaNoValida =
+      'Carta no válida o índice incorrecto';
+  static const String errorJugadorNoEncontrado =
+      'No se encontró el jugador actual en la partida';
+  static const String errorLanzarCarta = 'Error al lanzar carta: ';
+  static const String errorSesionInfo =
+      'No se pudo obtener información de la sesión';
+  static const String estadoJugando = 'jugando';
+
+  // Mesa
+  static const String mesaDeJuego = 'Mesa de Juego';
+  static const String ganando = 'Ganando: ';
+  static const String btnLanzar = 'LANZAR';
 }
 
 /// Textos relacionados con el perfil de usuario.
@@ -110,6 +130,7 @@ class TextoPerfil {
   static const String direccion = 'Dirección';
   static const String fechaNacimiento = 'Fecha de nacimiento';
   static const String siguienteAvatar = 'Siguiente avatar';
+  static const String jugadorDefecto = 'Jugador';
 }
 
 /// Textos legales y ayuda.

@@ -9,7 +9,7 @@ class AvatarJugadorPartida extends StatelessWidget {
   final int avatar;
   final List<dynamic>? mano;
   final bool esMiJugador;
-  // State from parent
+  // Estado desde el padre
   final int? cartaSeleccionadaIndex;
   final Function(int)? onSeleccionar;
   final bool esMiTurno;

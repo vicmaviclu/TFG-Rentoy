@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../models/usuario_model.dart';
+import '../../../core/constantes/cadenas.dart';
 
 class ControladorPartida {
   final ServicioRealtime _servicio;
@@ -116,6 +117,23 @@ class ControladorPartida {
     });
   }
 
+  /// Escucha el turno actual de la partida
+  Stream<int> streamTurnoActual(String idPartida) {
+    return _servicio.streamSesion(idPartida).map((event) {
+      final val = event.snapshot.value;
+      if (val is Map &&
+          val['rondas'] != null &&
+          val['rondas']['actual'] != null) {
+        final r = val['rondas']['actual'].toString();
+        if (val['rondas'][r] != null && val['rondas'][r]['turno'] != null) {
+          final t = val['rondas'][r]['turno'];
+          return (t is int) ? t : int.tryParse(t.toString()) ?? 1;
+        }
+      }
+      return 1; // Por defecto
+    });
+  }
+
   /// Busca qué "jugador X" soy yo en la partida
   Future<String?> obtenerMiKeyJugador(String idPartida) async {
     final uid = obtenerMiUid();
@@ -155,30 +173,40 @@ class ControladorPartida {
     return null;
   }
 
-  Future<void> jugarCarta(
-    String idPartida,
-    int cartaIndex,
-    Map<String, dynamic> cartaData,
-  ) async {
+  Future<void> jugarCarta(String idPartida, int cartaIndex) async {
     final miKey = await obtenerMiKeyJugador(idPartida);
-    if (miKey == null)
-      throw Exception("No se encontró el jugador actual en la partida");
+    if (miKey == null) throw Exception(TextoPartida.errorJugadorNoEncontrado);
 
     final event = await _servicio.streamSesion(idPartida).first;
     final val = event.snapshot.value;
     String? ronda;
     int maxPlayers = 4;
     int turnoActual = 1;
+    Map<String, dynamic>? cartaData;
 
     if (val is Map) {
       if (val['rondas'] != null && val['rondas']['actual'] != null) {
         ronda = val['rondas']['actual'].toString();
-        // Obtener turno actual para validación (opcional) y cálculo
+        // Obtener turno actual para validación
         if (val['rondas'][ronda] != null &&
             val['rondas'][ronda]['turno'] != null) {
           turnoActual = (val['rondas'][ronda]['turno'] is int)
               ? val['rondas'][ronda]['turno']
               : int.tryParse(val['rondas'][ronda]['turno'].toString()) ?? 1;
+        }
+
+        // Obtener carta de la mano
+        if (val['rondas'][ronda] != null) {
+          final rondaObj = val['rondas'][ronda];
+          if (rondaObj[miKey] is List) {
+            final mano = rondaObj[miKey] as List;
+            if (cartaIndex >= 0 && cartaIndex < mano.length) {
+              final c = mano[cartaIndex];
+              if (c is Map) {
+                cartaData = Map<String, dynamic>.from(c);
+              }
+            }
+          }
         }
       }
       if (val['maxJugadores'] != null) {
@@ -188,13 +216,13 @@ class ControladorPartida {
       }
     }
 
-    if (ronda == null) throw Exception("No hay ronda activa");
+    if (ronda == null) throw Exception(TextoPartida.errorRondaNoActiva);
+    if (cartaData == null) throw Exception(TextoPartida.errorCartaNoValida);
 
     // Verificar si es mi turno
     final miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
     if (miNumero != turnoActual) {
-      // throw Exception("No es tu turno");
-      // Comentado para facilitar pruebas si hay desincronización
+      // throw Exception(TextoPartida.errorNoEsTuTurno);
     }
 
     // Calcular siguiente turno
@@ -208,5 +236,120 @@ class ControladorPartida {
       cartaData: cartaData,
       nuevoTurno: proximoTurno,
     );
+
+    // --- LÓGICA DE FIN DE RONDA ---
+    // Verificar si se han jugado todas las cartas (3 cartas * maxJugadores)
+    // Para simplificar, obtenemos snapshot reciente
+    final snapPost = await _servicio.streamSesion(idPartida).first;
+    final valPost = snapPost.snapshot.value;
+    if (valPost is! Map) return;
+
+    final rondaData = valPost['rondas']?[ronda];
+    if (rondaData == null) return;
+
+    int cartasJugadas = 0;
+    for (var i = 1; i <= maxPlayers; i++) {
+      final k = 'jugador $i';
+      if (rondaData[k] is List) {
+        final mano = rondaData[k] as List;
+        for (var c in mano) {
+          if (c is Map && c['usada'] == true) {
+            cartasJugadas++;
+          }
+        }
+      }
+    }
+
+    final totalCartas = maxPlayers * 3;
+    if (cartasJugadas >= totalCartas) {
+      // FIN DE RONDA
+      // 1. Obtener carta ganadora de la última baza (ya grabada en jugarCarta)
+      final cg = rondaData['carta_ganadora'];
+      int equipoGanador = 0;
+      if (cg is Map && cg['equipo'] is int) {
+        equipoGanador = cg['equipo'];
+      }
+
+      // 2. Calcular puntos (ej. 1 punto por ganar la ronda)
+      // Ojo: Aquí deberíamos sumar puntaje real de las cartas, pero por ahora simplificado.
+      // Leemos puntos actuales de la ronda
+      int puntosRonda = 1;
+      if (rondaData['puntos'] is int) {
+        puntosRonda = rondaData['puntos'];
+      }
+
+      // Leemos puntos globales
+      final puntosGlobales = valPost['puntos'];
+      int p1 = 0;
+      int p2 = 0;
+      if (puntosGlobales is Map) {
+        p1 = (puntosGlobales['equipo1'] is int) ? puntosGlobales['equipo1'] : 0;
+        p2 = (puntosGlobales['equipo2'] is int) ? puntosGlobales['equipo2'] : 0;
+      }
+
+      if (equipoGanador == 1) {
+        p1 += puntosRonda;
+      } else if (equipoGanador == 2) {
+        p2 += puntosRonda;
+      }
+
+      // 3. Iniciar siguiente ronda
+      final proxRonda = int.parse(ronda) + 1;
+      await _servicio.iniciarSiguienteRonda(
+        sessionId: idPartida,
+        proximaRonda: proxRonda,
+        maxJugadores: maxPlayers,
+        nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
+      );
+    }
+  }
+
+  /// Organiza a los jugadores en dos equipos: rivales (arriba) y mi equipo (abajo).
+  /// Retorna un mapa con claves 'arriba' y 'abajo'.
+  Map<String, List<UsuarioModel>> organizarEquipos(
+    List<UsuarioModel> jugadores,
+    String miUid,
+  ) {
+    List<UsuarioModel> equipo1 = [];
+    List<UsuarioModel> equipo2 = [];
+    int miIndice = -1;
+
+    for (int i = 0; i < jugadores.length; i++) {
+      if (jugadores[i].uid == miUid) {
+        miIndice = i;
+      }
+      // Lógica par/impar para equipos
+      if (i % 2 == 0) {
+        equipo1.add(jugadores[i]);
+      } else {
+        equipo2.add(jugadores[i]);
+      }
+    }
+
+    // Determinar qué equipo va abajo (mi equipo)
+    bool soyEquipo1 = (miIndice != -1 && miIndice % 2 == 0);
+
+    // Si no me encuentro (espectador o error), defecto Equipo 1 abajo
+    return {
+      'abajo': soyEquipo1 ? equipo1 : equipo2,
+      'arriba': soyEquipo1 ? equipo2 : equipo1,
+    };
+  }
+
+  /// Determina si el usuario pertenece al Equipo 1 (índices pares).
+  bool soyEquipo1(List<UsuarioModel> jugadores, String miUid) {
+    for (int i = 0; i < jugadores.length; i++) {
+      if (jugadores[i].uid == miUid) {
+        return i % 2 == 0;
+      }
+    }
+    return false;
+  }
+
+  /// Comprueba si es el turno del jugador especificado por su key (ej: "jugador 1")
+  bool esMiTurno(String? miKey, int turnoActual) {
+    if (miKey == null) return false;
+    final miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
+    return miNumero == turnoActual;
   }
 }
