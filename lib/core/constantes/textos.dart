@@ -53,4 +53,16 @@ class EstilosTexto {
     fontWeight: FontWeight.w400,
     color: Colores.textoSecundario,
   );
+
+  static const TextStyle tituloPequeno = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Colores.textoPrimario,
+  );
+
+  static const TextStyle cuerpoPequeno = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: Colores.textoPrimario,
+  );
 }

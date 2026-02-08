@@ -2,8 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../models/usuario_model.dart';
-import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/errores.dart';
 
+/// Controlador principal para la lógica de la partida.
 class ControladorPartida {
   final ServicioRealtime _servicio;
 
@@ -173,9 +174,11 @@ class ControladorPartida {
     return null;
   }
 
+  /// Juega una carta en la partida actual.
   Future<void> jugarCarta(String idPartida, int cartaIndex) async {
+    // Obtener mi key (jugador 1, etc)
     final miKey = await obtenerMiKeyJugador(idPartida);
-    if (miKey == null) throw Exception(TextoPartida.errorJugadorNoEncontrado);
+    if (miKey == null) throw Exception(ErroresPartida.jugadorNoEncontrado);
 
     final event = await _servicio.streamSesion(idPartida).first;
     final val = event.snapshot.value;
@@ -216,8 +219,8 @@ class ControladorPartida {
       }
     }
 
-    if (ronda == null) throw Exception(TextoPartida.errorRondaNoActiva);
-    if (cartaData == null) throw Exception(TextoPartida.errorCartaNoValida);
+    if (ronda == null) throw Exception(ErroresPartida.rondaNoActiva);
+    if (cartaData == null) throw Exception(ErroresPartida.cartaNoValida);
 
     // Verificar si es mi turno
     final miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
@@ -238,8 +241,7 @@ class ControladorPartida {
     );
 
     // --- LÓGICA DE FIN DE RONDA ---
-    // Verificar si se han jugado todas las cartas (3 cartas * maxJugadores)
-    // Para simplificar, obtenemos snapshot reciente
+    // Obtener snapshot reciente para verificar cartas jugadas
     final snapPost = await _servicio.streamSesion(idPartida).first;
     final valPost = snapPost.snapshot.value;
     if (valPost is! Map) return;
@@ -293,14 +295,36 @@ class ControladorPartida {
         p2 += puntosRonda;
       }
 
-      // 3. Iniciar siguiente ronda
-      final proxRonda = int.parse(ronda) + 1;
-      await _servicio.iniciarSiguienteRonda(
-        sessionId: idPartida,
-        proximaRonda: proxRonda,
-        maxJugadores: maxPlayers,
-        nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
-      );
+      // Comprobar si hay ganador
+      bool hayGanador = false;
+      int winner = 0;
+
+      if (p1 >= 21 || p2 >= 21) {
+        if (p1 > p2) {
+          winner = 1;
+          hayGanador = true;
+        } else if (p2 > p1) {
+          winner = 2;
+          hayGanador = true;
+        }
+      }
+
+      if (hayGanador) {
+        await _servicio.finalizarPartida(
+          sessionId: idPartida,
+          equipoGanador: winner,
+          nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
+        );
+      } else {
+        // 3. Iniciar siguiente ronda
+        final proxRonda = int.parse(ronda) + 1;
+        await _servicio.iniciarSiguienteRonda(
+          sessionId: idPartida,
+          proximaRonda: proxRonda,
+          maxJugadores: maxPlayers,
+          nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
+        );
+      }
     }
   }
 

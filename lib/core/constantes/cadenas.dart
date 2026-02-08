@@ -50,14 +50,6 @@ class TextoAuth {
   static const String iniciando = 'Iniciando...';
   static const String bienvenido = 'Bienvenido';
 
-  // Mensajes de error Auth
-  static const String usuarioNoEncontrado = 'Usuario no encontrado';
-  static const String contrasenaIncorrecta = 'Contraseña incorrecta';
-  static const String correoEnUso = 'El correo ya está en uso';
-  static const String contrasenaDebil = 'Contraseña demasiado débil';
-  static const String demasiadosIntentos =
-      'Demasiados intentos, inténtalo más tarde';
-
   // Mensajes de navegación auth
   static const String noTienesCuenta = '¿No tienes cuenta? Regístrate';
   static const String yaTienesCuenta = '¿Ya tienes cuenta? Inicia sesión';
@@ -95,23 +87,19 @@ class TextoPartida {
   static const String cancelarPartida = 'Cancelar partida';
   static const String confirmarCancelarPartida =
       'Si sales, la partida se eliminará. ¿Continuar?';
-
-  // Errores de partida
-  static const String errorNoEsTuTurno = 'No es tu turno';
-  static const String errorRondaNoActiva = 'No hay ronda activa';
-  static const String errorCartaNoValida =
-      'Carta no válida o índice incorrecto';
-  static const String errorJugadorNoEncontrado =
-      'No se encontró el jugador actual en la partida';
-  static const String errorLanzarCarta = 'Error al lanzar carta: ';
-  static const String errorSesionInfo =
-      'No se pudo obtener información de la sesión';
   static const String estadoJugando = 'jugando';
 
   // Mesa
   static const String mesaDeJuego = 'Mesa de Juego';
   static const String ganando = 'Ganando: ';
   static const String btnLanzar = 'LANZAR';
+
+  // Fin de partida
+  static const String victoria = '¡VICTORIA!';
+  static const String derrota = 'DERROTA';
+  static const String volverAlMenu = 'Volver al Menú';
+  static const String objetivo = 'Objetivo';
+  static const String puntos = 'pts';
 }
 
 /// Textos relacionados con el perfil de usuario.

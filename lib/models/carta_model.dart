@@ -27,16 +27,17 @@ class Carta {
 
     // Reconstruir valor
     int valor = 0;
-    if (numero == 1)
+    if (numero == 1) {
       valor = 11;
-    else if (numero == 3)
+    } else if (numero == 3) {
       valor = 10;
-    else if (numero == 12)
+    } else if (numero == 12) {
       valor = 4;
-    else if (numero == 11)
+    } else if (numero == 11) {
       valor = 3;
-    else if (numero == 10)
+    } else if (numero == 10) {
       valor = 2;
+    }
 
     // Reconstruir foto (todos png)
     final prefijo = palo.isNotEmpty ? palo[0] : '';

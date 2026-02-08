@@ -2,23 +2,29 @@ import 'package:flutter/material.dart';
 import '../../../core/constantes/recursos.dart';
 import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
+import '../../../models/usuario_model.dart';
 import 'mano_interactiva.dart';
 
+/// Widget que muestra el avatar y nombre del jugador con sus cartas.
 class AvatarJugadorPartida extends StatelessWidget {
-  final String nombre;
-  final int avatar;
-  final List<dynamic>? mano;
+  /// Modelo de datos del jugador
+  final UsuarioModel jugador;
+
+  /// Indica si este jugador es el usuario actual
   final bool esMiJugador;
-  // Estado desde el padre
+
+  /// Índice de la carta seleccionada (estado del padre)
   final int? cartaSeleccionadaIndex;
+
+  /// Callback cuando se selecciona una carta
   final Function(int)? onSeleccionar;
+
+  /// Indica si es el turno del jugador
   final bool esMiTurno;
 
   const AvatarJugadorPartida({
     super.key,
-    required this.nombre,
-    required this.avatar,
-    this.mano,
+    required this.jugador,
     this.esMiJugador = false,
     this.cartaSeleccionadaIndex,
     this.onSeleccionar,
@@ -27,26 +33,30 @@ class AvatarJugadorPartida extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // --- COLUMNA PRINCIPAL: CARTAS + AVATAR + NOMBRE ---
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Cartas encima del nombre (si existen y soy yo)
-        if (esMiJugador && mano != null && mano!.isNotEmpty)
+        if (esMiJugador && jugador.mano != null && jugador.mano!.isNotEmpty)
           ManoInteractiva(
-            mano: mano!,
+            mano: jugador.mano!,
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
             onSeleccionar: onSeleccionar ?? (i) {},
             esTuTurno: esMiTurno,
           ),
 
-        if (mano != null && mano!.isNotEmpty) const SizedBox(height: 4),
+        // Espacio entre cartas y avatar
+        if (jugador.mano != null && jugador.mano!.isNotEmpty)
+          const SizedBox(height: 4),
 
+        // --- AVATAR DEL JUGADOR ---
         Container(
           width: 60,
           height: 60,
           decoration: BoxDecoration(
             color: esMiJugador
-                ? Colores.secundario.withOpacity(0.2)
+                ? Colores.secundario.withValues(alpha: 0.2)
                 : Colores.blanco12,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -54,14 +64,15 @@ class AvatarJugadorPartida extends StatelessWidget {
               width: 2,
             ),
             image: DecorationImage(
-              image: AssetImage(Recursos.obtenerAvatar(avatar)),
+              image: AssetImage(Recursos.obtenerAvatar(jugador.avatar)),
               fit: BoxFit.contain,
             ),
           ),
         ),
+        // --- NOMBRE DEL JUGADOR ---
         const SizedBox(height: 4),
         Text(
-          nombre,
+          jugador.nombreUsuario,
           style: EstilosTexto.caption.copyWith(
             color: Colores.blanco,
             fontWeight: esMiJugador ? FontWeight.bold : FontWeight.normal,

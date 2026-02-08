@@ -31,7 +31,7 @@ class UsuarioModel {
       nombreUsuario: nombreUsuario ?? this.nombreUsuario,
       avatar: avatar ?? this.avatar,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
-      mano: mano ?? this.mano,
+      mano: mano ?? mano,
     );
   }
 

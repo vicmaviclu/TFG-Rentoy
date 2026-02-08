@@ -15,7 +15,7 @@ class BotonGoogle extends StatelessWidget {
   /// ajustará su tamaño al contenido y se centrará.
   final bool fullWidth;
 
-  /// Altura opcional del botón (si no se proporciona se usa `Tamanos.buttonHeight`).
+  /// Altura opcional del botón
   final double? height;
 
   /// Tamaño opcional del icono.

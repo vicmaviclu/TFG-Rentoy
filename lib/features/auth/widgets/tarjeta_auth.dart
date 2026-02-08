@@ -25,10 +25,7 @@ class TarjetaAuth extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colores.fondo,
             borderRadius: BorderRadius.circular(Tamanos.cardRadius),
-            border: Border.all(
-              color: const Color.fromRGBO(0, 0, 0, 0.12),
-              width: 2,
-            ),
+            border: Border.all(color: Colores.negro12, width: 2),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(

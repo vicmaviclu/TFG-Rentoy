@@ -6,7 +6,6 @@ import '../../../core/constantes/errores.dart';
 import '../../../core/constantes/cadenas.dart';
 
 // Typedef para las funciones de autenticación por email/contraseña.
-// Hace el código más legible y facilita el uso en parámetros y mocks.
 typedef AuthEmailFn =
     Future<UserCredential> Function(String email, String password);
 
@@ -19,7 +18,7 @@ class ControladorLogin extends ChangeNotifier {
   bool _cargando = false;
   bool get cargando => _cargando;
 
-  // Marca para evitar notificar listeners después de `dispose()`.
+  // Evitar notificar listeners después de `dispose()`.
   bool _disposed = false;
 
   // Funciones inyectables para facilitar pruebas. Por defecto usan FirebaseAuth.
@@ -75,8 +74,9 @@ class ControladorLogin extends ChangeNotifier {
     try {
       final email = controladorCorreo.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@'))
+      if (email.isEmpty || !email.contains('@')) {
         return ErroresValidacion.emailInvalido;
+      }
       await _iniciarSesionEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -96,8 +96,9 @@ class ControladorLogin extends ChangeNotifier {
       final email = controladorCorreo.text.trim();
       final username = controladorUsuario.text.trim();
       final pass = controladorContrasena.text;
-      if (email.isEmpty || !email.contains('@'))
+      if (email.isEmpty || !email.contains('@')) {
         return ErroresValidacion.emailInvalido;
+      }
       if (pass.length < 6) return ErroresValidacion.contrasenaCorta;
       if (username.isEmpty) return TextoAuth.introducirUsuario;
 

@@ -48,7 +48,7 @@ class CuadriculaJugadores extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0, left: 12, right: 12),
               child: SizedBox(
-                height: 60, // Altura reducida
+                height: 60, 
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

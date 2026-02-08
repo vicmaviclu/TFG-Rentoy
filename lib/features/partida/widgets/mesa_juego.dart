@@ -5,10 +5,18 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/recursos.dart';
 import '../controllers/controlador_partida.dart';
 
+/// Widget que representa la mesa de juego central con la carta ganadora.
 class MesaJuego extends StatelessWidget {
+  /// Controlador de la lógica de partida
   final ControladorPartida? controlador;
+
+  /// ID de la sesión
   final String? idSesion;
+
+  /// Si se muestra el botón de lanzar
   final bool mostrarBotonLanzar;
+
+  /// Callback cuando se presiona el botón de lanzar
   final VoidCallback? onLanzar;
 
   const MesaJuego({
@@ -21,30 +29,24 @@ class MesaJuego extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double kAlturaBoton = 45.0;
+    const double kAlturaBoton = 40.0;
     const double kAnchoBoton = 140.0;
-    const double kProtrusion = 22.5; // Mitad del botón sale de la mesa visual
-    const double kMargin = 16.0; // Margen visual deseado
+    const double kProtrusion = 23.5; // Mitad del botón sale de la mesa visual
+    const double kMargin = 20.0; // Margen visual deseado
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
         // 1. La Mesa Visual (Fondo + Borde + Contenido)
-        // La colocamos con 'Positioned' para dejar espacio real abajo para el botón.
-        // Así el Stack padre crece lo suficiente para contener el botón.
         Positioned(
           top: kMargin,
           left: kMargin,
           right: kMargin,
-          bottom:
-              kMargin +
-              kProtrusion, // Dejamos espacio abajo para la mitad del botón
+          bottom: kMargin + kProtrusion,
           child: CustomPaint(
             painter: _MesaPainter(
-              gapWidth: mostrarBotonLanzar
-                  ? kAnchoBoton + 10
-                  : 0, // +10 de margen visual
-              colorFondo: Colores.primario.withOpacity(0.5),
+              gapWidth: mostrarBotonLanzar ? kAnchoBoton + 10 : 0,
+              colorFondo: Colores.primario.withValues(alpha: 0.5),
               colorBorde: Colores.blanco24,
             ),
             child: Container(
@@ -85,28 +87,42 @@ class MesaJuego extends StatelessWidget {
                           final path = Recursos.obtenerCarta(palo, numero);
                           if (path.isEmpty) return const SizedBox.shrink();
 
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "${TextoPartida.ganando}$jugador",
-                                  style: EstilosTexto.caption.copyWith(
-                                    color: Colores.blanco,
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 8),
+                              Text(
+                                "${TextoPartida.ganando}$jugador",
+                                style: EstilosTexto.caption.copyWith(
+                                  color: Colores.blanco,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 1.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.asset(
+                                    path,
+                                    width: 95,
+                                    height: 145,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (ctx, err, stack) =>
+                                        const Icon(
+                                          Icons.error,
+                                          color: Colors.red,
+                                        ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Image.asset(
-                                  path,
-                                  width: 100,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (ctx, err, stack) => const Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -118,21 +134,13 @@ class MesaJuego extends StatelessWidget {
         ),
 
         // 2. Botón Lanzar
-        // Lo colocamos alineado abajo del todo (dentro del kMargin + kProtrusion reservado)
-        // Su centro vertical debe coincidir con el bottom de la mesa visual.
-        // Mesa visual bottom = Height - (kMargin + kProtrusion)
-        // Botón Height = 45. Center = 22.5
-        // Si ponemos bottom: kMargin, el botón empieza en kMargin desde abajo.
-        // Height = 45. Top = kMargin + 45.
-        // Queremos que el CENTRO del botón esté en (kMargin + kProtrusion).
-        // CenterY = kMargin + 22.5.
-        // Bottom = CenterY - HalfHeight = (kMargin + 22.5) - 22.5 = kMargin.
+        // Lo colocamos alineado abajo del todo
         if (mostrarBotonLanzar)
           Positioned(
             bottom: kMargin,
             left: 0,
             right: 0,
-            height: kAlturaBoton, // Forzamos altura para asegurar hit test
+            height: kAlturaBoton,
             child: Center(
               child: SizedBox(
                 width: kAnchoBoton,
@@ -143,7 +151,7 @@ class MesaJuego extends StatelessWidget {
                     foregroundColor: Colores.blanco,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
-                      side: BorderSide.none, // El borde lo dibuja el Painter
+                      side: BorderSide.none,
                     ),
                     elevation: 10,
                     padding: EdgeInsets.zero,

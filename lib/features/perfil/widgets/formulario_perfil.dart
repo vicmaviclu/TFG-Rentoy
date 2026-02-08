@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/colores.dart';
+import '../../../core/constantes/recursos.dart';
 import '../../../core/constantes/textos.dart';
 import '../controllers/controlador_perfil.dart';
 
@@ -87,7 +88,7 @@ class _PerfilFormState extends State<PerfilForm> {
                       fit: BoxFit.contain,
                       alignment: Alignment.center,
                       child: Image.asset(
-                        'assets/images/avatares/avatar ${c.avatarSeleccionado}.png',
+                        Recursos.obtenerAvatar(c.avatarSeleccionado),
                         errorBuilder: (context, error, stackTrace) {
                           return Center(
                             child: Text(
@@ -229,7 +230,6 @@ class _PerfilFormState extends State<PerfilForm> {
                       borderRadius: BorderRadius.circular(22),
                     ),
                   ),
-                  // Use the same bold body style as the primary button for consistency
                   child: Text(
                     TextoComun.cerrarSesion,
                     style: EstilosTexto.cuerpoNegrita.copyWith(

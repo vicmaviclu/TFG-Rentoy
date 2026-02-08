@@ -6,6 +6,7 @@ import '../../../models/baraja_model.dart';
 import '../../../models/carta_model.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/errores.dart';
 import '../../../models/sesion_model.dart';
 import '../../../models/usuario_model.dart';
 
@@ -54,12 +55,11 @@ class ControladorSalaEspera {
         }
 
         if (v is String) {
-          // Si solo es string (nombre), usamos dummy para lo demás
           jugadores[i - 1] = UsuarioModel(
             uid: '',
             email: '',
             nombreUsuario: v,
-            avatar: 1, // Default avatar
+            avatar: 1,
           );
         } else if (v is Map) {
           jugadores[i - 1] = UsuarioModel(
@@ -115,15 +115,13 @@ class ControladorSalaEspera {
   }) async {
     try {
       // 1. Obtener estado actual de la sesión (para saber jugadores)
-      // Usamos `first` para obtener el valor actual del stream y cerrarlo implícitamente
       final evento = await _servicio.streamSesion(idSesion).first;
       final val = evento.snapshot.value;
       if (val == null || val is! Map) {
-        throw Exception(TextoPartida.errorSesionInfo);
+        throw Exception(ErroresPartida.errorSesionInfo);
       }
 
       final sesion = SesionModel.fromMap(val, idSesion);
-      // Calcular maxJugadores real basado en los que hay o el config
       final maxJugadores = sesion.maxJugadores;
 
       // 2. Preparar baraja
@@ -149,13 +147,11 @@ class ControladorSalaEspera {
 
       // 5. Preparar Updates
       final updates = <String, dynamic>{
-        'estado': TextoPartida
-            .estadoJugando, // 'jugando' según lo que espera el listener
+        'estado': TextoPartida.estadoJugando,
         'rondas/actual': 1,
         'puntos/objetivo': puntosObjetivo,
         'puntos/equipo1': 0,
         'puntos/equipo2': 0,
-        // Inicializar puntos de la ronda 1
         'rondas/1/puntos': 1,
       };
 

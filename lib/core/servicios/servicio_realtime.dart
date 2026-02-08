@@ -1,22 +1,25 @@
 import 'dart:math';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../models/usuario_model.dart';
 import '../../models/baraja_model.dart';
 import '../../models/carta_model.dart';
+import '../constantes/errores.dart';
 
 class ServicioRealtime {
-  final FirebaseDatabase _db = FirebaseDatabase.instance;
+  final FirebaseDatabase _db = FirebaseDatabase.instanceFor(
+    app: Firebase.app(),
+    databaseURL:
+        'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
+  );
 
-  /// Devuelve el nombre de usuario a usar (preferente: campo `name` o `username` en Firestore,
-  /// luego displayName; nunca usar el email si es posible). Si no encuentra nada, usa `fallback` o 'Jugador'.
-  Future<String> _resolvedUsernameForUser(
-    String? providedName,
-    String uid,
-  ) async {
+  /// Devuelve el nombre de usuario a usar
+  Future<String> _nombreUsuario(String? providedName, String uid) async {
     if (providedName != null &&
         providedName.isNotEmpty &&
         !providedName.contains('@')) {
@@ -54,8 +57,6 @@ class ServicioRealtime {
   }
 
   /// Crea una nueva sesión con código numérico de 6 dígitos.
-  /// Genera la escritura de forma optimista (sin esperar confirmación de red)
-  /// para evitar bloqueos y timeouts en conexiones lentas.
   Future<String> crearSesion({
     required String hostName,
     required int maxPlayers,
@@ -63,9 +64,7 @@ class ServicioRealtime {
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception(
-        'Autenticación requerida. Inicia sesión para crear una partida.',
-      );
+      throw Exception(ErroresSesion.autenticacionCrearPartida);
     }
     final rnd = Random.secure();
     final pin = (rnd.nextInt(900000) + 100000).toString();
@@ -74,7 +73,6 @@ class ServicioRealtime {
     final sessionId = ref.key ?? '';
     final now = DateTime.now().toIso8601String();
 
-    // Host Display comes directly from arguments
     final hostDisplay = hostName.isEmpty ? 'Jugador' : hostName;
 
     final sessionData = {
@@ -88,26 +86,21 @@ class ServicioRealtime {
       },
     };
 
-    // Fire and forget - Do not await DB writes
-    ref.set(sessionData).catchError((e) {
-      print("Error writing session Rtdb: $e");
-    });
+    try {
+      await ref.set(sessionData);
 
-    // Also fire-and-forget Firestore write
-    final firestore = FirebaseFirestore.instance;
-    firestore
-        .collection('partidas')
-        .doc(sessionId)
-        .set({
-          'pin': pin,
-          'jugadores': [hostDisplay],
-          'estado': 'esperando',
-          'maxJugadores': maxPlayers,
-          'creadoEn': FieldValue.serverTimestamp(),
-        })
-        .catchError((e) {
-          print("Error writing session Firestore: $e");
-        });
+      final firestore = FirebaseFirestore.instance;
+      await firestore.collection('partidas').doc(sessionId).set({
+        'pin': pin,
+        'jugadores': [hostDisplay],
+        'estado': 'esperando',
+        'maxJugadores': maxPlayers,
+        'creadoEn': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint("Error creando sesión: $e");
+      rethrow; // Re-lanzar para que el controlador lo sepa
+    }
 
     return sessionId;
   }
@@ -117,7 +110,7 @@ class ServicioRealtime {
   Future<void> salirDeSesion(String sessionId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception('Autenticación requerida.');
+      throw Exception(ErroresSesion.autenticacionRequerida);
     }
     final ref = referenciaSesion(sessionId);
     final snap = await ref.get();
@@ -144,8 +137,7 @@ class ServicioRealtime {
         await ref.child('jugadores/$key').remove();
         break;
       } else if (val is String) {
-        // if the slot stores a plain name, try to match by resolving current user's name
-        final resolved = await _resolvedUsernameForUser(null, user.uid);
+        final resolved = await _nombreUsuario(null, user.uid);
         if (val == resolved) {
           removedName = val.toString();
           await ref.child('jugadores/$key').remove();
@@ -189,14 +181,12 @@ class ServicioRealtime {
   Future<void> unirASesion(String sessionId, String playerName) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception(
-        'Autenticación requerida. Inicia sesión para unirte a una partida.',
-      );
+      throw Exception(ErroresSesion.autenticacionUnirsePartida);
     }
     final ref = referenciaSesion(sessionId);
     final snap = await ref.get();
     if (!snap.exists) {
-      throw Exception('Sesión no encontrada');
+      throw Exception(ErroresSesion.sesionNoEncontrada);
     }
 
     final data = snap.value as dynamic;
@@ -220,28 +210,24 @@ class ServicioRealtime {
       final key = 'jugador $i';
       final val = players.containsKey(key) ? players[key] : null;
 
-      // Check if this slot belongs to current user
       if (val is Map && val['uid'] == user.uid) {
         alreadyIn = true;
-        break; // Already joined, no need to add again
+        break;
       }
 
-      // Find first empty slot
       if (slot == 0 && (val == null || (val is String && val.isEmpty))) {
         slot = i;
       }
     }
 
     if (alreadyIn) {
-      // If already in, just return success (idempotent)
       return;
     }
 
     if (slot == 0) {
-      throw Exception('La sala está llena');
+      throw Exception(ErroresSesion.salaLlena);
     }
 
-    // fetch avatar for current user
     int avatarIndex = 1;
     try {
       final userDoc = await FirebaseFirestore.instance
@@ -254,16 +240,14 @@ class ServicioRealtime {
       }
     } catch (_) {}
 
-    final resolvedName = await _resolvedUsernameForUser(playerName, user.uid);
+    final resolvedName = await _nombreUsuario(playerName, user.uid);
     final playerKey = 'jugador $slot';
-    // write as map with name, avatar and uid to allow avatars in UI
     await ref.child('jugadores/$playerKey').set({
       'name': resolvedName,
       'avatar': avatarIndex,
       'uid': user.uid,
     });
 
-    // Actualizar Firestore (solo nombre)
     final firestore = FirebaseFirestore.instance;
     final partidaDoc = firestore.collection('partidas').doc(sessionId);
     final partidaSnap = await partidaDoc.get();
@@ -278,12 +262,12 @@ class ServicioRealtime {
   Future<void> tomarHueco(String sessionId, int slot) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw Exception('Autenticación requerida.');
+      throw Exception(ErroresSesion.autenticacionRequerida);
     }
     final ref = referenciaSesion(sessionId);
     final snap = await ref.get();
     if (!snap.exists) {
-      throw Exception('Sesión no encontrada');
+      throw Exception(ErroresSesion.sesionNoEncontrada);
     }
 
     final data = snap.value as dynamic;
@@ -300,10 +284,8 @@ class ServicioRealtime {
       players = {};
     }
 
-    // resolve display name for current user (prefer usuarios doc, then displayName)
-    final resolvedName = await _resolvedUsernameForUser(null, user.uid);
+    final resolvedName = await _nombreUsuario(null, user.uid);
 
-    // try to fetch avatar index for current user
     int avatarIndex = 1;
     try {
       final userDoc = await FirebaseFirestore.instance
@@ -316,7 +298,6 @@ class ServicioRealtime {
       }
     } catch (_) {}
 
-    // 1. Check if target slot is occupied (BEFORE removing current slot)
     final targetKey = 'jugador $slot';
     final targetVal = players.containsKey(targetKey)
         ? players[targetKey]
@@ -324,13 +305,12 @@ class ServicioRealtime {
 
     if (targetVal != null) {
       if (targetVal is Map && targetVal['uid'] != null) {
-        throw Exception('El hueco ya está ocupado');
+        throw Exception(ErroresSesion.huecoOcupado);
       } else if (targetVal is String && targetVal.isNotEmpty) {
-        throw Exception('El hueco ya está ocupado');
+        throw Exception(ErroresSesion.huecoOcupado);
       }
     }
 
-    // 2. Remove any existing slot for this uid (now safe to do)
     for (var i = 1; i <= maxPlayers; i++) {
       final key = 'jugador $i';
       final val = players.containsKey(key) ? players[key] : null;
@@ -359,7 +339,7 @@ class ServicioRealtime {
         .get();
 
     if (!snapshot.exists || snapshot.children.isEmpty) {
-      throw Exception('No se encontró ninguna partida con ese PIN.');
+      throw Exception(ErroresSesion.pinNoEncontrado);
     }
 
     final snap = snapshot.children.first;
@@ -397,10 +377,9 @@ class ServicioRealtime {
     await referenciaSesion(sessionId).update(updates);
 
     // 2. Actualizar Firestore (Espejo parcial)
-    // Extraemos info relevante para Firestore si existe en updates
     final nuevoEstado = updates['estado'];
     final puntos = updates['puntos'];
-    final ronda = updates['rondas/actual']; // Cuidado con la clave anidada
+    final ronda = updates['rondas/actual'];
 
     if (nuevoEstado != null) {
       final firestore = FirebaseFirestore.instance;
@@ -432,11 +411,8 @@ class ServicioRealtime {
   }) async {
     final ref = referenciaSesion(sessionId);
 
-    // Estructura de actualización
     final cardPath = 'rondas/$rondaId/$jugadorKey/$cartaIndex/usada';
 
-    // Almacenamos quién ganó (por ahora, el que tiró último, simplificado)
-    // TODO: Lógica real de quién gana la baza
     final winningPath = 'rondas/$rondaId/carta_ganadora';
 
     final turnoPath = 'rondas/$rondaId/turno';
@@ -447,7 +423,7 @@ class ServicioRealtime {
       'jugador': jugadorKey,
       'equipo': (jugadorKey == 'jugador 1' || jugadorKey == 'jugador 3')
           ? 1
-          : 2, // Simplificado, asumir orden estándar
+          : 2,
     };
 
     await ref.update({
@@ -457,14 +433,14 @@ class ServicioRealtime {
     });
   }
 
-  /// Limpia la mesa (no se usa si no hay mesa global, pero útil para resetear carta ganadora)
+  /// Limpia la mesa
   Future<void> limpiarCartaGanadora(String sessionId, String rondaId) async {
     await referenciaSesion(
       sessionId,
     ).child('rondas/$rondaId/carta_ganadora').remove();
   }
 
-  /// Escucha la carta ganadora de la ronda actual
+  /// Carta ganadora de la ronda actual
   Stream<Map<String, dynamic>> streamCartaGanadora(
     String sessionId,
     String rondaId,
@@ -526,7 +502,7 @@ class ServicioRealtime {
     // 3. Ejecutar actualización atómica
     await referenciaSesion(sessionId).update(updates);
 
-    // 4. Actualizar Firestore (espejo)
+    // 4. Actualizar Firestore
     final firestore = FirebaseFirestore.instance;
     final partidaDoc = firestore.collection('partidas').doc(sessionId);
     final partidaSnap = await partidaDoc.get();
@@ -536,6 +512,31 @@ class ServicioRealtime {
         'rondaActual': proximaRonda,
         'puntos': nuevosPuntos,
       });
+    }
+  }
+
+  /// Finaliza la partida estableciendo el ganador y los puntos finales
+  Future<void> finalizarPartida({
+    required String sessionId,
+    required int equipoGanador,
+    required Map<String, int> nuevosPuntos,
+  }) async {
+    final updates = <String, dynamic>{
+      'estado': 'finalizada',
+      'ganador': equipoGanador,
+      'puntos': nuevosPuntos,
+    };
+
+    // 1. Actualizar Realtime
+    await referenciaSesion(sessionId).update(updates);
+
+    // 2. Actualizar Firestore
+    final firestore = FirebaseFirestore.instance;
+    final partidaDoc = firestore.collection('partidas').doc(sessionId);
+    final partidaSnap = await partidaDoc.get();
+
+    if (partidaSnap.exists) {
+      await partidaDoc.update(updates);
     }
   }
 }

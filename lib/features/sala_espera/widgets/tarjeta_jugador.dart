@@ -94,14 +94,9 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
         onTap: widget.alPulsar,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(
-              0xFF1B5E20,
-            ).withOpacity(0.6), // Verde oscuro traslúcido
+            color: Colores.verdeOscuroTraslucido,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color.fromARGB(31, 15, 11, 11),
-              width: 2,
-            ), // Borde suave
+            border: Border.all(color: Colores.negro08, width: 2), // Borde suave
             boxShadow: [
               const BoxShadow(
                 color: Colors.black26,
@@ -128,7 +123,7 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
       onTap: widget.alPulsar,
       child: Container(
         decoration: BoxDecoration(
-          color: Colores.blanco12, // Fondo semi-claro para destacar jugador
+          color: Colores.blanco12,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             const BoxShadow(
@@ -137,7 +132,7 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
               offset: Offset(0, 3),
             ),
           ],
-          border: Border.all(color: Colores.blanco24), // Borde sutil
+          border: Border.all(color: Colores.blanco24),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(

@@ -35,7 +35,6 @@ class PantallaSalaEspera extends StatefulWidget {
 class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
   late ControladorSalaEspera _controlador;
 
-  // Streams cacheados
   late Stream<List<UsuarioModel>> _streamJugadores;
   late Stream<DatabaseEvent> _streamSesion;
   StreamSubscription? _subSesion;
@@ -43,9 +42,7 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
   @override
   void initState() {
     super.initState();
-    // Instanciamos el controlador
     _controlador = ControladorSalaEspera(servicio: ServicioRealtime());
-    // Inicializamos streams una vez
     _streamJugadores = _controlador.streamJugadores(
       widget.idSesion,
       widget.maxJugadores,

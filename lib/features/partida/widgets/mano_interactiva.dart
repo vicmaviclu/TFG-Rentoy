@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../../core/constantes/colores.dart';
 
+/// Widget que muestra la mano de cartas del jugador con interacción.
 class ManoInteractiva extends StatelessWidget {
+  /// Lista de cartas en mano
   final List<dynamic> mano;
-  // Index of the selected card, passed from parent
+
+  /// Índice de la carta seleccionada (desde el padre)
   final int? cartaSeleccionadaIndex;
-  // Callback when a card is selected
+
+  /// Callback cuando se selecciona una carta
   final Function(int index) onSeleccionar;
+
+  /// Indica si es el turno del jugador
   final bool esTuTurno;
 
   const ManoInteractiva({
@@ -19,20 +25,19 @@ class ManoInteractiva extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Altura suficiente para las cartas (120)
-    const double kAlturaMano = 120;
+    // --- CONSTANTES DE DIMENSIONES ---
+    const double kAlturaMano = 130;
+    const double kAlturaCarta = 120;
+    const double kAnchoCarta = 80;
 
-    // Configuración de cartas
-    const double kAlturaCarta = 90;
-    const double kAnchoCarta = 65;
-
+    // --- CONTENEDOR DE LA MANO ---
     return SizedBox(
       height: kAlturaMano,
       child: Stack(
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          // Lista de Cartas
+          // --- LISTA HORIZONTAL DE CARTAS ---
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -48,22 +53,24 @@ class ManoInteractiva extends StatelessWidget {
                 final numero = cartaMap['numero']?.toString() ?? '0';
                 final palo = cartaMap['palo']?.toString() ?? '';
 
-                if (numero == '0' || palo.isEmpty)
+                if (numero == '0' || palo.isEmpty) {
                   return const SizedBox.shrink();
+                }
 
                 final prefijo = palo[0];
                 final path =
                     'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
 
-                // Determinar si esta carta es la seleccionada usando la prop
+                // Verificar si esta carta está seleccionada
                 final esSeleccionada = cartaSeleccionadaIndex == index;
 
+                // --- CARTA INDIVIDUAL ---
                 return GestureDetector(
                   onTap: () {
-                    // Si no es mi turno, no hago nada
+                    // Verificar si es el turno del jugador
                     if (!esTuTurno) return;
 
-                    // Notificar al padre la selección
+                    // Notificar selección al widget padre
                     onSeleccionar(index);
                   },
                   child: AnimatedContainer(
@@ -72,18 +79,18 @@ class ManoInteractiva extends StatelessWidget {
                     margin: EdgeInsets.only(
                       left: 4,
                       right: 4,
-                      bottom: esSeleccionada ? 20 : 0,
+                      bottom: esSeleccionada ? 5 : 0,
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: esSeleccionada ? Colores.acento : Colors.black,
-                        width: esSeleccionada ? 3 : 1,
+                        width: esSeleccionada ? 3 : 1.5,
                       ),
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: esSeleccionada
                           ? [
                               BoxShadow(
-                                color: Colores.acento.withOpacity(0.5),
+                                color: Colores.acento.withValues(alpha: 0.5),
                                 blurRadius: 10,
                                 spreadRadius: 1,
                               ),
@@ -96,7 +103,7 @@ class ManoInteractiva extends StatelessWidget {
                         path,
                         width: kAnchoCarta,
                         height: kAlturaCarta,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stack) => Container(
                           width: kAnchoCarta,
                           height: kAlturaCarta,

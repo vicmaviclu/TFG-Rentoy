@@ -1,0 +1,108 @@
+import 'package:flutter/material.dart';
+import '../../../core/constantes/colores.dart';
+import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/cadenas.dart';
+
+/// Widget que muestra el marcador de puntos de ambos equipos.
+class TableroPuntos extends StatelessWidget {
+  /// Puntos del equipo 1
+  final int puntosEquipo1;
+
+  /// Puntos del equipo 2
+  final int puntosEquipo2;
+
+  /// Objetivo de puntos para ganar
+  final int objetivo;
+
+  const TableroPuntos({
+    super.key,
+    required this.puntosEquipo1,
+    required this.puntosEquipo2,
+    this.objetivo = 21,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // --- CONTENEDOR PRINCIPAL DEL MARCADOR ---
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colores.primarioOscuro.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colores.blanco24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Puntos del Equipo 1
+          _PuntosEquipo(
+            nombre: TextoPartida.equipo1,
+            puntos: puntosEquipo1,
+            color: Colores.acento,
+          ),
+          const SizedBox(width: 16),
+          // Objetivo de puntos para ganar
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                TextoPartida.objetivo,
+                style: EstilosTexto.cuerpoPequeno.copyWith(
+                  color: Colores.blanco54,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "$objetivo",
+                style: EstilosTexto.tituloPequeno.copyWith(
+                  color: Colores.blanco,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          // Puntos del Equipo 2
+          _PuntosEquipo(
+            nombre: TextoPartida.equipo2,
+            puntos: puntosEquipo2,
+            color: Colores.secundario,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Widget privado para mostrar los puntos de un equipo.
+class _PuntosEquipo extends StatelessWidget {
+  final String nombre;
+  final int puntos;
+  final Color color;
+
+  const _PuntosEquipo({
+    required this.nombre,
+    required this.puntos,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // --- COLUMNA: NOMBRE + PUNTOS ---
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          nombre,
+          style: EstilosTexto.cuerpoPequeno.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          "$puntos ${TextoPartida.puntos}",
+          style: EstilosTexto.cuerpo.copyWith(color: Colores.blanco),
+        ),
+      ],
+    );
+  }
+}

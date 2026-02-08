@@ -47,7 +47,7 @@ void main() {
         ctrl.controladorContrasena.text = 'wrongpass';
 
         final res = await ctrl.iniciarSesionConEmail();
-        expect(res, TextoAuth.contrasenaIncorrecta);
+        expect(res, ErroresAuth.contrasenaIncorrecta);
       },
     );
 

@@ -1,25 +1,35 @@
 import 'cadenas.dart';
 
+/// Errores de autenticación de Firebase.
+class ErroresAuth {
+  static const String usuarioNoEncontrado = 'Usuario no encontrado';
+  static const String contrasenaIncorrecta = 'Contraseña incorrecta';
+  static const String correoEnUso = 'El correo ya está en uso';
+  static const String contrasenaDebil = 'Contraseña demasiado débil';
+  static const String demasiadosIntentos =
+      'Demasiados intentos, inténtalo más tarde';
+}
+
 /// Mapea códigos de error de FirebaseAuth a mensajes amigables para el usuario.
 String mensajeErrorFirebaseAuth(String code) {
   switch (code) {
     case 'user-not-found':
     case 'user_not_found':
-      return TextoAuth.usuarioNoEncontrado;
+      return ErroresAuth.usuarioNoEncontrado;
     case 'wrong-password':
     case 'wrong_password':
-      return TextoAuth.contrasenaIncorrecta;
+      return ErroresAuth.contrasenaIncorrecta;
     case 'invalid-credential':
     case 'invalid_credential':
-      return TextoAuth.contrasenaIncorrecta;
+      return ErroresAuth.contrasenaIncorrecta;
     case 'email-already-in-use':
     case 'email_already_in_use':
-      return TextoAuth.correoEnUso;
+      return ErroresAuth.correoEnUso;
     case 'weak-password':
     case 'weak_password':
-      return TextoAuth.contrasenaDebil;
+      return ErroresAuth.contrasenaDebil;
     case 'too-many-requests':
-      return TextoAuth.demasiadosIntentos;
+      return ErroresAuth.demasiadosIntentos;
     default:
       return TextoComun.errorInesperado;
   }
@@ -43,8 +53,17 @@ class ErroresRed {
       'Tiempo de espera agotado. Comprueba tu conexión a internet.';
 }
 
+/// Errores de lógica de juego durante la partida.
 class ErroresPartida {
   static const String errorCrear = 'Error creando partida';
+  static const String noEsTuTurno = 'No es tu turno';
+  static const String rondaNoActiva = 'No hay ronda activa';
+  static const String cartaNoValida = 'Carta no válida o índice incorrecto';
+  static const String jugadorNoEncontrado =
+      'No se encontró el jugador actual en la partida';
+  static const String errorLanzarCarta = 'Error al lanzar carta: ';
+  static const String errorSesionInfo =
+      'No se pudo obtener información de la sesión';
 }
 
 class ErroresValidacion {
@@ -53,4 +72,18 @@ class ErroresValidacion {
       'La contraseña debe tener al menos 6 caracteres';
   static const String contrasenasNoCoinciden = 'Las contraseñas no coinciden';
   static const String telefonoInvalido = 'Número de teléfono inválido';
+}
+
+/// Errores de sesión y partidas en tiempo real.
+class ErroresSesion {
+  static const String autenticacionRequerida = 'Autenticación requerida.';
+  static const String autenticacionCrearPartida =
+      'Autenticación requerida. Inicia sesión para crear una partida.';
+  static const String autenticacionUnirsePartida =
+      'Autenticación requerida. Inicia sesión para unirte a una partida.';
+  static const String sesionNoEncontrada = 'Sesión no encontrada';
+  static const String salaLlena = 'La sala está llena';
+  static const String huecoOcupado = 'El hueco ya está ocupado';
+  static const String pinNoEncontrado =
+      'No se encontró ninguna partida con ese PIN.';
 }
