@@ -198,11 +198,18 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                     }
 
                     // --- CONSTRUCCIÓN DEL LAYOUT DE PANTALLA ---
+                    final double screenHeight = MediaQuery.of(
+                      context,
+                    ).size.height;
+                    final double alturaCarta = (screenHeight * 0.20).clamp(
+                      100.0,
+                      220.0,
+                    );
                     return Column(
                       children: [
                         // --- MARCADOR DE PUNTOS ---
                         Padding(
-                          padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
+                          padding: const EdgeInsets.only(top: 2.0, bottom: 0.0),
                           child: TableroPuntos(
                             puntosEquipo1: p1,
                             puntosEquipo2: p2,
@@ -211,7 +218,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
 
                         // --- EQUIPO RIVAL (ARRIBA) ---
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -228,6 +235,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                                 cartaSeleccionadaIndex: null,
                                 onSeleccionar: null,
                                 esMiTurno: false,
+                                alturaCarta: alturaCarta,
                               ),
                             ],
                           ),
@@ -237,7 +245,9 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                         Expanded(
                           child: Center(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxHeight: 310),
+                              constraints: BoxConstraints(
+                                maxHeight: screenHeight * 0.60,
+                              ),
                               child: SizedBox(
                                 width: double.infinity,
                                 child: MesaJuego(
@@ -253,7 +263,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
 
                         // --- MI EQUIPO (ABAJO) ---
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -263,6 +273,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                                 cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
                                 onSeleccionar: _onSeleccionarCarta,
                                 esMiTurno: esMiTurno,
+                                alturaCarta: alturaCarta,
                               ),
                               const SizedBox(height: 4),
                               Text(

@@ -15,20 +15,24 @@ class ManoInteractiva extends StatelessWidget {
   /// Indica si es el turno del jugador
   final bool esTuTurno;
 
+  /// Altura deseada para las cartas
+  final double alturaCarta;
+
   const ManoInteractiva({
     super.key,
     required this.mano,
     required this.cartaSeleccionadaIndex,
     required this.onSeleccionar,
     this.esTuTurno = false,
+    this.alturaCarta = 120.0,
   });
 
   @override
   Widget build(BuildContext context) {
     // --- CONSTANTES DE DIMENSIONES ---
-    const double kAlturaMano = 130;
-    const double kAlturaCarta = 120;
-    const double kAnchoCarta = 80;
+    final double kAlturaMano = alturaCarta + 10.0;
+    final double kAlturaCarta = alturaCarta;
+    final double kAnchoCarta = kAlturaCarta * (2 / 3);
 
     // --- CONTENEDOR DE LA MANO ---
     return SizedBox(

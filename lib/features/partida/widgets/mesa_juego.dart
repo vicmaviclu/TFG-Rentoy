@@ -29,10 +29,10 @@ class MesaJuego extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double kAlturaBoton = 40.0;
-    const double kAnchoBoton = 140.0;
-    const double kProtrusion = 23.5; // Mitad del botón sale de la mesa visual
-    const double kMargin = 20.0; // Margen visual deseado
+    const double kAlturaBoton = 35.0;
+    const double kAnchoBoton = 110.0;
+    const double kProtrusion = 18.0;
+    const double kMargin = 10.0;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -49,92 +49,127 @@ class MesaJuego extends StatelessWidget {
               colorFondo: Colores.primario.withValues(alpha: 0.5),
               colorBorde: Colores.blanco24,
             ),
-            child: Container(
-              alignment: Alignment.center,
-              child: Stack(
-                children: [
-                  // Título
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      TextoPartida.mesaDeJuego,
-                      style: EstilosTexto.tituloMedio.copyWith(
-                        color: Colores.blanco24,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Calcular tamaño de carta basado en el alto disponible de la mesa
+                final double altoDisponible = constraints.maxHeight;
+
+                final double cartaHeight = altoDisponible * 0.75;
+                final double cartaWidth = cartaHeight * (2 / 3);
+
+                return Container(
+                  alignment: Alignment.center,
+                  child: Stack(
+                    children: [
+                      // Título
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          TextoPartida.mesaDeJuego,
+                          style: EstilosTexto.tituloMedio.copyWith(
+                            color: Colores.blanco24,
+                            fontSize: altoDisponible * 0.1,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
-                  // Carta ganadora
-                  if (controlador != null && idSesion != null)
-                    Positioned.fill(
-                      child: StreamBuilder<Map<String, dynamic>>(
-                        stream: controlador!.streamCartaGanadora(idSesion!),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
+                      // Carta ganadora
+                      if (controlador != null && idSesion != null)
+                        Positioned.fill(
+                          child: StreamBuilder<Map<String, dynamic>>(
+                            stream: controlador!.streamCartaGanadora(idSesion!),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
 
-                          final dataGanadora = snapshot.data!;
-                          final carta = dataGanadora['carta'];
-                          final jugador =
-                              dataGanadora['jugador']?.toString() ?? '';
+                              final dataGanadora = snapshot.data!;
+                              final carta = dataGanadora['carta'];
+                              final jugador =
+                                  dataGanadora['jugador']?.toString() ?? '';
 
-                          if (carta is! Map) return const SizedBox.shrink();
+                              if (carta is! Map) return const SizedBox.shrink();
 
-                          final numero = carta['numero']?.toString() ?? '0';
-                          final palo = carta['palo']?.toString() ?? '';
+                              final numero = carta['numero']?.toString() ?? '0';
+                              final palo = carta['palo']?.toString() ?? '';
 
-                          final path = Recursos.obtenerCarta(palo, numero);
-                          if (path.isEmpty) return const SizedBox.shrink();
+                              final path = Recursos.obtenerCarta(palo, numero);
+                              if (path.isEmpty) return const SizedBox.shrink();
 
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(height: 8),
-                              Text(
-                                "${TextoPartida.ganando}$jugador",
-                                style: EstilosTexto.caption.copyWith(
-                                  color: Colores.blanco,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.black,
-                                    width: 1.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.asset(
-                                    path,
-                                    width: 95,
-                                    height: 145,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) =>
-                                        const Icon(
-                                          Icons.error,
-                                          color: Colors.red,
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Texto "Ganando: ..."
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        "${TextoPartida.ganando} $jugador",
+                                        style: EstilosTexto.subtitulo.copyWith(
+                                          color: Colores.blanco,
+                                          fontSize: (altoDisponible * 0.035)
+                                              .clamp(10.0, 14.0),
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                  ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 1.5,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.3,
+                                            ),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Image.asset(
+                                          path,
+                                          width: cartaWidth,
+                                          height: cartaHeight,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (ctx, err, stack) =>
+                                              const Icon(
+                                                Icons.error,
+                                                color: Colors.red,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                ],
-              ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
 
         // 2. Botón Lanzar
-        // Lo colocamos alineado abajo del todo
         if (mostrarBotonLanzar)
           Positioned(
             bottom: kMargin,
@@ -161,7 +196,8 @@ class MesaJuego extends StatelessWidget {
                     TextoPartida.btnLanzar,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
+                      fontSize: 13,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
@@ -224,13 +260,9 @@ class _MesaPainter extends CustomPainter {
     // Línea Inferior
     if (gapWidth > 0) {
       final centerX = size.width / 2;
-      // Ancho total del hueco/botón: gapWidth (aprox 140 + 10)
-      // Pero el botón mide exactamente 140.
-      // Ajustamos para dibujar el contorno del botón (140 width, 45 height, 22.5 radius)
 
-      const double btnWidth = 140.0;
-      // const double btnHeight = 45.0; // Unused
-      const double btnRadius = 22.5; // btnHeight / 2
+      const double btnWidth = 110.0;
+      const double btnRadius = 17.5;
 
       final btnRight = centerX + (btnWidth / 2);
       final btnLeft = centerX - (btnWidth / 2);
@@ -239,44 +271,30 @@ class _MesaPainter extends CustomPainter {
       path.lineTo(btnRight, size.height);
 
       // 2. Dibujar contorno del botón (panza abajo)
-      // Estamos en (btnRight, centerY). CenterY del botón es size.height.
-      // Arc de 90 grados hacia abajo
-      // Centro del arco derecho: (btnRight - btnRadius, size.height)
-
-      // ArcToPoint para la esquina inferior derecha del botón
       path.arcToPoint(
         Offset(btnRight - btnRadius, size.height + btnRadius),
         radius: const Radius.circular(btnRadius),
         clockwise: true,
       );
 
-      // Línea recta inferior
       path.lineTo(btnLeft + btnRadius, size.height + btnRadius);
 
-      // ArcToPoint para la esquina inferior izquierda (subida)
       path.arcToPoint(
         Offset(btnLeft, size.height),
         radius: const Radius.circular(btnRadius),
         clockwise: true,
       );
 
-      // Ahora estamos en el borde izquierdo del botón, listos para seguir con la mesa
       path.lineTo(radius, size.height);
     } else {
-      // Sin hueco, línea completa
       path.lineTo(radius, size.height);
     }
 
-    // Curva Bottom-Left
     path.quadraticBezierTo(0, size.height, 0, size.height - radius);
 
-    // Cierre
     path.close();
-
-    // Dibujar fondo
     canvas.drawPath(path, paintFondo);
 
-    // Dibujar borde
     canvas.drawPath(path, paintBorde);
   }
 

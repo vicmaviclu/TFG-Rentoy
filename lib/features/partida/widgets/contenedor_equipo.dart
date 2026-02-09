@@ -19,6 +19,9 @@ class ContenedorEquipo extends StatelessWidget {
   /// Si es el turno del jugador
   final bool esMiTurno;
 
+  /// Altura deseada para las cartas
+  final double alturaCarta;
+
   const ContenedorEquipo({
     super.key,
     required this.jugadores,
@@ -26,6 +29,7 @@ class ContenedorEquipo extends StatelessWidget {
     this.cartaSeleccionadaIndex,
     this.onSeleccionar,
     this.esMiTurno = false,
+    this.alturaCarta = 120.0,
   });
 
   @override
@@ -43,6 +47,7 @@ class ContenedorEquipo extends StatelessWidget {
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
             onSeleccionar: onSeleccionar,
             esMiTurno: esMiTurno,
+            alturaCarta: alturaCarta,
           ),
         );
       }).toList(),

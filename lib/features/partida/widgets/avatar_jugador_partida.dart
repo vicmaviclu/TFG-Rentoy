@@ -22,6 +22,9 @@ class AvatarJugadorPartida extends StatelessWidget {
   /// Indica si es el turno del jugador
   final bool esMiTurno;
 
+  /// Altura deseada para las cartas
+  final double alturaCarta;
+
   const AvatarJugadorPartida({
     super.key,
     required this.jugador,
@@ -29,11 +32,14 @@ class AvatarJugadorPartida extends StatelessWidget {
     this.cartaSeleccionadaIndex,
     this.onSeleccionar,
     this.esMiTurno = false,
+    this.alturaCarta = 120.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    // --- COLUMNA PRINCIPAL: CARTAS + AVATAR + NOMBRE ---
+    // --- AVATAR DEL JUGADOR ---
+    final double tamanoAvatar = (alturaCarta * 0.45).clamp(40.0, 65.0);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -44,6 +50,7 @@ class AvatarJugadorPartida extends StatelessWidget {
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
             onSeleccionar: onSeleccionar ?? (i) {},
             esTuTurno: esMiTurno,
+            alturaCarta: alturaCarta,
           ),
 
         // Espacio entre cartas y avatar
@@ -52,8 +59,8 @@ class AvatarJugadorPartida extends StatelessWidget {
 
         // --- AVATAR DEL JUGADOR ---
         Container(
-          width: 60,
-          height: 60,
+          width: tamanoAvatar,
+          height: tamanoAvatar,
           decoration: BoxDecoration(
             color: esMiJugador
                 ? Colores.secundario.withValues(alpha: 0.2)
