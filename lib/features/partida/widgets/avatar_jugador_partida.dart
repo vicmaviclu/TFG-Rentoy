@@ -25,6 +25,9 @@ class AvatarJugadorPartida extends StatelessWidget {
   /// Altura deseada para las cartas
   final double alturaCarta;
 
+  /// Si las cartas deben mostrarse ocultas
+  final bool ocultarCartas;
+
   const AvatarJugadorPartida({
     super.key,
     required this.jugador,
@@ -33,6 +36,7 @@ class AvatarJugadorPartida extends StatelessWidget {
     this.onSeleccionar,
     this.esMiTurno = false,
     this.alturaCarta = 120.0,
+    this.ocultarCartas = false,
   });
 
   @override
@@ -51,6 +55,7 @@ class AvatarJugadorPartida extends StatelessWidget {
             onSeleccionar: onSeleccionar ?? (i) {},
             esTuTurno: esMiTurno,
             alturaCarta: alturaCarta,
+            ocultas: ocultarCartas,
           ),
 
         // Espacio entre cartas y avatar

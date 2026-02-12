@@ -100,6 +100,10 @@ class TextoPartida {
   static const String volverAlMenu = 'Volver al Menú';
   static const String objetivo = 'Objetivo';
   static const String puntos = 'pts';
+  static const String cantar = 'Cantar';
+  static const String cambiar = 'Cambiar';
+  static const String muestra = 'Muestra';
+  static const String ronda = 'Ronda';
 }
 
 /// Textos relacionados con el perfil de usuario.

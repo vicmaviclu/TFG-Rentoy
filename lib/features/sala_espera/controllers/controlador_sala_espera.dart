@@ -145,6 +145,12 @@ class ControladorSalaEspera {
         }
       }
 
+      // Extraer carta de muestra
+      Carta? cartaMuestra;
+      if (baraja.cartas.isNotEmpty) {
+        cartaMuestra = baraja.cartas.removeAt(0);
+      }
+
       // 5. Preparar Updates
       final updates = <String, dynamic>{
         'estado': TextoPartida.estadoJugando,
@@ -154,6 +160,10 @@ class ControladorSalaEspera {
         'puntos/equipo2': 0,
         'rondas/1/puntos': 1,
       };
+
+      if (cartaMuestra != null) {
+        updates['rondas/1/muestra'] = cartaMuestra.toMap();
+      }
 
       // Añadir manos a la ronda 1
       manosTemp.forEach((key, cartas) {

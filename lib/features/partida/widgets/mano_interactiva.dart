@@ -25,7 +25,11 @@ class ManoInteractiva extends StatelessWidget {
     required this.onSeleccionar,
     this.esTuTurno = false,
     this.alturaCarta = 120.0,
+    this.ocultas = false,
   });
+
+  /// Si las cartas deben mostrarse ocultas (reverso)
+  final bool ocultas;
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +66,9 @@ class ManoInteractiva extends StatelessWidget {
                 }
 
                 final prefijo = palo[0];
-                final path =
-                    'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
+                final path = ocultas
+                    ? 'assets/images/cartas/reverso.png'
+                    : 'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
 
                 // Verificar si esta carta está seleccionada
                 final esSeleccionada = cartaSeleccionadaIndex == index;

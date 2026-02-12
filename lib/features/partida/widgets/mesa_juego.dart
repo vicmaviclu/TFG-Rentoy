@@ -3,6 +3,7 @@ import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/recursos.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../controllers/controlador_partida.dart';
 
 /// Widget que representa la mesa de juego central con la carta ganadora.
@@ -19,12 +20,16 @@ class MesaJuego extends StatelessWidget {
   /// Callback cuando se presiona el botón de lanzar
   final VoidCallback? onLanzar;
 
+  /// Callback cuando se presiona el botón de cambiar
+  final VoidCallback? onCambiar;
+
   const MesaJuego({
     super.key,
     this.controlador,
     this.idSesion,
     this.mostrarBotonLanzar = false,
     this.onLanzar,
+    this.onCambiar,
   });
 
   @override
@@ -39,7 +44,7 @@ class MesaJuego extends StatelessWidget {
       children: [
         // 1. La Mesa Visual (Fondo + Borde + Contenido)
         Positioned(
-          top: kMargin,
+          top: 0,
           left: kMargin,
           right: kMargin,
           bottom: kMargin + kProtrusion,
@@ -59,107 +64,371 @@ class MesaJuego extends StatelessWidget {
 
                 return Container(
                   alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Stack(
                     children: [
-                      // Título
+                      // Título (Fondo Centrado)
                       Align(
                         alignment: Alignment.center,
-                        child: Text(
-                          TextoPartida.mesaDeJuego,
-                          style: EstilosTexto.tituloMedio.copyWith(
-                            color: Colores.blanco24,
-                            fontSize: altoDisponible * 0.1,
-                            fontWeight: FontWeight.bold,
+                        child: Opacity(
+                          opacity: 0.3, // Un poco más sutil ya que está detrás
+                          child: Text(
+                            TextoPartida.mesaDeJuego,
+                            style: EstilosTexto.tituloMedio.copyWith(
+                              color: Colores.blanco,
+                              fontSize: altoDisponible * 0.1,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
 
-                      // Carta ganadora
+                      // Contenido Principal
                       if (controlador != null && idSesion != null)
-                        Positioned.fill(
-                          child: StreamBuilder<Map<String, dynamic>>(
-                            stream: controlador!.streamCartaGanadora(idSesion!),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              final dataGanadora = snapshot.data!;
-                              final carta = dataGanadora['carta'];
-                              final jugador =
-                                  dataGanadora['jugador']?.toString() ?? '';
-
-                              if (carta is! Map) return const SizedBox.shrink();
-
-                              final numero = carta['numero']?.toString() ?? '0';
-                              final palo = carta['palo']?.toString() ?? '';
-
-                              final path = Recursos.obtenerCarta(palo, numero);
-                              if (path.isEmpty) return const SizedBox.shrink();
-
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Texto "Ganando: ..."
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
+                        Stack(
+                          children: [
+                            // --- IZQUIERDA: BOTONES + MUESTRA ---
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Botones
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      _BotonMesa(
+                                        icon: Icons.mic,
+                                        label: TextoPartida.cantar,
+                                        onTap: () {},
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.5),
-                                        borderRadius: BorderRadius.circular(12),
+                                      const SizedBox(height: 12),
+                                      _BotonMesa(
+                                        icon: Icons.change_circle,
+                                        label: TextoPartida.cambiar,
+                                        onTap: onCambiar ?? () {},
                                       ),
-                                      child: Text(
-                                        "${TextoPartida.ganando} $jugador",
-                                        style: EstilosTexto.subtitulo.copyWith(
-                                          color: Colores.blanco,
-                                          fontSize: (altoDisponible * 0.035)
-                                              .clamp(10.0, 14.0),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(width: 16),
+
+                                  // Muestra
+                                  StreamBuilder<Map<String, dynamic>>(
+                                    stream: controlador!.streamCartaMuestra(
+                                      idSesion!,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 1.5,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(
-                                              0.3,
-                                            ),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: Image.asset(
-                                          path,
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData ||
+                                          snapshot.data!.isEmpty) {
+                                        return SizedBox(
                                           width: cartaWidth,
                                           height: cartaHeight,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (ctx, err, stack) =>
-                                              const Icon(
-                                                Icons.error,
-                                                color: Colors.red,
+                                        );
+                                      }
+                                      final muestra = snapshot.data!;
+                                      final numero =
+                                          muestra['numero']?.toString() ?? '0';
+                                      final palo =
+                                          muestra['palo']?.toString() ?? '';
+                                      final path = Recursos.obtenerCarta(
+                                        palo,
+                                        numero,
+                                      );
+
+                                      if (path.isEmpty) {
+                                        return SizedBox(
+                                          width: cartaWidth,
+                                          height: cartaHeight,
+                                        );
+                                      }
+
+                                      return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              TextoPartida.muestra,
+                                              style: EstilosTexto.subtitulo
+                                                  .copyWith(
+                                                    color: Colores.blanco,
+                                                    fontSize:
+                                                        (altoDisponible * 0.035)
+                                                            .clamp(10.0, 14.0),
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 1.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.3),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              child: Image.asset(
+                                                path,
+                                                width: cartaWidth,
+                                                height: cartaHeight,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // --- CENTRO: INFORMACIÓN DE RONDA (Centrado) ---
+                            Align(
+                              alignment: Alignment.center,
+                              child: StreamBuilder<DatabaseEvent>(
+                                stream: controlador!.streamPartida(
+                                  idSesion ?? '',
+                                ),
+                                builder: (context, snapshot) {
+                                  String textoRonda = "${TextoPartida.ronda} 1";
+                                  if (snapshot.hasData &&
+                                      snapshot.data!.snapshot.value is Map) {
+                                    final val =
+                                        snapshot.data!.snapshot.value as Map;
+                                    if (val['rondas'] != null &&
+                                        val['rondas']['actual'] != null) {
+                                      textoRonda =
+                                          "${TextoPartida.ronda} ${val['rondas']['actual']}";
+                                    }
+                                  }
+
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Texto Ronda
+                                      Text(
+                                        textoRonda,
+                                        style: EstilosTexto.subtitulo.copyWith(
+                                          color: Colores.blanco,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 2,
+                                              color: Colors.black.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              offset: const Offset(1, 1),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+
+                                      // Indicadores Equipo 2 (Arriba)
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _IndicadorBaza(),
+                                          const SizedBox(width: 8),
+                                          _IndicadorBaza(),
+                                        ],
+                                      ),
+
+                                      // Valor de la Ronda
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6.0,
+                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.4,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            border: Border.all(
+                                              color: Colores.acento.withValues(
+                                                alpha: 0.8,
+                                              ),
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "1", // Valor de la ronda
+                                            style: EstilosTexto.tituloMedio
+                                                .copyWith(
+                                                  color: Colores.acento,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Indicadores Equipo 1 (Abajo)
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _IndicadorBaza(),
+                                          const SizedBox(width: 8),
+                                          _IndicadorBaza(),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+
+                            // --- DERECHA: CARTA GANADORA ---
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: StreamBuilder<Map<String, dynamic>>(
+                                stream: controlador!.streamCartaGanadora(
+                                  idSesion!,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    return SizedBox(
+                                      width: cartaWidth,
+                                      height: cartaHeight,
+                                    );
+                                  }
+
+                                  final dataGanadora = snapshot.data!;
+                                  final carta = dataGanadora['carta'];
+                                  final jugador =
+                                      dataGanadora['jugador']?.toString() ?? '';
+
+                                  if (carta is! Map) {
+                                    return SizedBox(
+                                      width: cartaWidth,
+                                      height: cartaHeight,
+                                    );
+                                  }
+
+                                  final numero =
+                                      carta['numero']?.toString() ?? '0';
+                                  final palo = carta['palo']?.toString() ?? '';
+                                  final path = Recursos.obtenerCarta(
+                                    palo,
+                                    numero,
+                                  );
+
+                                  if (path.isEmpty) {
+                                    return SizedBox(
+                                      width: cartaWidth,
+                                      height: cartaHeight,
+                                    );
+                                  }
+
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "${TextoPartida.ganando} $jugador",
+                                          style: EstilosTexto.subtitulo
+                                              .copyWith(
+                                                color: Colores.blanco,
+                                                fontSize:
+                                                    (altoDisponible * 0.035)
+                                                        .clamp(10.0, 14.0),
+                                                fontWeight: FontWeight.bold,
                                               ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1.5,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          child: Image.asset(
+                                            path,
+                                            width: cartaWidth,
+                                            height: cartaHeight,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (ctx, err, stack) =>
+                                                const Icon(
+                                                  Icons.error,
+                                                  color: Colors.red,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                     ],
                   ),
@@ -169,7 +438,7 @@ class MesaJuego extends StatelessWidget {
           ),
         ),
 
-        // 2. Botón Lanzar
+        // 3. Botón Lanzar
         if (mostrarBotonLanzar)
           Positioned(
             bottom: kMargin,
@@ -303,5 +572,64 @@ class _MesaPainter extends CustomPainter {
     return oldDelegate.gapWidth != gapWidth ||
         oldDelegate.colorFondo != colorFondo ||
         oldDelegate.colorBorde != colorBorde;
+  }
+}
+
+class _BotonMesa extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _BotonMesa({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colores.primario.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colores.blanco54, width: 2),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 10),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IndicadorBaza extends StatelessWidget {
+  const _IndicadorBaza();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(
+          color: Colores.blanco, // Siempre blanco
+          width: 2,
+        ),
+        shape: BoxShape.circle,
+      ),
+    );
   }
 }

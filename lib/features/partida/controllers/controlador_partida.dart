@@ -11,6 +11,39 @@ class ControladorPartida {
   ControladorPartida({required ServicioRealtime servicio})
     : _servicio = servicio;
 
+  // --- CONSTANTES PRIVADAS PARA CLAVES FIREBASE ---
+  static const String _kKeyRondas = 'rondas';
+  static const String _kKeyActual = 'actual';
+  static const String _kKeyJugadores = 'jugadores';
+  static const String _kKeyMaxJugadores = 'maxJugadores';
+  static const String _kKeyCartaGanadora = 'carta_ganadora';
+  static const String _kKeyMuestra = 'muestra';
+  static const String _kKeyTurno = 'turno';
+  static const String _kKeyUid = 'uid';
+  static const String _kKeyEmail = 'email';
+  static const String _kKeyName = 'name';
+  static const String _kKeyAvatar = 'avatar';
+  static const String _kKeyUsada = 'usada';
+  static const String _kKeyPuntos = 'puntos';
+  static const String _kKeyEquipo1 = 'equipo1';
+  static const String _kKeyEquipo2 = 'equipo2';
+
+  // --- HELPERS PRIVADOS ---
+  int _safeInt(dynamic value, [int defaultValue = 0]) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? defaultValue;
+    return defaultValue;
+  }
+
+  String _safeString(dynamic value, [String defaultValue = '']) {
+    return value?.toString() ?? defaultValue;
+  }
+
+  Map<String, dynamic> _safeMap(dynamic value) {
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return {};
+  }
+
   /// Escucha los cambios en la sesión/partida
   Stream<DatabaseEvent> streamPartida(String idPartida) {
     return _servicio.streamSesion(idPartida);
@@ -25,22 +58,15 @@ class ControladorPartida {
       }
 
       final sesion = val;
-      Map<String, dynamic> jugadoresMap = {};
-      if (sesion['jugadores'] is Map) {
-        jugadoresMap = Map<String, dynamic>.from(sesion['jugadores']);
-      } else {
-        return <UsuarioModel>[];
-      }
+      final jugadoresMap = _safeMap(sesion[_kKeyJugadores]);
+      if (jugadoresMap.isEmpty) return <UsuarioModel>[];
 
-      final maxJugadores = (sesion['maxJugadores'] is int)
-          ? sesion['maxJugadores'] as int
-          : int.tryParse(sesion['maxJugadores']?.toString() ?? '') ?? 4;
+      final maxJugadores = _safeInt(sesion[_kKeyMaxJugadores], 4);
 
       // Obtener ronda actual para buscar las manos
-      final rondaActual =
-          (sesion['rondas'] != null && sesion['rondas']['actual'] != null)
-          ? sesion['rondas']['actual']
-          : null;
+      final rondas = _safeMap(sesion[_kKeyRondas]);
+      final rondaActual = rondas[_kKeyActual];
+      final rondaData = _safeMap(rondas[rondaActual.toString()]);
 
       List<UsuarioModel> lista = [];
 
@@ -51,15 +77,10 @@ class ControladorPartida {
         final v = jugadoresMap[clave];
         if (v == null) continue;
 
-        // Buscar mano en rondas/x/jugador i
+        // Buscar mano
         List<dynamic>? manoRaw;
-        if (rondaActual != null &&
-            sesion['rondas'] != null &&
-            sesion['rondas'][rondaActual.toString()] != null) {
-          final rondaData = sesion['rondas'][rondaActual.toString()];
-          if (rondaData[clave] != null) {
-            manoRaw = rondaData[clave];
-          }
+        if (rondaData.isNotEmpty && rondaData[clave] != null) {
+          manoRaw = rondaData[clave] as List<dynamic>?;
         }
 
         if (v is String) {
@@ -75,12 +96,10 @@ class ControladorPartida {
         } else if (v is Map) {
           lista.add(
             UsuarioModel(
-              uid: v['uid']?.toString() ?? '',
-              email: v['email']?.toString() ?? '',
-              nombreUsuario: v['name']?.toString() ?? '',
-              avatar: (v['avatar'] is int)
-                  ? v['avatar'] as int
-                  : int.tryParse(v['avatar']?.toString() ?? '') ?? 1,
+              uid: _safeString(v[_kKeyUid]),
+              email: _safeString(v[_kKeyEmail]),
+              nombreUsuario: _safeString(v[_kKeyName]),
+              avatar: _safeInt(v[_kKeyAvatar], 1),
               mano: manoRaw,
             ),
           );
@@ -95,26 +114,32 @@ class ControladorPartida {
     return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
-  Stream<Map<String, dynamic>> streamCartaGanadora(String idPartida) async* {
-    // Necesitamos saber la ronda actual antes de suscribirnos.
-    // Esto es un poco truco porque la ronda puede cambiar.
-    // Lo ideal sería un stream combinado, pero por simpleza re-buscamos la ronda.
-    // O mejor, escuchemos la sesión entera y mapeemos, pero streamSesion es costoso.
-    // Haremos polling simple o map sobre sesion.
-
-    yield* _servicio.streamSesion(idPartida).map((event) {
+  Stream<Map<String, dynamic>> streamCartaGanadora(String idPartida) {
+    return _servicio.streamSesion(idPartida).map((event) {
       final val = event.snapshot.value;
-      if (val is Map &&
-          val['rondas'] != null &&
-          val['rondas']['actual'] != null) {
-        final r = val['rondas']['actual'].toString();
-        if (val['rondas'][r] != null &&
-            val['rondas'][r]['carta_ganadora'] != null) {
-          final cg = val['rondas'][r]['carta_ganadora'];
-          if (cg is Map) return Map<String, dynamic>.from(cg);
-        }
-      }
-      return {};
+      if (val is! Map) return {};
+
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final actual = rondas[_kKeyActual];
+      if (actual == null) return {};
+
+      final rondaData = _safeMap(rondas[actual.toString()]);
+      return _safeMap(rondaData[_kKeyCartaGanadora]);
+    });
+  }
+
+  /// Escucha la carta de muestra de la ronda actual
+  Stream<Map<String, dynamic>> streamCartaMuestra(String idPartida) {
+    return _servicio.streamSesion(idPartida).map((event) {
+      final val = event.snapshot.value;
+      if (val is! Map) return {};
+
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final actual = rondas[_kKeyActual];
+      if (actual == null) return {};
+
+      final rondaData = _safeMap(rondas[actual.toString()]);
+      return _safeMap(rondaData[_kKeyMuestra]);
     });
   }
 
@@ -122,16 +147,14 @@ class ControladorPartida {
   Stream<int> streamTurnoActual(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {
       final val = event.snapshot.value;
-      if (val is Map &&
-          val['rondas'] != null &&
-          val['rondas']['actual'] != null) {
-        final r = val['rondas']['actual'].toString();
-        if (val['rondas'][r] != null && val['rondas'][r]['turno'] != null) {
-          final t = val['rondas'][r]['turno'];
-          return (t is int) ? t : int.tryParse(t.toString()) ?? 1;
-        }
-      }
-      return 1; // Por defecto
+      if (val is! Map) return 1;
+
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final actual = rondas[_kKeyActual];
+      if (actual == null) return 1;
+
+      final rondaData = _safeMap(rondas[actual.toString()]);
+      return _safeInt(rondaData[_kKeyTurno], 1);
     });
   }
 
@@ -145,17 +168,13 @@ class ControladorPartida {
     if (val == null || val is! Map) return null;
 
     final sesion = val;
-    final maxPlayers = (sesion['maxJugadores'] is int)
-        ? sesion['maxJugadores'] as int
-        : int.tryParse(sesion['maxJugadores']?.toString() ?? '') ?? 4;
-
-    if (sesion['jugadores'] is! Map) return null;
-    final jugadoresMap = Map<String, dynamic>.from(sesion['jugadores']);
+    final maxPlayers = _safeInt(sesion[_kKeyMaxJugadores], 4);
+    final jugadoresMap = _safeMap(sesion[_kKeyJugadores]);
 
     for (var i = 1; i <= maxPlayers; i++) {
       final key = 'jugador $i';
-      final p = jugadoresMap[key];
-      if (p is Map && p['uid'] == uid) {
+      final p = _safeMap(jugadoresMap[key]);
+      if (_safeString(p[_kKeyUid]) == uid) {
         return key;
       }
     }
@@ -166,12 +185,11 @@ class ControladorPartida {
   Future<String?> obtenerRondaActual(String idPartida) async {
     final event = await _servicio.streamSesion(idPartida).first;
     final val = event.snapshot.value;
-    if (val is Map &&
-        val['rondas'] != null &&
-        val['rondas']['actual'] != null) {
-      return val['rondas']['actual'].toString();
-    }
-    return null;
+    if (val is! Map) return null;
+
+    final rondas = _safeMap(val[_kKeyRondas]);
+    final actual = rondas[_kKeyActual];
+    return actual?.toString();
   }
 
   /// Juega una carta en la partida actual.
@@ -188,35 +206,27 @@ class ControladorPartida {
     Map<String, dynamic>? cartaData;
 
     if (val is Map) {
-      if (val['rondas'] != null && val['rondas']['actual'] != null) {
-        ronda = val['rondas']['actual'].toString();
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final actual = rondas[_kKeyActual];
+      if (actual != null) {
+        ronda = actual.toString();
+        final rondaData = _safeMap(rondas[ronda]);
+
         // Obtener turno actual para validación
-        if (val['rondas'][ronda] != null &&
-            val['rondas'][ronda]['turno'] != null) {
-          turnoActual = (val['rondas'][ronda]['turno'] is int)
-              ? val['rondas'][ronda]['turno']
-              : int.tryParse(val['rondas'][ronda]['turno'].toString()) ?? 1;
-        }
+        turnoActual = _safeInt(rondaData[_kKeyTurno], 1);
 
         // Obtener carta de la mano
-        if (val['rondas'][ronda] != null) {
-          final rondaObj = val['rondas'][ronda];
-          if (rondaObj[miKey] is List) {
-            final mano = rondaObj[miKey] as List;
-            if (cartaIndex >= 0 && cartaIndex < mano.length) {
-              final c = mano[cartaIndex];
-              if (c is Map) {
-                cartaData = Map<String, dynamic>.from(c);
-              }
+        if (rondaData[miKey] is List) {
+          final mano = rondaData[miKey] as List;
+          if (cartaIndex >= 0 && cartaIndex < mano.length) {
+            final c = mano[cartaIndex];
+            if (c is Map) {
+              cartaData = Map<String, dynamic>.from(c);
             }
           }
         }
       }
-      if (val['maxJugadores'] != null) {
-        maxPlayers = (val['maxJugadores'] is int)
-            ? val['maxJugadores']
-            : int.tryParse(val['maxJugadores'].toString()) ?? 4;
-      }
+      maxPlayers = _safeInt(val[_kKeyMaxJugadores], 4);
     }
 
     if (ronda == null) throw Exception(ErroresPartida.rondaNoActiva);
@@ -246,8 +256,9 @@ class ControladorPartida {
     final valPost = snapPost.snapshot.value;
     if (valPost is! Map) return;
 
-    final rondaData = valPost['rondas']?[ronda];
-    if (rondaData == null) return;
+    final rondasPost = _safeMap(valPost[_kKeyRondas]);
+    final rondaData = _safeMap(rondasPost[ronda]);
+    if (rondaData.isEmpty) return;
 
     int cartasJugadas = 0;
     for (var i = 1; i <= maxPlayers; i++) {
@@ -255,7 +266,7 @@ class ControladorPartida {
       if (rondaData[k] is List) {
         final mano = rondaData[k] as List;
         for (var c in mano) {
-          if (c is Map && c['usada'] == true) {
+          if (c is Map && c[_kKeyUsada] == true) {
             cartasJugadas++;
           }
         }
@@ -266,28 +277,21 @@ class ControladorPartida {
     if (cartasJugadas >= totalCartas) {
       // FIN DE RONDA
       // 1. Obtener carta ganadora de la última baza (ya grabada en jugarCarta)
-      final cg = rondaData['carta_ganadora'];
+      final cg = _safeMap(rondaData[_kKeyCartaGanadora]);
       int equipoGanador = 0;
-      if (cg is Map && cg['equipo'] is int) {
+      if (cg.isNotEmpty && cg['equipo'] is int) {
         equipoGanador = cg['equipo'];
       }
 
       // 2. Calcular puntos (ej. 1 punto por ganar la ronda)
       // Ojo: Aquí deberíamos sumar puntaje real de las cartas, pero por ahora simplificado.
       // Leemos puntos actuales de la ronda
-      int puntosRonda = 1;
-      if (rondaData['puntos'] is int) {
-        puntosRonda = rondaData['puntos'];
-      }
+      int puntosRonda = _safeInt(rondaData[_kKeyPuntos], 1);
 
       // Leemos puntos globales
-      final puntosGlobales = valPost['puntos'];
-      int p1 = 0;
-      int p2 = 0;
-      if (puntosGlobales is Map) {
-        p1 = (puntosGlobales['equipo1'] is int) ? puntosGlobales['equipo1'] : 0;
-        p2 = (puntosGlobales['equipo2'] is int) ? puntosGlobales['equipo2'] : 0;
-      }
+      final puntosGlobales = _safeMap(valPost[_kKeyPuntos]);
+      int p1 = _safeInt(puntosGlobales[_kKeyEquipo1]);
+      int p2 = _safeInt(puntosGlobales[_kKeyEquipo2]);
 
       if (equipoGanador == 1) {
         p1 += puntosRonda;
@@ -313,7 +317,7 @@ class ControladorPartida {
         await _servicio.finalizarPartida(
           sessionId: idPartida,
           equipoGanador: winner,
-          nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
+          nuevosPuntos: {_kKeyEquipo1: p1, _kKeyEquipo2: p2},
         );
       } else {
         // 3. Iniciar siguiente ronda
@@ -322,7 +326,7 @@ class ControladorPartida {
           sessionId: idPartida,
           proximaRonda: proxRonda,
           maxJugadores: maxPlayers,
-          nuevosPuntos: {'equipo1': p1, 'equipo2': p2},
+          nuevosPuntos: {_kKeyEquipo1: p1, _kKeyEquipo2: p2},
         );
       }
     }

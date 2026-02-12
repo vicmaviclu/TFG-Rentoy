@@ -482,6 +482,12 @@ class ServicioRealtime {
       }
     }
 
+    // Extraer carta de muestra
+    Carta? cartaMuestra;
+    if (baraja.cartas.isNotEmpty) {
+      cartaMuestra = baraja.cartas.removeAt(0);
+    }
+
     // 2. Preparar updates
     final updates = <String, dynamic>{
       'rondas/actual': proximaRonda,
@@ -491,6 +497,10 @@ class ServicioRealtime {
       'puntos/equipo1': nuevosPuntos['equipo1'],
       'puntos/equipo2': nuevosPuntos['equipo2'],
     };
+
+    if (cartaMuestra != null) {
+      updates['rondas/$proximaRonda/muestra'] = cartaMuestra.toMap();
+    }
 
     // Añadir nuevas manos
     manosTemp.forEach((key, cartas) {

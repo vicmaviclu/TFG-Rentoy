@@ -22,6 +22,9 @@ class ContenedorEquipo extends StatelessWidget {
   /// Altura deseada para las cartas
   final double alturaCarta;
 
+  /// Si las cartas deben mostrarse ocultas
+  final bool ocultarCartas;
+
   const ContenedorEquipo({
     super.key,
     required this.jugadores,
@@ -30,6 +33,7 @@ class ContenedorEquipo extends StatelessWidget {
     this.onSeleccionar,
     this.esMiTurno = false,
     this.alturaCarta = 120.0,
+    this.ocultarCartas = false,
   });
 
   @override
@@ -48,6 +52,7 @@ class ContenedorEquipo extends StatelessWidget {
             onSeleccionar: onSeleccionar,
             esMiTurno: esMiTurno,
             alturaCarta: alturaCarta,
+            ocultarCartas: ocultarCartas,
           ),
         );
       }).toList(),
