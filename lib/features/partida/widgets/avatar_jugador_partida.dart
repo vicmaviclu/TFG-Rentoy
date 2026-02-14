@@ -71,13 +71,15 @@ class AvatarJugadorPartida extends StatelessWidget {
                 ? Colores.secundario.withValues(alpha: 0.2)
                 : Colores.blanco12,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: esMiJugador ? Colores.secundario : Colors.transparent,
-              width: 2,
-            ),
-            image: DecorationImage(
-              image: AssetImage(Recursos.obtenerAvatar(jugador.avatar)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              Recursos.obtenerAvatar(jugador.avatar),
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.person, color: Colores.blanco54);
+              },
             ),
           ),
         ),

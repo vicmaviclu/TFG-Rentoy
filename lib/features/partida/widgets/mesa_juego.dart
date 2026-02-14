@@ -5,6 +5,8 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/recursos.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../controllers/controlador_partida.dart';
+import 'boton_mesa.dart';
+import 'indicador_baza.dart';
 
 /// Widget que representa la mesa de juego central con la carta ganadora.
 class MesaJuego extends StatelessWidget {
@@ -87,129 +89,119 @@ class MesaJuego extends StatelessWidget {
                       if (controlador != null && idSesion != null)
                         Stack(
                           children: [
-                            // --- IZQUIERDA: BOTONES + MUESTRA ---
+                            // --- IZQUIERDA: MUESTRA ---
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Botones
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      _BotonMesa(
-                                        icon: Icons.mic,
-                                        label: TextoPartida.cantar,
-                                        onTap: () {},
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 10.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Muestra
+                                    StreamBuilder<Map<String, dynamic>>(
+                                      stream: controlador!.streamCartaMuestra(
+                                        idSesion!,
                                       ),
-                                      const SizedBox(height: 12),
-                                      _BotonMesa(
-                                        icon: Icons.change_circle,
-                                        label: TextoPartida.cambiar,
-                                        onTap: onCambiar ?? () {},
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  // Muestra
-                                  StreamBuilder<Map<String, dynamic>>(
-                                    stream: controlador!.streamCartaMuestra(
-                                      idSesion!,
-                                    ),
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData ||
-                                          snapshot.data!.isEmpty) {
-                                        return SizedBox(
-                                          width: cartaWidth,
-                                          height: cartaHeight,
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData ||
+                                            snapshot.data!.isEmpty) {
+                                          return SizedBox(
+                                            width: cartaWidth,
+                                            height: cartaHeight,
+                                          );
+                                        }
+                                        final muestra = snapshot.data!;
+                                        final numero =
+                                            muestra['numero']?.toString() ??
+                                            '0';
+                                        final palo =
+                                            muestra['palo']?.toString() ?? '';
+                                        final path = Recursos.obtenerCarta(
+                                          palo,
+                                          numero,
                                         );
-                                      }
-                                      final muestra = snapshot.data!;
-                                      final numero =
-                                          muestra['numero']?.toString() ?? '0';
-                                      final palo =
-                                          muestra['palo']?.toString() ?? '';
-                                      final path = Recursos.obtenerCarta(
-                                        palo,
-                                        numero,
-                                      );
 
-                                      if (path.isEmpty) {
-                                        return SizedBox(
-                                          width: cartaWidth,
-                                          height: cartaHeight,
-                                        );
-                                      }
+                                        if (path.isEmpty) {
+                                          return SizedBox(
+                                            width: cartaWidth,
+                                            height: cartaHeight,
+                                          );
+                                        }
 
-                                      return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Text(
-                                              TextoPartida.muestra,
-                                              style: EstilosTexto.subtitulo
-                                                  .copyWith(
-                                                    color: Colores.blanco,
-                                                    fontSize:
-                                                        (altoDisponible * 0.035)
-                                                            .clamp(10.0, 14.0),
-                                                    fontWeight: FontWeight.bold,
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
                                                   ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.white,
-                                                width: 1.5,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withValues(alpha: 0.3),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.5,
                                                 ),
-                                              ],
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              child: Image.asset(
-                                                path,
-                                                width: cartaWidth,
-                                                height: cartaHeight,
-                                                fit: BoxFit.cover,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                TextoPartida.muestra,
+                                                style: EstilosTexto.subtitulo
+                                                    .copyWith(
+                                                      color: Colores.blanco,
+                                                      fontSize:
+                                                          (altoDisponible *
+                                                                  0.035)
+                                                              .clamp(
+                                                                10.0,
+                                                                14.0,
+                                                              ),
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ],
+                                            const SizedBox(height: 4),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 1.5,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                child: Image.asset(
+                                                  path,
+                                                  width: cartaWidth,
+                                                  height: cartaHeight,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
 
-                            // --- CENTRO: INFORMACIÓN DE RONDA (Centrado) ---
+                            // --- CENTRO: INFORMACIÓN DE RONDA  ---
                             Align(
                               alignment: Alignment.center,
                               child: StreamBuilder<DatabaseEvent>(
@@ -251,61 +243,104 @@ class MesaJuego extends StatelessWidget {
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 4),
 
-                                      // Indicadores Equipo 2 (Arriba)
+                                      // Grupo Central: Botones + (Puntos/Indicadores)
                                       Row(
-                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
-                                          _IndicadorBaza(),
-                                          const SizedBox(width: 8),
-                                          _IndicadorBaza(),
-                                        ],
-                                      ),
+                                          // Botón Cantar
+                                          BotonMesa(
+                                            icon: Icons.mic,
+                                            label: TextoPartida.cantar,
+                                            onTap: () {},
+                                          ),
 
-                                      // Valor de la Ronda
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 6.0,
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.4,
+                                          const SizedBox(width: 18),
+
+                                          // Columna Central: Indicadores + Puntos
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 20.0,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            border: Border.all(
-                                              color: Colores.acento.withValues(
-                                                alpha: 0.8,
-                                              ),
-                                              width: 2,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "1", // Valor de la ronda
-                                            style: EstilosTexto.tituloMedio
-                                                .copyWith(
-                                                  color: Colores.acento,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Indicadores Equipo 2 (Arriba)
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IndicadorBaza(),
+                                                    const SizedBox(width: 8),
+                                                    IndicadorBaza(),
+                                                  ],
                                                 ),
-                                          ),
-                                        ),
-                                      ),
 
-                                      // Indicadores Equipo 1 (Abajo)
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          _IndicadorBaza(),
-                                          const SizedBox(width: 8),
-                                          _IndicadorBaza(),
+                                                const SizedBox(height: 8),
+
+                                                // Valor de la Ronda
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 4,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.4),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          16,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: Colores.acento
+                                                          .withValues(
+                                                            alpha: 0.8,
+                                                          ),
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    "1", // Valor de la ronda
+                                                    style: EstilosTexto
+                                                        .tituloMedio
+                                                        .copyWith(
+                                                          color: Colores.acento,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 20,
+                                                        ),
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 8),
+
+                                                // Indicadores Equipo 1 (Abajo)
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IndicadorBaza(),
+                                                    const SizedBox(width: 8),
+                                                    IndicadorBaza(),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 18),
+
+                                          // Botón Cambiar
+                                          BotonMesa(
+                                            icon: Icons.change_circle,
+                                            label: TextoPartida.cambiar,
+                                            onTap: onCambiar ?? () {},
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -572,64 +607,5 @@ class _MesaPainter extends CustomPainter {
     return oldDelegate.gapWidth != gapWidth ||
         oldDelegate.colorFondo != colorFondo ||
         oldDelegate.colorBorde != colorBorde;
-  }
-}
-
-class _BotonMesa extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _BotonMesa({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colores.primario.withValues(alpha: 0.8),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colores.blanco54, width: 2),
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 10),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IndicadorBaza extends StatelessWidget {
-  const _IndicadorBaza();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 18,
-      height: 18,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(
-          color: Colores.blanco, // Siempre blanco
-          width: 2,
-        ),
-        shape: BoxShape.circle,
-      ),
-    );
   }
 }
