@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'carta_model.dart';
+import 'reglas_juego_model.dart';
 
 class Baraja {
   List<Carta> cartas = [];
@@ -19,7 +20,8 @@ class Baraja {
       for (var i = 1; i <= 12; i++) {
         if (i == 8 || i == 9) continue; // No hay 8 ni 9 en la baraja
 
-        final valor = _obtenerValor(i);
+        final valor =
+            0; // Inicialmente 0, se calcula dinámicamente según reglas
         final path = _obtenerRutaImagen(palo, prefijo, i);
 
         cartas.add(Carta(numero: i, palo: palo, valor: valor, foto: path));
@@ -27,21 +29,28 @@ class Baraja {
     }
   }
 
-  /// Devuelve el valor de la carta (As=11, 3=10, etc.)
-  int _obtenerValor(int numero) {
-    switch (numero) {
-      case 1:
-        return 11;
-      case 3:
-        return 10;
-      case 12: // Rey
-        return 4;
-      case 11: // Caballo
-        return 3;
-      case 10: // Sota
-        return 2;
-      default:
-        return 0;
+  /// Calcula y asigna los valores a una lista de cartas según las reglas actuales.
+  /// [cartas]: Lista de cartas a actualizar.
+  /// [paloMuestra]: Palo del triunfo.
+  /// [paloSalida]: Palo de salida de la baza actual.
+  /// [cantidadJugadores]: Para saber qué reglas aplicar (2, 4, 6).
+  static void calcularValores(
+    List<Carta> cartas,
+    String paloMuestra,
+    String? paloSalida,
+    int cantidadJugadores,
+  ) {
+    final reglas = ReglasFactory.obtenerReglas(cantidadJugadores);
+
+    for (var carta in cartas) {
+      carta.valor = reglas.calcularFuerza(carta, paloMuestra, paloSalida);
+    }
+  }
+
+  /// Reinicia el valor de todas las cartas a 0.
+  static void resetearValores(List<Carta> cartas) {
+    for (var carta in cartas) {
+      carta.valor = 0;
     }
   }
 

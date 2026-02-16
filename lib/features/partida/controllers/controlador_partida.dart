@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../models/usuario_model.dart';
+import '../../../models/carta_model.dart';
+
+import '../../../models/baraja_model.dart';
 import '../../../core/constantes/errores.dart';
 
 /// Controlador principal para la lógica de la partida.
@@ -241,13 +244,110 @@ class ControladorPartida {
     // Calcular siguiente turno
     int proximoTurno = (turnoActual % maxPlayers) + 1;
 
+    // Calcular fuerzas y determinar ganador
+    // 1. Contar cartas usadas para saber si empiezo baza
+    int cartasUsadas = 0;
+    if (val is Map) {
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final rondaDataAux = _safeMap(rondas[ronda]);
+      for (var i = 1; i <= maxPlayers; i++) {
+        final k = 'jugador $i';
+        if (rondaDataAux[k] is List) {
+          final mano = rondaDataAux[k] as List;
+          for (var c in mano) {
+            if (c is Map && c[_kKeyUsada] == true) {
+              cartasUsadas++;
+            }
+          }
+        }
+      }
+    }
+
+    bool inicioBaza = (cartasUsadas % maxPlayers == 0);
+
+    // 2. Preparar datos para reglas
+    final miCarta = Carta.fromMap(cartaData);
+
+    // Datos de la ronda actual
+    final rondaDataActual = (val is Map)
+        ? _safeMap(_safeMap(val['rondas'])[ronda])
+        : {};
+
+    final muestraData = _safeMap(rondaDataActual[_kKeyMuestra]);
+    final paloMuestra = _safeString(muestraData['palo']);
+
+    // Obtener palo de salida y carta ganadora actual
+    String? paloSalida = _safeString(rondaDataActual['palo_salida']);
+    if (paloSalida.isEmpty) paloSalida = null;
+
+    final cartaGanadoraMap = _safeMap(rondaDataActual[_kKeyCartaGanadora]);
+    Carta? cartaGanadora;
+    if (cartaGanadoraMap.isNotEmpty && cartaGanadoraMap['carta'] != null) {
+      cartaGanadora = Carta.fromMap(_safeMap(cartaGanadoraMap['carta']));
+    }
+
+    // 3. Lógica de inicio de baza vs continuación
+    String? nuevoPaloSalida;
+
+    if (inicioBaza) {
+      // Si empiezo baza, ignoro la carta ganadora anterior (visual)
+      // y establezco mi palo como salida.
+      cartaGanadora = null;
+      paloSalida = miCarta.palo;
+      nuevoPaloSalida = miCarta.palo;
+    } else {
+      // Si no hay palo salida registrado (legacy/error), asumimos el de la carta ganadora
+      if (paloSalida == null && cartaGanadora != null) {
+        paloSalida = cartaGanadora.palo;
+        nuevoPaloSalida = paloSalida;
+      }
+    }
+
+    // 4. Calcular ganador usando la lógica de Baraja (Eager Calculation)
+    bool yoGano = false;
+    if (cartaGanadora == null) {
+      yoGano = true;
+    } else {
+      // Creamos una lista temporal con las dos cartas en disputa para calcular sus valores
+      // en este contexto específico (misma muestra y mismo palo salida).
+      // Al ser objetos nuevos (creados por fromMap), no afecta a otros estados.
+      final cartasDisputa = [miCarta, cartaGanadora];
+
+      Baraja.calcularValores(
+        cartasDisputa,
+        paloMuestra,
+        paloSalida,
+        maxPlayers,
+      );
+
+      // Ahora miCarta.valor y cartaGanadora.valor tienen la fuerza calculada
+      if (miCarta.valor > cartaGanadora.valor) {
+        yoGano = true;
+      }
+    }
+
+    Map<String, dynamic>? datosNuevoGanador;
+    if (yoGano) {
+      // Determinar equipo
+      int numJugador = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
+      int equipo = (numJugador % 2 != 0) ? 1 : 2; // Impares eq 1, Pares eq 2
+
+      datosNuevoGanador = {
+        'carta': cartaData,
+        'jugador': miKey,
+        'equipo': equipo,
+      };
+    }
+
     await _servicio.jugarCarta(
       sessionId: idPartida,
-      rondaId: ronda,
+      rondaId: ronda, // Removed '!' as it's promoted
       jugadorKey: miKey,
       cartaIndex: cartaIndex,
       cartaData: cartaData,
       nuevoTurno: proximoTurno,
+      cartaGanadoraData: datosNuevoGanador,
+      paloSalida: nuevoPaloSalida,
     );
 
     // --- LÓGICA DE FIN DE RONDA ---

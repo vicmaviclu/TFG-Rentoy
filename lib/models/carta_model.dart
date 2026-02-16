@@ -1,7 +1,7 @@
 class Carta {
   final int numero;
   final String palo;
-  final int valor;
+  int valor; 
   final String foto;
   bool usada;
 
@@ -25,19 +25,8 @@ class Carta {
     final String palo = map['palo']?.toString() ?? '';
     final bool usada = map['usada'] == true;
 
-    // Reconstruir valor
-    int valor = 0;
-    if (numero == 1) {
-      valor = 11;
-    } else if (numero == 3) {
-      valor = 10;
-    } else if (numero == 12) {
-      valor = 4;
-    } else if (numero == 11) {
-      valor = 3;
-    } else if (numero == 10) {
-      valor = 2;
-    }
+    // Reconstruir valor mediante reglas de juego
+    int valor = (map['valor'] is int) ? map['valor'] : 0;
 
     // Reconstruir foto (todos png)
     final prefijo = palo.isNotEmpty ? palo[0] : '';

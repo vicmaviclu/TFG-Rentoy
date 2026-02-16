@@ -400,7 +400,7 @@ class ServicioRealtime {
     }
   }
 
-  /// Juega una carta: marca usada, actualiza carta ganadora, pasa turno.
+  /// Juega una carta: marca usada, actualiza carta ganadora (si se pasa), pasa turno.
   Future<void> jugarCarta({
     required String sessionId,
     required String rondaId,
@@ -408,6 +408,10 @@ class ServicioRealtime {
     required int cartaIndex,
     required Map<String, dynamic> cartaData,
     required int nuevoTurno,
+    Map<String, dynamic>?
+    cartaGanadoraData, // Opcional: Si es null, no se cambia
+    String?
+    paloSalida, // Opcional: Si se pasa, se guarda como palo de salida de la baza
   }) async {
     final ref = referenciaSesion(sessionId);
 
@@ -417,20 +421,23 @@ class ServicioRealtime {
 
     final turnoPath = 'rondas/$rondaId/turno';
 
-    // Guardar info completa de la carta ganadora
-    final dataGanadora = {
-      'carta': cartaData,
-      'jugador': jugadorKey,
-      'equipo': (jugadorKey == 'jugador 1' || jugadorKey == 'jugador 3')
-          ? 1
-          : 2,
-    };
+    final updates = <String, dynamic>{cardPath: true, turnoPath: nuevoTurno};
 
-    await ref.update({
-      cardPath: true,
-      winningPath: dataGanadora,
-      turnoPath: nuevoTurno,
-    });
+    if (cartaGanadoraData != null) {
+      // Guardar info completa de la carta ganadora
+      final dataGanadora = {
+        'carta': cartaGanadoraData['carta'], // La carta que gana
+        'jugador': cartaGanadoraData['jugador'], // El jugador que la tiró
+        'equipo': cartaGanadoraData['equipo'],
+      };
+      updates[winningPath] = dataGanadora;
+    }
+
+    if (paloSalida != null) {
+      updates['rondas/$rondaId/palo_salida'] = paloSalida;
+    }
+
+    await ref.update(updates);
   }
 
   /// Limpia la mesa

@@ -253,7 +253,7 @@ class _VistaPartida extends StatelessWidget {
     final mostrarBoton = esMiTurno && cartaSeleccionadaIndex != null;
 
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double alturaCarta = (screenHeight * 0.20).clamp(100.0, 220.0);
+    final double alturaCarta = (screenHeight * 0.19).clamp(100.0, 220.0);
 
     return Column(
       children: [
