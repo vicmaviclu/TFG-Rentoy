@@ -23,9 +23,16 @@ class TableroPuntos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool esPantallaPequena = screenWidth < 400;
+    final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
+
     // --- CONTENEDOR PRINCIPAL DEL MARCADOR ---
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: esPantallaPequena ? 12 : (esPantallaIntermedia ? 16 : 24),
+        vertical: esPantallaPequena ? 8 : (esPantallaIntermedia ? 10 : 12),
+      ),
       decoration: BoxDecoration(
         color: Colores.primarioOscuro.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(20),
@@ -40,7 +47,7 @@ class TableroPuntos extends StatelessWidget {
             puntos: puntosEquipo1,
             color: Colores.acento,
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: esPantallaPequena ? 8 : 16),
           // Objetivo de puntos para ganar
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -56,11 +63,14 @@ class TableroPuntos extends StatelessWidget {
                 "$objetivo",
                 style: EstilosTexto.tituloPequeno.copyWith(
                   color: Colores.blanco,
+                  fontSize: esPantallaPequena
+                      ? 12
+                      : (esPantallaIntermedia ? 13 : 14), // Adjust size
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: esPantallaPequena ? 8 : 16),
           // Puntos del Equipo 2
           _PuntosEquipo(
             nombre: TextoPartida.equipo2,

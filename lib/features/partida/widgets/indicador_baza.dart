@@ -6,9 +6,16 @@ class IndicadorBaza extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool esPantallaPequena = screenWidth < 400;
+    final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
+    final double size = esPantallaPequena
+        ? 14
+        : (esPantallaIntermedia ? 16 : 18);
+
     return Container(
-      width: 18,
-      height: 18,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border.all(

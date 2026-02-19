@@ -41,8 +41,15 @@ class AvatarJugadorPartida extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool esPantallaPequena = screenWidth < 400;
+    final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
+
     // --- AVATAR DEL JUGADOR ---
-    final double tamanoAvatar = (alturaCarta * 0.45).clamp(40.0, 65.0);
+    final double tamanoAvatar = (alturaCarta * 0.45).clamp(
+      esPantallaPequena ? 30.0 : (esPantallaIntermedia ? 35.0 : 40.0),
+      esPantallaPequena ? 65.0 : (esPantallaIntermedia ? 80.0 : 90.0),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -252,8 +252,22 @@ class _VistaPartida extends StatelessWidget {
 
     final mostrarBoton = esMiTurno && cartaSeleccionadaIndex != null;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool esPantallaPequena = screenWidth < 400;
+    final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
+
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double alturaCarta = (screenHeight * 0.19).clamp(100.0, 220.0);
+    final double alturaCarta =
+        (screenHeight *
+                (esPantallaPequena
+                    ? 0.15
+                    : (esPantallaIntermedia ? 0.16 : 0.18)))
+            .clamp(
+              esPantallaPequena ? 80.0 : (esPantallaIntermedia ? 90.0 : 100.0),
+              esPantallaPequena
+                  ? 120.0
+                  : (esPantallaIntermedia ? 135.0 : 150.0),
+            );
 
     return Column(
       children: [
@@ -300,6 +314,7 @@ class _VistaPartida extends StatelessWidget {
                   mostrarBotonLanzar: mostrarBoton,
                   onLanzar: onLanzarCarta,
                   onCambiar: onCambiarCartas,
+                  alturaCarta: alturaCarta,
                 ),
               ),
             ),
