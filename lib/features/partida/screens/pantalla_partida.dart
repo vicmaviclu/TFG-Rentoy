@@ -256,6 +256,14 @@ class _VistaPartida extends StatelessWidget {
     final bool esPantallaPequena = screenWidth < 400;
     final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
 
+    // Extract Turno actual and Bazas ganadas (Refactored logic to ControladorPartida)
+    int turnoActual = controlador.obtenerTurnoActual(datosPartida);
+    Map<String, int> bazasGanadas = controlador.obtenerBazasGanadas(
+      datosPartida,
+    );
+    int bazasEq1 = bazasGanadas['equipo1'] ?? 0;
+    int bazasEq2 = bazasGanadas['equipo2'] ?? 0;
+
     final double screenHeight = MediaQuery.of(context).size.height;
     final double alturaCarta =
         (screenHeight *
@@ -287,7 +295,7 @@ class _VistaPartida extends StatelessWidget {
                 miUid: miUid,
                 cartaSeleccionadaIndex: null,
                 onSeleccionar: null,
-                esMiTurno: false,
+                turnoActual: turnoActual,
                 alturaCarta: alturaCarta,
               ),
             ],
@@ -315,6 +323,9 @@ class _VistaPartida extends StatelessWidget {
                   onLanzar: onLanzarCarta,
                   onCambiar: onCambiarCartas,
                   alturaCarta: alturaCarta,
+                  bazasEquipo1: bazasEq1,
+                  bazasEquipo2: bazasEq2,
+                  soyEquipo1: soyEquipo1,
                 ),
               ),
             ),
@@ -332,7 +343,7 @@ class _VistaPartida extends StatelessWidget {
                 miUid: miUid,
                 cartaSeleccionadaIndex: cartaSeleccionadaIndex,
                 onSeleccionar: onSeleccionarCarta,
-                esMiTurno: esMiTurno,
+                turnoActual: turnoActual,
                 alturaCarta: alturaCarta,
                 ocultarCartas: ocultarCartas,
               ),

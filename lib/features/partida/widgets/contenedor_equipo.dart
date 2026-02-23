@@ -16,8 +16,8 @@ class ContenedorEquipo extends StatelessWidget {
   /// Función para seleccionar carta
   final Function(int)? onSeleccionar;
 
-  /// Si es el turno del jugador
-  final bool esMiTurno;
+  /// Turno de la partida actual
+  final int turnoActual;
 
   /// Altura deseada para las cartas
   final double alturaCarta;
@@ -31,7 +31,7 @@ class ContenedorEquipo extends StatelessWidget {
     required this.miUid,
     this.cartaSeleccionadaIndex,
     this.onSeleccionar,
-    this.esMiTurno = false,
+    this.turnoActual = 1,
     this.alturaCarta = 120.0,
     this.ocultarCartas = false,
   });
@@ -50,7 +50,9 @@ class ContenedorEquipo extends StatelessWidget {
             esMiJugador: usuario.uid == miUid,
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
             onSeleccionar: onSeleccionar,
-            esMiTurno: esMiTurno,
+            esSuTurno: usuario.esSuTurno(turnoActual),
+            esMiTurnoPropio:
+                (usuario.uid == miUid) && usuario.esSuTurno(turnoActual),
             alturaCarta: alturaCarta,
             ocultarCartas: ocultarCartas,
           ),

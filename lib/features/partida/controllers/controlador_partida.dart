@@ -94,6 +94,7 @@ class ControladorPartida {
               nombreUsuario: v,
               avatar: 1,
               mano: manoRaw,
+              keyJugador: clave,
             ),
           );
         } else if (v is Map) {
@@ -104,6 +105,7 @@ class ControladorPartida {
               nombreUsuario: _safeString(v[_kKeyName]),
               avatar: _safeInt(v[_kKeyAvatar], 1),
               mano: manoRaw,
+              keyJugador: clave,
             ),
           );
         }
@@ -264,6 +266,7 @@ class ControladorPartida {
     }
 
     bool inicioBaza = (cartasUsadas % maxPlayers == 0);
+    bool finDeBaza = (cartasUsadas % maxPlayers == maxPlayers - 1);
 
     // 2. Preparar datos para reglas
     final miCarta = Carta.fromMap(cartaData);
@@ -296,7 +299,7 @@ class ControladorPartida {
       paloSalida = miCarta.palo;
       nuevoPaloSalida = miCarta.palo;
     } else {
-      // Si no hay palo salida registrado (legacy/error), asumimos el de la carta ganadora
+      // Si no hay palo salida registrado, asumimos el de la carta ganadora
       if (paloSalida == null && cartaGanadora != null) {
         paloSalida = cartaGanadora.palo;
         nuevoPaloSalida = paloSalida;
@@ -309,8 +312,7 @@ class ControladorPartida {
       yoGano = true;
     } else {
       // Creamos una lista temporal con las dos cartas en disputa para calcular sus valores
-      // en este contexto específico (misma muestra y mismo palo salida).
-      // Al ser objetos nuevos (creados por fromMap), no afecta a otros estados.
+      // en este contexto específico.
       final cartasDisputa = [miCarta, cartaGanadora];
 
       Baraja.calcularValores(
@@ -320,7 +322,6 @@ class ControladorPartida {
         maxPlayers,
       );
 
-      // Ahora miCarta.valor y cartaGanadora.valor tienen la fuerza calculada
       if (miCarta.valor > cartaGanadora.valor) {
         yoGano = true;
       }
@@ -339,15 +340,36 @@ class ControladorPartida {
       };
     }
 
+    String? ganadorBazaKey;
+    int? numBaza;
+    if (finDeBaza) {
+      if (yoGano) {
+        ganadorBazaKey = miKey;
+        proximoTurno =
+            int.tryParse(miKey.replaceAll('jugador ', '')) ?? proximoTurno;
+      } else if (cartaGanadoraMap.isNotEmpty &&
+          cartaGanadoraMap['jugador'] != null) {
+        ganadorBazaKey = cartaGanadoraMap['jugador'].toString();
+        proximoTurno =
+            int.tryParse(ganadorBazaKey.replaceAll('jugador ', '')) ??
+            proximoTurno;
+      } else {
+        ganadorBazaKey = miKey;
+      }
+      numBaza = (cartasUsadas ~/ maxPlayers) + 1;
+    }
+
     await _servicio.jugarCarta(
       sessionId: idPartida,
-      rondaId: ronda, // Removed '!' as it's promoted
+      rondaId: ronda,
       jugadorKey: miKey,
       cartaIndex: cartaIndex,
       cartaData: cartaData,
       nuevoTurno: proximoTurno,
       cartaGanadoraData: datosNuevoGanador,
       paloSalida: nuevoPaloSalida,
+      ganadorBazaKey: ganadorBazaKey,
+      numBaza: numBaza,
     );
 
     // --- LÓGICA DE FIN DE RONDA ---
@@ -376,16 +398,14 @@ class ControladorPartida {
     final totalCartas = maxPlayers * 3;
     if (cartasJugadas >= totalCartas) {
       // FIN DE RONDA
-      // 1. Obtener carta ganadora de la última baza (ya grabada en jugarCarta)
+      // 1. Obtener carta ganadora de la última baza
       final cg = _safeMap(rondaData[_kKeyCartaGanadora]);
       int equipoGanador = 0;
       if (cg.isNotEmpty && cg['equipo'] is int) {
         equipoGanador = cg['equipo'];
       }
 
-      // 2. Calcular puntos (ej. 1 punto por ganar la ronda)
-      // Ojo: Aquí deberíamos sumar puntaje real de las cartas, pero por ahora simplificado.
-      // Leemos puntos actuales de la ronda
+      // 2. Calcular puntos
       int puntosRonda = _safeInt(rondaData[_kKeyPuntos], 1);
 
       // Leemos puntos globales
@@ -422,11 +442,14 @@ class ControladorPartida {
       } else {
         // 3. Iniciar siguiente ronda
         final proxRonda = int.parse(ronda) + 1;
+        int turnoInicialProxRonda = ((proxRonda - 1) % maxPlayers) + 1;
+
         await _servicio.iniciarSiguienteRonda(
           sessionId: idPartida,
           proximaRonda: proxRonda,
           maxJugadores: maxPlayers,
           nuevosPuntos: {_kKeyEquipo1: p1, _kKeyEquipo2: p2},
+          turnoInicial: turnoInicialProxRonda,
         );
       }
     }
@@ -457,7 +480,6 @@ class ControladorPartida {
     // Determinar qué equipo va abajo (mi equipo)
     bool soyEquipo1 = (miIndice != -1 && miIndice % 2 == 0);
 
-    // Si no me encuentro (espectador o error), defecto Equipo 1 abajo
     return {
       'abajo': soyEquipo1 ? equipo1 : equipo2,
       'arriba': soyEquipo1 ? equipo2 : equipo1,
@@ -479,5 +501,62 @@ class ControladorPartida {
     if (miKey == null) return false;
     final miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
     return miNumero == turnoActual;
+  }
+
+  /// Extrae el turno actual de los datos de la partida
+  int obtenerTurnoActual(Map datosPartida) {
+    if (datosPartida['rondas'] is Map) {
+      final rondas = datosPartida['rondas'];
+      final actual = rondas['actual'];
+      if (actual != null && rondas[actual.toString()] is Map) {
+        return rondas[actual.toString()]['turno'] ?? 1;
+      }
+    }
+    return 1;
+  }
+
+  /// Extrae las bazas ganadas por cada equipo en la ronda actual
+  Map<String, int> obtenerBazasGanadas(Map datosPartida) {
+    int bazasEq1 = 0;
+    int bazasEq2 = 0;
+
+    if (datosPartida['rondas'] is Map) {
+      final rondas = datosPartida['rondas'];
+      final actual = rondas['actual'];
+      if (actual != null && rondas[actual.toString()] is Map) {
+        final rondaActualData = rondas[actual.toString()];
+
+        if (rondaActualData['bazas_ganadas'] is Map) {
+          final bazas = rondaActualData['bazas_ganadas'] as Map;
+          bazas.forEach((key, ganadorKey) {
+            String ganadorStr = ganadorKey.toString();
+            int numJugador =
+                int.tryParse(ganadorStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+            int equipo = (numJugador % 2 != 0)
+                ? 1
+                : 2; // Impares eq 1, Pares eq 2
+
+            if (equipo == 1) {
+              bazasEq1++;
+            } else {
+              bazasEq2++;
+            }
+          });
+        }
+      }
+    }
+    return {'equipo1': bazasEq1, 'equipo2': bazasEq2};
+  }
+
+  /// Método para saber si es el turno de un jugador usando su keyJugador (ej: 'jugador 1')
+  bool esTurnoDeJugador(UsuarioModel usuario, int turnoActual) {
+    if (usuario.keyJugador == null) return false;
+    int? numeroJugador = int.tryParse(
+      usuario.keyJugador!.replaceAll(RegExp(r'[^0-9]'), ''),
+    );
+    if (numeroJugador != null) {
+      return numeroJugador == turnoActual;
+    }
+    return false;
   }
 }

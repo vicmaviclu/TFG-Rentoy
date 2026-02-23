@@ -19,8 +19,11 @@ class AvatarJugadorPartida extends StatelessWidget {
   /// Callback cuando se selecciona una carta
   final Function(int)? onSeleccionar;
 
-  /// Indica si es el turno del jugador
-  final bool esMiTurno;
+  /// Indica si es el turno del jugador (para bordes del avatar)
+  final bool esSuTurno;
+
+  /// Indica si es el turno del jugador Y es el usuario actual (para las cartas)
+  final bool esMiTurnoPropio;
 
   /// Altura deseada para las cartas
   final double alturaCarta;
@@ -34,7 +37,8 @@ class AvatarJugadorPartida extends StatelessWidget {
     this.esMiJugador = false,
     this.cartaSeleccionadaIndex,
     this.onSeleccionar,
-    this.esMiTurno = false,
+    this.esSuTurno = false,
+    this.esMiTurnoPropio = false,
     this.alturaCarta = 120.0,
     this.ocultarCartas = false,
   });
@@ -60,7 +64,7 @@ class AvatarJugadorPartida extends StatelessWidget {
             mano: jugador.mano!,
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
             onSeleccionar: onSeleccionar ?? (i) {},
-            esTuTurno: esMiTurno,
+            esTuTurno: esMiTurnoPropio,
             alturaCarta: alturaCarta,
             ocultas: ocultarCartas,
           ),
@@ -78,6 +82,9 @@ class AvatarJugadorPartida extends StatelessWidget {
                 ? Colores.secundario.withValues(alpha: 0.2)
                 : Colores.blanco12,
             borderRadius: BorderRadius.circular(12),
+            border: esSuTurno
+                ? Border.all(color: Colores.acento, width: 3)
+                : null,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),

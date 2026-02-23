@@ -22,8 +22,16 @@ class MesaJuego extends StatelessWidget {
   /// Callback cuando se presiona el botón de lanzar
   final VoidCallback? onLanzar;
 
-  /// Callback cuando se presiona el botón de cambiar
   final VoidCallback? onCambiar;
+
+  /// Cuántas bazas ha ganado el Equipo 1
+  final int bazasEquipo1;
+
+  /// Cuántas bazas ha ganado el Equipo 2
+  final int bazasEquipo2;
+
+  /// Si el jugador actual es del Equipo 1
+  final bool soyEquipo1;
 
   const MesaJuego({
     super.key,
@@ -33,6 +41,9 @@ class MesaJuego extends StatelessWidget {
     this.onLanzar,
     this.onCambiar,
     this.alturaCarta,
+    this.bazasEquipo1 = 0,
+    this.bazasEquipo2 = 0,
+    this.soyEquipo1 = true,
   });
 
   /// Altura de referencia para las cartas (misma que en la mano)
@@ -490,13 +501,21 @@ class MesaJuego extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Indicadores Equipo 2 (Arriba)
+                      // Indicadores Equipo Rival (Arriba)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IndicadorBaza(),
+                          IndicadorBaza(
+                            ganada: soyEquipo1
+                                ? bazasEquipo2 >= 1
+                                : bazasEquipo1 >= 1,
+                          ),
                           const SizedBox(width: 8),
-                          IndicadorBaza(),
+                          IndicadorBaza(
+                            ganada: soyEquipo1
+                                ? bazasEquipo2 >= 2
+                                : bazasEquipo1 >= 2,
+                          ),
                         ],
                       ),
 
@@ -530,13 +549,21 @@ class MesaJuego extends StatelessWidget {
 
                       const SizedBox(height: 8),
 
-                      // Indicadores Equipo 1 (Abajo)
+                      // Indicadores Mi Equipo (Abajo)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IndicadorBaza(),
+                          IndicadorBaza(
+                            ganada: soyEquipo1
+                                ? bazasEquipo1 >= 1
+                                : bazasEquipo2 >= 1,
+                          ),
                           const SizedBox(width: 8),
-                          IndicadorBaza(),
+                          IndicadorBaza(
+                            ganada: soyEquipo1
+                                ? bazasEquipo1 >= 2
+                                : bazasEquipo2 >= 2,
+                          ),
                         ],
                       ),
                     ],

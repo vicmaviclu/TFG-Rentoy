@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../core/constantes/colores.dart';
 
 class IndicadorBaza extends StatelessWidget {
-  const IndicadorBaza({super.key});
+  final bool ganada;
+
+  const IndicadorBaza({super.key, this.ganada = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +19,9 @@ class IndicadorBaza extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.transparent,
+        color: ganada ? Colores.acento : Colors.transparent,
         border: Border.all(
-          color: Colores.blanco, // Siempre blanco
+          color: ganada ? Colores.acento : Colores.blanco,
           width: 2,
         ),
         shape: BoxShape.circle,

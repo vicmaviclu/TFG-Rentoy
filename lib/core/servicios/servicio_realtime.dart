@@ -412,6 +412,8 @@ class ServicioRealtime {
     cartaGanadoraData, // Opcional: Si es null, no se cambia
     String?
     paloSalida, // Opcional: Si se pasa, se guarda como palo de salida de la baza
+    String? ganadorBazaKey,
+    int? numBaza,
   }) async {
     final ref = referenciaSesion(sessionId);
 
@@ -435,6 +437,10 @@ class ServicioRealtime {
 
     if (paloSalida != null) {
       updates['rondas/$rondaId/palo_salida'] = paloSalida;
+    }
+
+    if (ganadorBazaKey != null && numBaza != null) {
+      updates['rondas/$rondaId/bazas_ganadas/baza$numBaza'] = ganadorBazaKey;
     }
 
     await ref.update(updates);
@@ -470,6 +476,7 @@ class ServicioRealtime {
     required int proximaRonda,
     required int maxJugadores,
     required Map<String, int> nuevosPuntos, // { 'equipo1': x, 'equipo2': y }
+    int turnoInicial = 1,
   }) async {
     // 1. Generar nueva baraja y repartir
     final baraja = Baraja();
@@ -499,7 +506,7 @@ class ServicioRealtime {
     final updates = <String, dynamic>{
       'rondas/actual': proximaRonda,
       'rondas/$proximaRonda/puntos': 1, // Puntos base de la nueva ronda
-      'rondas/$proximaRonda/turno': 1, // Reset turno
+      'rondas/$proximaRonda/turno': turnoInicial, // Turno inicial calculado
       // Actualizar marcadores globales
       'puntos/equipo1': nuevosPuntos['equipo1'],
       'puntos/equipo2': nuevosPuntos['equipo2'],

@@ -7,6 +7,7 @@ class UsuarioModel {
   final int avatar;
   final DateTime? fechaCreacion;
   final List<dynamic>? mano;
+  final String? keyJugador;
 
   UsuarioModel({
     required this.uid,
@@ -15,6 +16,7 @@ class UsuarioModel {
     required this.avatar,
     this.fechaCreacion,
     this.mano,
+    this.keyJugador,
   });
 
   /// Crea una copia del modelo con campos modificados
@@ -24,6 +26,7 @@ class UsuarioModel {
     String? nombreUsuario,
     int? avatar,
     DateTime? fechaCreacion,
+    String? keyJugador,
   }) {
     return UsuarioModel(
       uid: uid ?? this.uid,
@@ -32,7 +35,20 @@ class UsuarioModel {
       avatar: avatar ?? this.avatar,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       mano: mano ?? mano,
+      keyJugador: keyJugador ?? this.keyJugador,
     );
+  }
+
+  /// Método para saber si es el turno de un jugador usando su keyJugador (ej: 'jugador 1')
+  bool esSuTurno(int turnoActual) {
+    if (keyJugador == null) return false;
+    int? numeroJugador = int.tryParse(
+      keyJugador!.replaceAll(RegExp(r'[^0-9]'), ''),
+    );
+    if (numeroJugador != null) {
+      return numeroJugador == turnoActual;
+    }
+    return false;
   }
 
   /// Convierte un Map de Firestore a UsuarioModel.
