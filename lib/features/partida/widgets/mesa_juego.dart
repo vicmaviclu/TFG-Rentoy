@@ -23,6 +23,7 @@ class MesaJuego extends StatelessWidget {
   final VoidCallback? onLanzar;
 
   final VoidCallback? onCambiar;
+  final VoidCallback? onCantar;
 
   /// Cuántas bazas ha ganado el Equipo 1
   final int bazasEquipo1;
@@ -40,6 +41,7 @@ class MesaJuego extends StatelessWidget {
     this.mostrarBotonLanzar = false,
     this.onLanzar,
     this.onCambiar,
+    this.onCantar,
     this.alturaCarta,
     this.bazasEquipo1 = 0,
     this.bazasEquipo2 = 0,
@@ -490,7 +492,7 @@ class MesaJuego extends StatelessWidget {
                 BotonMesa(
                   icon: Icons.mic,
                   label: TextoPartida.cantar,
-                  onTap: () {},
+                  onTap: onCantar ?? () {},
                 ),
 
                 SizedBox(width: esMuyAlta ? 40 : (esPantallaPequena ? 4 : 18)),

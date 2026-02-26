@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../core/widgets/pagina_fondo.dart';
 import '../../partida/controllers/controlador_partida.dart';
-import '../../partida/widgets/contenedor_equipo.dart';
-import '../../partida/widgets/mesa_juego.dart';
 import '../../../models/usuario_model.dart';
-import '../../../core/constantes/textos.dart';
+import '../widgets/overlay_envite.dart';
 import 'pantalla_fin_partida.dart';
-import '../widgets/tablero_puntos.dart';
-
+import '../widgets/vista_partida.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 /// Pantalla principal del juego donde se desarrolla la partida.
@@ -39,6 +35,7 @@ class _PantallaPartidaState extends State<PantallaPartida> {
   int? _cartaSeleccionadaIndex;
   bool _navegandoAFin = false;
   bool _ocultarCartas = false;
+  bool _envitePendienteLocal = false;
 
   @override
   void initState() {
@@ -73,6 +70,9 @@ class _PantallaPartidaState extends State<PantallaPartida> {
   void _ejecutarLanzamiento() {
     if (_cartaSeleccionadaIndex == null) return;
 
+    // Bloquear si hay envite
+    if (_envitePendienteLocal) return;
+
     _controlador
         .jugarCarta(widget.idSesion, _cartaSeleccionadaIndex!)
         .then((_) {
@@ -91,7 +91,6 @@ class _PantallaPartidaState extends State<PantallaPartida> {
         });
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     // --- LAYOUT PRINCIPAL CON FONDO ---
@@ -134,22 +133,143 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                       _gestionarNavegacionFinPartida(val, jugadores);
                     }
 
-                    return _VistaPartida(
-                      jugadores: jugadores,
-                      miUid: _miUid,
-                      esMiTurno: esMiTurno,
-                      cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
-                      ocultarCartas: _ocultarCartas,
-                      datosPartida: (val is Map) ? val : {},
-                      controlador: _controlador,
-                      idSesion: widget.idSesion,
-                      onSeleccionarCarta: _onSeleccionarCarta,
-                      onLanzarCarta: _ejecutarLanzamiento,
-                      onCambiarCartas: () {
-                        setState(() {
-                          _ocultarCartas = !_ocultarCartas;
-                        });
-                      },
+                    final datosPartida = (val is Map) ? val : {};
+
+                    // --- LÓGICA DE BLOQUEO POR ENVITE ---
+                    Map? enviteData;
+                    int puntosActuales = 1;
+                    if (datosPartida['rondas'] is Map) {
+                      final rondas = datosPartida['rondas'] as Map;
+                      final actual = rondas['actual'];
+                      if (actual != null && rondas[actual.toString()] is Map) {
+                        final rondaData = rondas[actual.toString()] as Map;
+                        enviteData = rondaData['envite'] as Map?;
+                        puntosActuales = (rondaData['puntos'] as int?) ?? 1;
+                      }
+                    }
+
+                    final envitePendiente =
+                        enviteData != null &&
+                        enviteData['estado'] == 'pendiente';
+                    final respondoYo =
+                        envitePendiente &&
+                        enviteData['quien_responde'] == _miKey;
+
+                    // Comprobar la alternancia de cantos
+                    int? ultimoEquipoCanto;
+                    if (datosPartida['rondas'] is Map) {
+                      final rondas = datosPartida['rondas'] as Map;
+                      final actual = rondas['actual'];
+                      if (actual != null && rondas[actual.toString()] is Map) {
+                        final rondaData = rondas[actual.toString()] as Map;
+                        if (rondaData['ultimo_equipo_canto'] != null) {
+                          ultimoEquipoCanto =
+                              rondaData['ultimo_equipo_canto'] as int;
+                        }
+                      }
+                    }
+
+                    // Sincronizar estado local para el onSeleccionarCarta / _ejecutarLanzamiento
+                    _envitePendienteLocal = envitePendiente;
+
+                    bool soyEquipo1 = _controlador.soyEquipo1(
+                      jugadores,
+                      _miUid,
+                    );
+                    int miEquipo = soyEquipo1 ? 1 : 2;
+
+                    // Todos pueden cantar si es su turno.
+                    // el equipo 1 no puede volver a cantar hasta que cante el 2.
+
+                    void presionarCantar() {
+                      if (envitePendiente) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              TextoPartida.envitePendientePrecaucion,
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (!esMiTurno) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(TextoPartida.errorTurnoCantar),
+                          ),
+                        );
+                        return;
+                      }
+                      if (ultimoEquipoCanto == miEquipo) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(TextoPartida.errorEquipoYaCanto),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final messenger = ScaffoldMessenger.of(context);
+
+                      _controlador
+                          .cantar(widget.idSesion)
+                          .then((_) {
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(TextoPartida.enviteEnviado),
+                              ),
+                            );
+                          })
+                          .catchError((e) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "${ErroresPartida.errorCantar}$e",
+                                ),
+                              ),
+                            );
+                          });
+                    }
+
+                    return Stack(
+                      children: [
+                        VistaPartida(
+                          jugadores: jugadores,
+                          miUid: _miUid,
+                          esMiTurno: esMiTurno,
+                          cartaSeleccionadaIndex: _cartaSeleccionadaIndex,
+                          ocultarCartas: _ocultarCartas,
+                          datosPartida: datosPartida,
+                          controlador: _controlador,
+                          idSesion: widget.idSesion,
+                          onSeleccionarCarta: envitePendiente
+                              ? (i) {}
+                              : _onSeleccionarCarta,
+                          onLanzarCarta: envitePendiente
+                              ? () {}
+                              : _ejecutarLanzamiento,
+                          onCambiarCartas: () {
+                            setState(() {
+                              _ocultarCartas = !_ocultarCartas;
+                            });
+                          },
+                          onCantar: presionarCantar,
+                        ),
+
+                        // --- OVERLAY DE ENVITE ---
+                        if (respondoYo)
+                          OverlayEnvite(
+                            puntosActuales: puntosActuales,
+                            onReenviar: () => _controlador.responderCantar(
+                              widget.idSesion,
+                              false,
+                            ),
+                            onAceptar: () => _controlador.responderCantar(
+                              widget.idSesion,
+                              true,
+                            ),
+                          ),
+                      ],
                     );
                   },
                 );
@@ -196,169 +316,5 @@ class _PantallaPartidaState extends State<PantallaPartida> {
         );
       });
     }
-  }
-}
-
-class _VistaPartida extends StatelessWidget {
-  final List<UsuarioModel> jugadores;
-  final String miUid;
-  final bool esMiTurno;
-  final int? cartaSeleccionadaIndex;
-  final bool ocultarCartas;
-  final Map datosPartida;
-  final ControladorPartida controlador;
-  final String idSesion;
-  final Function(int) onSeleccionarCarta;
-  final VoidCallback onLanzarCarta;
-  final VoidCallback onCambiarCartas;
-
-  const _VistaPartida({
-    required this.jugadores,
-    required this.miUid,
-    required this.esMiTurno,
-    required this.cartaSeleccionadaIndex,
-    required this.ocultarCartas,
-    required this.datosPartida,
-    required this.controlador,
-    required this.idSesion,
-    required this.onSeleccionarCarta,
-    required this.onLanzarCarta,
-    required this.onCambiarCartas,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Organizar equipos
-    final equipos = controlador.organizarEquipos(jugadores, miUid);
-    final equipoAbajo = equipos['abajo']!;
-    final equipoArriba = equipos['arriba']!;
-    final soyEquipo1 = controlador.soyEquipo1(jugadores, miUid);
-
-    String tituloEquipoArriba = soyEquipo1
-        ? TextoPartida.equipo2
-        : TextoPartida.equipo1;
-    String tituloEquipoAbajo = soyEquipo1
-        ? TextoPartida.equipo1
-        : TextoPartida.equipo2;
-
-    // Puntos
-    int p1 = 0;
-    int p2 = 0;
-    if (datosPartida['puntos'] is Map) {
-      final pts = datosPartida['puntos'];
-      p1 = (pts['equipo1'] is int) ? pts['equipo1'] : 0;
-      p2 = (pts['equipo2'] is int) ? pts['equipo2'] : 0;
-    }
-
-    final mostrarBoton = esMiTurno && cartaSeleccionadaIndex != null;
-
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool esPantallaPequena = screenWidth < 400;
-    final bool esPantallaIntermedia = screenWidth >= 400 && screenWidth < 460;
-
-    // Extract Turno actual and Bazas ganadas (Refactored logic to ControladorPartida)
-    int turnoActual = controlador.obtenerTurnoActual(datosPartida);
-    Map<String, int> bazasGanadas = controlador.obtenerBazasGanadas(
-      datosPartida,
-    );
-    int bazasEq1 = bazasGanadas['equipo1'] ?? 0;
-    int bazasEq2 = bazasGanadas['equipo2'] ?? 0;
-
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double alturaCarta =
-        (screenHeight *
-                (esPantallaPequena
-                    ? 0.15
-                    : (esPantallaIntermedia ? 0.16 : 0.18)))
-            .clamp(
-              esPantallaPequena ? 80.0 : (esPantallaIntermedia ? 90.0 : 100.0),
-              esPantallaPequena
-                  ? 120.0
-                  : (esPantallaIntermedia ? 135.0 : 150.0),
-            );
-
-    return Column(
-      children: [
-        // --- EQUIPO RIVAL (ARRIBA) ---
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                tituloEquipoArriba,
-                style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
-              ),
-              const SizedBox(height: 4),
-              ContenedorEquipo(
-                jugadores: equipoArriba,
-                miUid: miUid,
-                cartaSeleccionadaIndex: null,
-                onSeleccionar: null,
-                turnoActual: turnoActual,
-                alturaCarta: alturaCarta,
-              ),
-            ],
-          ),
-        ),
-
-        // --- MARCADOR DE PUNTOS ---
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 0.0),
-          child: TableroPuntos(puntosEquipo1: p1, puntosEquipo2: p2),
-        ),
-
-        // --- MESA DE JUEGO (CENTRO) ---
-        Expanded(
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: screenHeight * 0.75),
-              child: SizedBox(
-                width: double.infinity,
-                child: MesaJuego(
-                  controlador: controlador,
-                  idSesion: idSesion,
-                  mostrarBotonLanzar: mostrarBoton,
-                  onLanzar: onLanzarCarta,
-                  onCambiar: onCambiarCartas,
-                  alturaCarta: alturaCarta,
-                  bazasEquipo1: bazasEq1,
-                  bazasEquipo2: bazasEq2,
-                  soyEquipo1: soyEquipo1,
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // --- MI EQUIPO (ABAJO) ---
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ContenedorEquipo(
-                jugadores: equipoAbajo,
-                miUid: miUid,
-                cartaSeleccionadaIndex: cartaSeleccionadaIndex,
-                onSeleccionar: onSeleccionarCarta,
-                turnoActual: turnoActual,
-                alturaCarta: alturaCarta,
-                ocultarCartas: ocultarCartas,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                tituloEquipoAbajo,
-                style: EstilosTexto.subtitulo.copyWith(
-                  color: Colores.secundario,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
   }
 }

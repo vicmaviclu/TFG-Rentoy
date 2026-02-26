@@ -53,15 +53,15 @@ abstract class ReglasJuego {
     // jerarquia.length = 10. Indice 0 (el mejor) -> 10 puntos. Indice 9 -> 1 punto.
     int index = jerarquia.indexOf(numero);
 
-    if (index == -1)
+    if (index == -1) {
       return 0; // Carta no encontrada en jerarquía estándar (error?)
+    }
 
     return jerarquia.length - index;
   }
 
   // --- MÉTODOS QUE PUEDEN SER SOBREESCRITOS POR ESTRATEGIAS ESPECÍFICAS ---
-  // Por ahora, implementamos la base común. Si hay variaciones en el futuro
-  // (como "solo varía una carta"), se pueden sobreescribir aquí o en las subclases.
+
 }
 
 /// Reglas para 2 jugadores.

@@ -104,6 +104,16 @@ class TextoPartida {
   static const String cambiar = 'Cambiar';
   static const String muestra = 'Muestra';
   static const String ronda = 'Ronda';
+
+  // Envites
+  static const String envitePendientePrecaucion = 'Ya hay un envite pendiente.';
+  static const String errorTurnoCantar = 'Solo puedes cantar en tu turno.';
+  static const String errorEquipoYaCanto =
+      'Tu equipo ya cantó. Debes esperar a que el rival cante.';
+  static const String enviteEnviado = 'Envite enviado.';
+  static const String tituloEnvite = '¡TE HAN CANTADO!';
+  static const String enviteSubeA = 'La ronda sube a ';
+  static const String btnReenviar = 'Reenviar';
 }
 
 /// Textos relacionados con el perfil de usuario.

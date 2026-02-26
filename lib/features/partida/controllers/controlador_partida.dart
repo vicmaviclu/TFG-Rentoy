@@ -148,6 +148,112 @@ class ControladorPartida {
     });
   }
 
+  /// Escucha el estado del envite de la ronda actual
+  Stream<Map<String, dynamic>> streamEnvite(String idPartida) {
+    return _servicio.streamSesion(idPartida).map((event) {
+      final val = event.snapshot.value;
+      if (val is! Map) return {};
+
+      final rondas = _safeMap(val[_kKeyRondas]);
+      final actual = rondas[_kKeyActual];
+      if (actual == null) return {};
+
+      final rondaData = _safeMap(rondas[actual.toString()]);
+      return _safeMap(rondaData['envite']);
+    });
+  }
+
+  /// Inicia un envite por primera vez en la ronda
+  Future<void> cantar(String idPartida) async {
+    final miKey = await obtenerMiKeyJugador(idPartida);
+    if (miKey == null) return;
+    final ronda = await obtenerRondaActual(idPartida);
+    if (ronda == null) return;
+
+    // Check session data for maxPlayers to find next
+    final event = await _servicio.streamSesion(idPartida).first;
+    final val = event.snapshot.value;
+    if (val is! Map) return;
+
+    // Server-side validation for double singing
+    final rondasInfo = _safeMap(val[_kKeyRondas]);
+    final rondaData = _safeMap(rondasInfo[ronda]);
+
+    int miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 1;
+    int equipo = (miNumero % 2 != 0) ? 1 : 2;
+
+    if (rondaData['ultimo_equipo_canto'] == equipo) {
+      // El equipo ya cantó, no puede volver a cantar dos veces seguidas
+      return;
+    }
+
+    final maxPlayers = _safeInt(val[_kKeyMaxJugadores], 4);
+    int siguienteNumero = (miNumero % maxPlayers) + 1;
+    String siguienteKey = 'jugador $siguienteNumero';
+
+    await _servicio.enviarEnvite(
+      sessionId: idPartida,
+      rondaId: ronda,
+      quienEnvia: miKey,
+      quienResponde: siguienteKey,
+      equipoEnvia: equipo,
+    );
+  }
+
+  /// Responde a un envite (aceptar o reenviar subiéndolo)
+  Future<void> responderCantar(String idPartida, bool aceptar) async {
+    final miKey = await obtenerMiKeyJugador(idPartida);
+    if (miKey == null) return;
+    final ronda = await obtenerRondaActual(idPartida);
+    if (ronda == null) return;
+
+    final event = await _servicio.streamSesion(idPartida).first;
+    final val = event.snapshot.value;
+    if (val is! Map) return;
+
+    final rondas = _safeMap(val[_kKeyRondas]);
+    final rondaData = _safeMap(rondas[ronda]);
+
+    final enviteData = _safeMap(rondaData['envite']);
+    if (enviteData.isEmpty || enviteData['estado'] != 'pendiente') return;
+
+    int puntosActuales = _safeInt(rondaData['puntos'], 1);
+    int nuevosPuntos = puntosActuales == 1 ? 3 : puntosActuales + 3;
+
+    if (aceptar) {
+      // Calcula puntos y envía respuesta
+      await _servicio.responderEnvite(
+        sessionId: idPartida,
+        rondaId: ronda,
+        aceptar: true,
+        nuevosPuntos: nuevosPuntos,
+      );
+    } else {
+      // Rechaza y reenvia el canto al jugador original
+      String quienEnviaOriginal = _safeString(enviteData['quien_envia']);
+
+      int miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 1;
+      int equipo = (miNumero % 2 != 0) ? 1 : 2;
+
+      // Actualiza puntos de la ronda
+      await _servicio.responderEnvite(
+        sessionId: idPartida,
+        rondaId: ronda,
+        aceptar: false,
+        nuevosPuntos: nuevosPuntos,
+      );
+
+      // Envía el nuevo envite de respuesta
+      await _servicio.enviarEnvite(
+        sessionId: idPartida,
+        rondaId: ronda,
+        quienEnvia: miKey,
+        quienResponde: quienEnviaOriginal,
+        equipoEnvia: equipo,
+      );
+    }
+  }
+
   /// Escucha el turno actual de la partida
   Stream<int> streamTurnoActual(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {

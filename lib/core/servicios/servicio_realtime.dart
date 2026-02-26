@@ -453,6 +453,68 @@ class ServicioRealtime {
     ).child('rondas/$rondaId/carta_ganadora').remove();
   }
 
+  // --- LÓGICA DE ENVITES (CANTAR) ---
+
+  /// Envía o reenvía un envite (canto)
+  Future<void> enviarEnvite({
+    required String sessionId,
+    required String rondaId,
+    required String quienEnvia,
+    required String quienResponde,
+    required int equipoEnvia,
+  }) async {
+    final ref = referenciaSesion(sessionId);
+    final envitePath = 'rondas/$rondaId/envite';
+    await ref.update({
+      '$envitePath/estado': 'pendiente',
+      '$envitePath/quien_envia': quienEnvia,
+      '$envitePath/quien_responde': quienResponde,
+      'rondas/$rondaId/ultimo_equipo_canto':
+          equipoEnvia, // Guardado a nivel de ronda
+    });
+  }
+
+  /// Responde a un envite (aceptar o rechazar)
+  Future<void> responderEnvite({
+    required String sessionId,
+    required String rondaId,
+    required bool aceptar,
+    int? nuevosPuntos,
+  }) async {
+    final ref = referenciaSesion(sessionId);
+    final updates = <String, dynamic>{};
+
+    if (aceptar) {
+      // Si acepta, se actualizan los puntos de la ronda y se limpia el envite
+      updates['rondas/$rondaId/envite'] = null;
+      if (nuevosPuntos != null) {
+        updates['rondas/$rondaId/puntos'] = nuevosPuntos;
+      }
+    } else {
+      // Reenviar es enviarEnvite, pero puede que queramos actualizar los puntos provisionales
+      updates['rondas/$rondaId/envite'] = null;
+      if (nuevosPuntos != null) {
+        updates['rondas/$rondaId/puntos'] = nuevosPuntos;
+      }
+    }
+
+    await ref.update(updates);
+  }
+
+  /// Escucha el estado del envite de la ronda actual
+  Stream<Map<String, dynamic>> streamEnvite(String sessionId, String rondaId) {
+    if (rondaId.isEmpty) return Stream.value({});
+    return referenciaSesion(
+      sessionId,
+    ).child('rondas/$rondaId/envite').onValue.map((event) {
+      final val = event.snapshot.value;
+      if (val != null && val is Map) {
+        return Map<String, dynamic>.from(val);
+      }
+      return {};
+    });
+  }
+
   /// Carta ganadora de la ronda actual
   Stream<Map<String, dynamic>> streamCartaGanadora(
     String sessionId,
@@ -507,6 +569,8 @@ class ServicioRealtime {
       'rondas/actual': proximaRonda,
       'rondas/$proximaRonda/puntos': 1, // Puntos base de la nueva ronda
       'rondas/$proximaRonda/turno': turnoInicial, // Turno inicial calculado
+      'rondas/$proximaRonda/ultimo_equipo_canto':
+          null, // Reseteo del equipo que cantó
       // Actualizar marcadores globales
       'puntos/equipo1': nuevosPuntos['equipo1'],
       'puntos/equipo2': nuevosPuntos['equipo2'],
