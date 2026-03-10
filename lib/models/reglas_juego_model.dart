@@ -4,12 +4,17 @@ import '../../../models/carta_model.dart';
 /// Permite variar la jerarquía de cartas según el número de jugadores (2, 4, 6).
 abstract class ReglasJuego {
   /// Jerarquía de cartas para el palo de triunfo (Muestra).
-  /// De mayor a menor fuerza.
-  static const List<int> _jerarquiaTriunfo = [2, 12, 11, 10, 1, 7, 6, 5, 4, 3];
+  /// De mayor a menor fuerza. (Por defecto 2 jugadores)
+  List<int> get jerarquiaTriunfo => [2, 12, 11, 10, 1, 7, 6, 5, 4, 3];
 
   /// Jerarquía de cartas para palos normales (No Muestra).
   /// De mayor a menor fuerza.
-  static const List<int> _jerarquiaNormal = [12, 11, 10, 1, 7, 6, 5, 4, 3, 2];
+  List<int> get jerarquiaNormal => [12, 11, 10, 1, 7, 6, 5, 4, 3, 2];
+
+  /// Retorna la fuerza adicional o null si no es especial.
+  int? getFuerzaCartaEspecial(Carta carta, String paloMuestra) {
+    return null; // Por defecto no hay cartas especiales (2 jugadores)
+  }
 
   /// Calcula la fuerza de una carta dada.
   ///
@@ -20,6 +25,12 @@ abstract class ReglasJuego {
   /// Retorna un valor entero representando la fuerza relativa.
   /// Mayor valor gana la baza.
   int calcularFuerza(Carta carta, String paloMuestra, String? paloSalida) {
+    // Si la carta es especial (tuerto, malilla, perica, pablo), retorna su fuerza especial asegurando que gane a todos
+    int? fuerzaEspecial = getFuerzaCartaEspecial(carta, paloMuestra);
+    if (fuerzaEspecial != null) {
+      return 300 + fuerzaEspecial;
+    }
+
     bool esTriunfo = carta.palo.toLowerCase() == paloMuestra.toLowerCase();
     bool esPaloSalida =
         paloSalida != null &&
@@ -46,7 +57,7 @@ abstract class ReglasJuego {
 
   /// Obtiene el puntaje por ranking (posición en la jerarquía)
   int _obtenerPuntajeRanking(int numero, bool esTriunfo) {
-    List<int> jerarquia = esTriunfo ? _jerarquiaTriunfo : _jerarquiaNormal;
+    List<int> jerarquia = esTriunfo ? jerarquiaTriunfo : jerarquiaNormal;
 
     // Buscamos el índice. Mientras menor sea el índice, mayor es la carta.
     // Invertimos el valor para que un índice bajo de un puntaje alto.
@@ -59,19 +70,45 @@ abstract class ReglasJuego {
 
     return jerarquia.length - index;
   }
-
-  // --- MÉTODOS QUE PUEDEN SER SOBREESCRITOS POR ESTRATEGIAS ESPECÍFICAS ---
-
 }
 
 /// Reglas para 2 jugadores.
 class ReglasDosJugadores extends ReglasJuego {}
 
 /// Reglas para 4 jugadores.
-class ReglasCuatroJugadores extends ReglasJuego {}
+class ReglasCuatroJugadores extends ReglasJuego {
+  @override
+  List<int> get jerarquiaTriunfo => [3, 2, 12, 11, 10, 1, 7, 6, 5, 4];
+
+  @override
+  int? getFuerzaCartaEspecial(Carta carta, String paloMuestra) {
+    // El 11 de Oros (Tuerto) es la mejor carta absoluta.
+    if (carta.numero == 11 && carta.palo.toLowerCase() == 'oros') {
+      return 100; // Total: 400
+    }
+    return null;
+  }
+}
 
 /// Reglas para 6 jugadores.
-class ReglasSeisJugadores extends ReglasJuego {}
+class ReglasSeisJugadores extends ReglasCuatroJugadores {
+  @override
+  int? getFuerzaCartaEspecial(Carta carta, String paloMuestra) {
+    // 10 de Oros (Perica) es la mejor
+    if (carta.numero == 10 && carta.palo.toLowerCase() == 'oros') {
+      return 100; // Total: 400
+    }
+    // 5 de Oros (Pablo) es la segunda mejor
+    if (carta.numero == 5 && carta.palo.toLowerCase() == 'oros') {
+      return 90; // Total: 390
+    }
+    // 11 de Oros (Tuerto) es la tercera mejor
+    if (carta.numero == 11 && carta.palo.toLowerCase() == 'oros') {
+      return 80; // Total: 380
+    }
+    return null;
+  }
+}
 
 /// Factory para obtener la regla correcta.
 class ReglasFactory {

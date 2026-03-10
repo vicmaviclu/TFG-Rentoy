@@ -71,5 +71,130 @@ void main() {
       Baraja.resetearValores([carta]);
       expect(carta.valor, equals(0));
     });
+
+    group('Reglas Específicas 2 Jugadores', () {
+      test('Tuerto (11 Oros) no es buena con en 2 jugadores', () {
+        final tuerto = crearCarta(11, 'Oros');
+        final reyOros = crearCarta(12, 'Oros'); // Rey de muestra
+        final paloMuestra = 'Oros';
+
+        Baraja.calcularValores([tuerto, reyOros], paloMuestra, 'Oros', 2);
+
+        // En 2 jugadores, el 11 de muestra vale menos que el 12 de muestra
+        expect(reyOros.valor, greaterThan(tuerto.valor));
+      });
+    });
+
+    group('Reglas Específicas 4 Jugadores', () {
+      test('Tuerto (11 Oros) es la mejor carta', () {
+        final tuerto = crearCarta(11, 'Oros');
+        final andorra = crearCarta(
+          3,
+          'Copas',
+        ); // Supongamos que Copas es muestra
+        final paloMuestra = 'Copas';
+
+        Baraja.calcularValores([tuerto, andorra], paloMuestra, 'Copas', 4);
+
+        expect(tuerto.valor, greaterThan(andorra.valor));
+      });
+
+      test('Falso Tuerto (11 de otro palo) no es buena carta', () {
+        final falsoTuerto = crearCarta(
+          11,
+          'Copas',
+        ); // Caballo de copas, no oros
+        final dosMuestra = crearCarta(2, 'Espadas'); // 2 de muestra
+        final paloMuestra = 'Espadas';
+
+        Baraja.calcularValores(
+          [falsoTuerto, dosMuestra],
+          paloMuestra,
+          'Espadas',
+          4,
+        );
+
+        // El 2 de muestra debe ganar al 11 de un palo normal
+        expect(dosMuestra.valor, greaterThan(falsoTuerto.valor));
+      });
+
+      test('Andorra (3 Muestra) gana a 2 y 12 Muestra', () {
+        final andorra = crearCarta(3, 'Espadas'); // Muestra
+        final dosMuestra = crearCarta(2, 'Espadas');
+        final reyMuestra = crearCarta(12, 'Espadas');
+        final paloMuestra = 'Espadas';
+
+        Baraja.calcularValores(
+          [andorra, dosMuestra, reyMuestra],
+          paloMuestra,
+          'Espadas',
+          4,
+        );
+
+        expect(andorra.valor, greaterThan(dosMuestra.valor));
+        expect(dosMuestra.valor, greaterThan(reyMuestra.valor));
+      });
+    });
+
+    group('Reglas Específicas 6 Jugadores', () {
+      test('Jerarquía de invencibles: Perica > Pablo > Tuerto > Andorra', () {
+        final perica = crearCarta(10, 'Oros');
+        final pablo = crearCarta(5, 'Oros');
+        final tuerto = crearCarta(11, 'Oros');
+        final andorra = crearCarta(3, 'Copas'); // Muestra
+        final paloMuestra = 'Copas';
+
+        Baraja.calcularValores(
+          [perica, pablo, tuerto, andorra],
+          paloMuestra,
+          'Copas',
+          6,
+        );
+
+        expect(perica.valor, greaterThan(pablo.valor));
+        expect(pablo.valor, greaterThan(tuerto.valor));
+        expect(tuerto.valor, greaterThan(andorra.valor));
+      });
+
+      test(
+        'Falsas cartas especiales de otros palos no son buenas cartas',
+        () {
+          final falsaPerica = crearCarta(10, 'Espadas'); // Sota de espadas
+          final falsoPablo = crearCarta(5, 'Copas'); // 5 de copas
+          final reyMuestra = crearCarta(12, 'Bastos'); // Rey de bastos, muestra
+          final paloMuestra = 'Bastos';
+
+          Baraja.calcularValores(
+            [falsaPerica, falsoPablo, reyMuestra],
+            paloMuestra,
+            'Bastos',
+            6,
+          );
+
+          // El rey de muestra gana a una sota y un 5 que no son de oros
+          expect(reyMuestra.valor, greaterThan(falsaPerica.valor));
+          expect(reyMuestra.valor, greaterThan(falsoPablo.valor));
+        },
+      );
+    });
+
+    group('Factory de Reglas', () {
+      test('Retorna instancias correctas implícitamente según jugadores', () {
+        final tresOros = crearCarta(3, 'Oros');
+        final dosOros = crearCarta(2, 'Oros');
+
+        // 2 jugadores: 2 gana a 3 (Jerarquía clásica)
+        Baraja.calcularValores([tresOros, dosOros], 'Oros', 'Oros', 2);
+        expect(dosOros.valor, greaterThan(tresOros.valor));
+
+        // 4 jugadores: 3 gana a 2 (Andorra > 2)
+        Baraja.calcularValores([tresOros, dosOros], 'Oros', 'Oros', 4);
+        expect(tresOros.valor, greaterThan(dosOros.valor));
+
+        // Parámetro no estándar (ej. 3) usa default que es 4 jugadores
+        Baraja.calcularValores([tresOros, dosOros], 'Oros', 'Oros', 3);
+        expect(tresOros.valor, greaterThan(dosOros.valor));
+      });
+    });
   });
 }
