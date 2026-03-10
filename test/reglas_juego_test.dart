@@ -156,26 +156,23 @@ void main() {
         expect(tuerto.valor, greaterThan(andorra.valor));
       });
 
-      test(
-        'Falsas cartas especiales de otros palos no son buenas cartas',
-        () {
-          final falsaPerica = crearCarta(10, 'Espadas'); // Sota de espadas
-          final falsoPablo = crearCarta(5, 'Copas'); // 5 de copas
-          final reyMuestra = crearCarta(12, 'Bastos'); // Rey de bastos, muestra
-          final paloMuestra = 'Bastos';
+      test('Falsas cartas especiales de otros palos no son buenas cartas', () {
+        final falsaPerica = crearCarta(10, 'Espadas'); // Sota de espadas
+        final falsoPablo = crearCarta(5, 'Copas'); // 5 de copas
+        final reyMuestra = crearCarta(12, 'Bastos'); // Rey de bastos, muestra
+        final paloMuestra = 'Bastos';
 
-          Baraja.calcularValores(
-            [falsaPerica, falsoPablo, reyMuestra],
-            paloMuestra,
-            'Bastos',
-            6,
-          );
+        Baraja.calcularValores(
+          [falsaPerica, falsoPablo, reyMuestra],
+          paloMuestra,
+          'Bastos',
+          6,
+        );
 
-          // El rey de muestra gana a una sota y un 5 que no son de oros
-          expect(reyMuestra.valor, greaterThan(falsaPerica.valor));
-          expect(reyMuestra.valor, greaterThan(falsoPablo.valor));
-        },
-      );
+        // El rey de muestra gana a una sota y un 5 que no son de oros
+        expect(reyMuestra.valor, greaterThan(falsaPerica.valor));
+        expect(reyMuestra.valor, greaterThan(falsoPablo.valor));
+      });
     });
 
     group('Factory de Reglas', () {
@@ -194,6 +191,30 @@ void main() {
         // Parámetro no estándar (ej. 3) usa default que es 4 jugadores
         Baraja.calcularValores([tresOros, dosOros], 'Oros', 'Oros', 3);
         expect(tresOros.valor, greaterThan(dosOros.valor));
+      });
+    });
+
+    group('Reglas Personalizadas', () {
+      test('Jerarquía personalizada se respeta sobre la por defecto', () {
+        final tresOros = crearCarta(3, 'Oros'); // Muestra
+        final tuerto = crearCarta(11, 'Oros'); // Tuerto natural
+        final dosOros = crearCarta(2, 'Oros'); // Muestra
+
+        // Configuración donde el 3 es lo mejor (rango 1) y el tuerto es rango 2
+        final reglasCustom = {'3_muestra': 1, '11_oros': 2, '2_muestra': 3};
+
+        // En 4 jugadores por defecto Tuerto > 3 > 2
+        // Pero con custom: 3 > Tuerto > 2
+        Baraja.calcularValores(
+          [tresOros, tuerto, dosOros],
+          'Oros',
+          'Oros',
+          4,
+          reglasCustom,
+        );
+
+        expect(tresOros.valor, greaterThan(tuerto.valor));
+        expect(tuerto.valor, greaterThan(dosOros.valor));
       });
     });
   });

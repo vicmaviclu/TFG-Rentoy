@@ -24,11 +24,14 @@ class ControladorLogin extends ChangeNotifier {
   // Funciones inyectables para facilitar pruebas. Por defecto usan FirebaseAuth.
   final AuthEmailFn _iniciarSesionEmail;
   final AuthEmailFn _crearUsuarioEmail;
+  final bool _ignorarFirestoreParaTest;
 
   ControladorLogin({
     AuthEmailFn? iniciarSesionEmail,
     AuthEmailFn? crearUsuarioEmail,
-  }) : _iniciarSesionEmail =
+    bool ignorarFirestoreParaTest = false,
+  }) : _ignorarFirestoreParaTest = ignorarFirestoreParaTest,
+       _iniciarSesionEmail =
            iniciarSesionEmail ??
            ((email, password) => FirebaseAuth.instance
                .signInWithEmailAndPassword(email: email, password: password)),
@@ -103,28 +106,32 @@ class ControladorLogin extends ChangeNotifier {
       if (username.isEmpty) return TextoAuth.introducirUsuario;
 
       // Comprobar si el nombre de usuario ya existe en la colección 'usuarios'
-      final existente = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .where('nombre_usuario', isEqualTo: username)
-          .limit(1)
-          .get();
-      if (existente.docs.isNotEmpty) {
-        return TextoAuth.usuarioEnUso;
+      if (!_ignorarFirestoreParaTest) {
+        final existente = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .where('nombre_usuario', isEqualTo: username)
+            .limit(1)
+            .get();
+        if (existente.docs.isNotEmpty) {
+          return TextoAuth.usuarioEnUso;
+        }
       }
 
       // Crear el usuario en Firebase Auth
       await _crearUsuarioEmail(email, pass);
 
       // Guardar datos adicionales en Firestore (sin contraseña)
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final uid = user.uid;
-        await FirebaseFirestore.instance.collection('usuarios').doc(uid).set({
-          'email': email,
-          'nombre_usuario': username,
-          'avatar': 1,
-          'fecha_creacion': FieldValue.serverTimestamp(),
-        });
+      if (!_ignorarFirestoreParaTest) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final uid = user.uid;
+          await FirebaseFirestore.instance.collection('usuarios').doc(uid).set({
+            'email': email,
+            'nombre_usuario': username,
+            'avatar': 1,
+            'fecha_creacion': FieldValue.serverTimestamp(),
+          });
+        }
       }
       return null;
     } on FirebaseAuthException catch (e) {

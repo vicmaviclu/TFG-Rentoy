@@ -421,11 +421,20 @@ class ControladorPartida {
       // en este contexto específico.
       final cartasDisputa = [miCarta, cartaGanadora];
 
+      // Leer reglas personalizadas si existen
+      Map<String, int>? reglasPersonalizadas;
+      if (val is Map && val['reglas_personalizadas'] is Map) {
+        reglasPersonalizadas = Map<String, int>.from(
+          val['reglas_personalizadas'],
+        );
+      }
+
       Baraja.calcularValores(
         cartasDisputa,
         paloMuestra,
         paloSalida,
         maxPlayers,
+        reglasPersonalizadas,
       );
 
       if (miCarta.valor > cartaGanadora.valor) {

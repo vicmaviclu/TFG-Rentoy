@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/controlador_login.dart';
 import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/textos.dart';
+import '../../../core/constantes/colores.dart';
 
 /// Formulario de inicio de sesión.
 class FormularioLogin extends StatefulWidget {
@@ -49,13 +50,13 @@ class _FormularioLoginState extends State<FormularioLogin> {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
+              height: 40,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  minimumSize: const Size(double.infinity, 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  backgroundColor: Colores.secundario,
+                  foregroundColor: Colores.textoPrimario,
+                  textStyle: EstilosTexto.boton,
+                  elevation: 4,
                 ),
                 // Botón de iniciar sesión
                 onPressed: controller.cargando ? null : _performLogin,
@@ -65,10 +66,7 @@ class _FormularioLoginState extends State<FormularioLogin> {
                         width: 20,
                         child: CircularProgressIndicator(),
                       )
-                    : Text(
-                        TextoAuth.tituloLogin,
-                        style: EstilosTexto.cuerpoNegrita,
-                      ),
+                    : Text(TextoAuth.tituloLogin),
               ),
             ),
           ],

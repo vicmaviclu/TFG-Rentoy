@@ -61,6 +61,7 @@ class ServicioRealtime {
     required String hostName,
     required int maxPlayers,
     required int avatar,
+    Map<String, int>? reglasPersonalizadas,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -81,6 +82,8 @@ class ServicioRealtime {
       'maxJugadores': maxPlayers,
       'estado': 'esperando',
       'creadoEn': now,
+      if (reglasPersonalizadas != null && reglasPersonalizadas.isNotEmpty)
+        'reglas_personalizadas': reglasPersonalizadas,
       'jugadores': {
         'jugador 1': {'name': hostDisplay, 'avatar': avatar, 'uid': user.uid},
       },

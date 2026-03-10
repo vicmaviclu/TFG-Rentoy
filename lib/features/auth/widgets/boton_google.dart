@@ -67,10 +67,11 @@ class BotonGoogle extends StatelessWidget {
       ),
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colores.grisGoogle,
+        backgroundColor: Colores.blanco,
         foregroundColor: Colores.textoPrimario,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        elevation: 4,
         minimumSize: fullWidth
             ? Size(double.infinity, resolvedHeight)
             : Size.zero,

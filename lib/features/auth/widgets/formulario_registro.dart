@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constantes/textos.dart';
 import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/errores.dart';
 import '../controllers/controlador_login.dart';
 
@@ -81,8 +82,15 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
             const SizedBox(height: 16),
             // Botón de registro
             SizedBox(
-              width: double.infinity,
+              width: 100,
+              height: 20,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colores.secundario,
+                  foregroundColor: Colores.textoPrimario,
+                  textStyle: EstilosTexto.boton,
+                  elevation: 4,
+                ),
                 onPressed: widget.controller.cargando
                     ? null
                     : _performRegistration,
@@ -92,10 +100,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
                         height: 20,
                         child: CircularProgressIndicator(),
                       )
-                    : const Text(
-                        TextoAuth.registrarse,
-                        style: EstilosTexto.cuerpoNegrita,
-                      ),
+                    : const Text(TextoAuth.registrarse),
               ),
             ),
           ],

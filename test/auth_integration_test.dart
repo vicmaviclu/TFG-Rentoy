@@ -58,9 +58,11 @@ void main() {
         final ctrl = ControladorLogin(
           crearUsuarioEmail: (e, p) async =>
               throw FirebaseAuthException(code: 'weak-password'),
+          ignorarFirestoreParaTest: true,
         );
 
         ctrl.controladorCorreo.text = 'test@example.com';
+        ctrl.controladorUsuario.text = 'testuser';
         ctrl.controladorContrasena.text = '123';
 
         final res = await ctrl.registrarConEmail();
@@ -74,9 +76,11 @@ void main() {
       final ctrl = ControladorLogin(
         crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
         iniciarSesionEmail: (e, p) async => _FakeUserCredential(),
+        ignorarFirestoreParaTest: true,
       );
 
       ctrl.controladorCorreo.text = 'ok@example.com';
+      ctrl.controladorUsuario.text = 'testuser';
       ctrl.controladorContrasena.text = 'goodpassword';
 
       final reg = await ctrl.registrarConEmail();
@@ -94,6 +98,7 @@ void main() {
     ) async {
       final ctrl = ControladorLogin(
         crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
+        ignorarFirestoreParaTest: true,
       );
 
       await tester.pumpWidget(
@@ -104,10 +109,12 @@ void main() {
 
       // Enter email
       await tester.enterText(find.byType(TextField).at(0), 'user@example.com');
+      // Enter username
+      await tester.enterText(find.byType(TextField).at(1), 'test_user');
       // Enter password
-      await tester.enterText(find.byType(TextField).at(1), 'password1');
+      await tester.enterText(find.byType(TextField).at(2), 'password1');
       // Enter different confirm password
-      await tester.enterText(find.byType(TextField).at(2), 'password2');
+      await tester.enterText(find.byType(TextField).at(3), 'password2');
 
       // Tap register button
       await tester.tap(
@@ -128,6 +135,7 @@ void main() {
     ) async {
       final ctrl = ControladorLogin(
         crearUsuarioEmail: (e, p) async => _FakeUserCredential(),
+        ignorarFirestoreParaTest: true,
       );
 
       final observer = _PopObserver();
@@ -141,8 +149,9 @@ void main() {
 
       // matching passwords
       await tester.enterText(find.byType(TextField).at(0), 'user2@example.com');
-      await tester.enterText(find.byType(TextField).at(1), 'goodpassword');
+      await tester.enterText(find.byType(TextField).at(1), 'test_user');
       await tester.enterText(find.byType(TextField).at(2), 'goodpassword');
+      await tester.enterText(find.byType(TextField).at(3), 'goodpassword');
 
       await tester.tap(
         find.widgetWithText(ElevatedButton, TextoAuth.registrarse),

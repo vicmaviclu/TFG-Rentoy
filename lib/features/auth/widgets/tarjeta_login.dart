@@ -54,10 +54,10 @@ class TarjetaLogin extends StatelessWidget {
                       ).showSnackBar(SnackBar(content: Text(err)));
                     }
                   },
-                  fullWidth: false,
+                  fullWidth: true,
                   label: TextoAuth.continuarConGoogle,
-                  height: 54,
-                  iconSize: 30,
+                  height: 40,
+                  iconSize: 24,
                   textStyle: EstilosTexto.boton,
                 ),
               );

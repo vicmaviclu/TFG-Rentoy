@@ -8,6 +8,7 @@ import '../../../core/constantes/cadenas.dart';
 import '../../../core/constantes/errores.dart';
 import '../../../app/rutas.dart';
 import '../../../core/widgets/contenedor_principal.dart';
+import 'seccion_reglas_personalizadas.dart';
 
 /// Contenido del modal para crear partida.
 class CrearPartidaOverlay extends StatefulWidget {
@@ -133,6 +134,11 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 12),
+
+              // === SECCIÓN: REGLAS PERSONALIZADAS ===
+              SeccionReglasPersonalizadas(controlador: _ctrl),
+
               const SizedBox(height: 16),
               // Botón crear partida
               SizedBox(
@@ -142,7 +148,9 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                     backgroundColor: Colores.secundario,
                     foregroundColor: Colores.textoPrimario,
                   ),
-                  onPressed: _ctrl.cargando ? null : _crear,
+                  onPressed: (_ctrl.cargando || !_ctrl.reglasValidas)
+                      ? null
+                      : _crear,
                   child: _ctrl.cargando
                       ? SizedBox(
                           width: 20,
@@ -152,7 +160,14 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
                             color: Colores.textoPrimario,
                           ),
                         )
-                      : const Text(TextoPartida.btnCrearPartida),
+                      : Text(
+                          TextoPartida.btnCrearPartida,
+                          style: EstilosTexto.boton.copyWith(
+                            color: (_ctrl.cargando || !_ctrl.reglasValidas)
+                                ? Colores.textoSecundario
+                                : Colores.textoPrimario,
+                          ),
+                        ),
                 ),
               ),
             ],

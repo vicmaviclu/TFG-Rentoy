@@ -110,9 +110,49 @@ class ReglasSeisJugadores extends ReglasCuatroJugadores {
   }
 }
 
+/// Reglas personalizadas (Se definen desde la pantalla de crear partida)
+class ReglasPersonalizadas extends ReglasJuego {
+  final Map<String, int> reglas;
+  final int cantidadJugadores;
+
+  ReglasPersonalizadas(this.reglas, this.cantidadJugadores);
+
+  @override
+  List<int> get jerarquiaTriunfo {
+    if (cantidadJugadores == 2) {
+      return super.jerarquiaTriunfo; // [2, 12, 11...]
+    }
+    return [3, 2, 12, 11, 10, 1, 7, 6, 5, 4]; // Base de 4+ jugadores
+  }
+
+  @override
+  int? getFuerzaCartaEspecial(Carta carta, String paloMuestra) {
+    String id = '${carta.numero}_${carta.palo.toLowerCase()}';
+    if (carta.palo.toLowerCase() == paloMuestra.toLowerCase()) {
+      final idMuestra = '${carta.numero}_muestra';
+      if (reglas.containsKey(idMuestra)) {
+        int rank = reglas[idMuestra]!;
+        // Fórmula de fuerza basada en el rango 1-5 (Rank 1: +95, Rank 5: +75)
+        return 100 - (rank * 5);
+      }
+    }
+    if (reglas.containsKey(id)) {
+      int rank = reglas[id]!;
+      return 100 - (rank * 5);
+    }
+    return null;
+  }
+}
+
 /// Factory para obtener la regla correcta.
 class ReglasFactory {
-  static ReglasJuego obtenerReglas(int cantidadJugadores) {
+  static ReglasJuego obtenerReglas(
+    int cantidadJugadores, [
+    Map<String, int>? reglasPersonalizadas,
+  ]) {
+    if (reglasPersonalizadas != null && reglasPersonalizadas.isNotEmpty) {
+      return ReglasPersonalizadas(reglasPersonalizadas, cantidadJugadores);
+    }
     switch (cantidadJugadores) {
       case 2:
         return ReglasDosJugadores();

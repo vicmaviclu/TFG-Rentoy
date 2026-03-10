@@ -34,13 +34,18 @@ class Baraja {
   /// [paloMuestra]: Palo del triunfo.
   /// [paloSalida]: Palo de salida de la baza actual.
   /// [cantidadJugadores]: Para saber qué reglas aplicar (2, 4, 6).
+  /// [reglasPersonalizadas]: Mapa con la jerarquía personalizada de cartas especiales.
   static void calcularValores(
     List<Carta> cartas,
     String paloMuestra,
     String? paloSalida,
-    int cantidadJugadores,
-  ) {
-    final reglas = ReglasFactory.obtenerReglas(cantidadJugadores);
+    int cantidadJugadores, [
+    Map<String, int>? reglasPersonalizadas,
+  ]) {
+    final reglas = ReglasFactory.obtenerReglas(
+      cantidadJugadores,
+      reglasPersonalizadas,
+    );
 
     for (var carta in cartas) {
       carta.valor = reglas.calcularFuerza(carta, paloMuestra, paloSalida);

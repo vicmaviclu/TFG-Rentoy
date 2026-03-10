@@ -10,8 +10,90 @@ class ControladorCrearPartida extends ChangeNotifier {
   final ServicioRealtime _servicio = ServicioRealtime();
   final ControladorPerfil _perfil = ControladorPerfil();
 
-  int maxJugadores = 2;
+  int _maxJugadores = 2;
+  int get maxJugadores => _maxJugadores;
+  set maxJugadores(int value) {
+    if (_maxJugadores != value) {
+      _maxJugadores = value;
+      _inicializarReglas();
+      notifyListeners();
+    }
+  }
+
   bool cargando = false;
+  bool mostrarReglas = false;
+
+  // Mapa con las reglas personalizadas (ID Carta -> Posición/Fuerza 1,2,3...)
+  final Map<String, int?> configuracionCartas = {};
+
+  final List<Map<String, String>> cartasEspecialesDisponibles = [
+    {'id': '11_oros', 'nombre': '11 Oros (Tuerto)'},
+    {'id': '10_oros', 'nombre': '10 Oros (Perica)'},
+    {'id': '5_oros', 'nombre': '5 Oros (Pablo)'},
+    {'id': '3_muestra', 'nombre': '3 de Muestra'},
+    {'id': '2_muestra', 'nombre': '2 de Muestra'},
+  ];
+
+  ControladorCrearPartida() {
+    _inicializarReglas();
+  }
+
+  void _inicializarReglas() {
+    configuracionCartas.clear();
+    for (var carta in cartasEspecialesDisponibles) {
+      configuracionCartas[carta['id']!] = null;
+    }
+
+    // Valores por defecto según número de jugadores
+    if (_maxJugadores == 4) {
+      configuracionCartas['11_oros'] = 1;
+      configuracionCartas['3_muestra'] = 2;
+      configuracionCartas['2_muestra'] = 3;
+    } else if (_maxJugadores == 6) {
+      configuracionCartas['10_oros'] = 1;
+      configuracionCartas['5_oros'] = 2;
+      configuracionCartas['11_oros'] = 3;
+      configuracionCartas['3_muestra'] = 4;
+      configuracionCartas['2_muestra'] = 5;
+    } else if (_maxJugadores == 2) {
+      configuracionCartas['3_muestra'] = 1;
+      configuracionCartas['2_muestra'] = 2;
+    }
+  }
+
+  bool get reglasValidas {
+    final values = _obtenerReglasValidas().values.toList();
+    final uniqueValues = values.toSet();
+    return values.length == uniqueValues.length;
+  }
+
+  void toggleMostrarReglas() {
+    mostrarReglas = !mostrarReglas;
+    notifyListeners();
+  }
+
+  void actualizarRegla(String idCarta, String valor) {
+    if (valor.trim().isEmpty) {
+      configuracionCartas[idCarta] = null;
+    } else {
+      int? rank = int.tryParse(valor);
+      if (rank != null && rank > 0) {
+        configuracionCartas[idCarta] = rank;
+      }
+    }
+    notifyListeners();
+  }
+
+  // Filtrar nulos para guardar en DB
+  Map<String, int> _obtenerReglasValidas() {
+    final Map<String, int> validas = {};
+    configuracionCartas.forEach((key, value) {
+      if (value != null) {
+        validas[key] = value;
+      }
+    });
+    return validas;
+  }
 
   // Obtiene el nombre del anfitrión desde el perfil o Auth
   String get nombreAnfitrion {
@@ -37,6 +119,7 @@ class ControladorCrearPartida extends ChangeNotifier {
         hostName: nombre,
         maxPlayers: maxJugadores,
         avatar: _perfil.avatarSeleccionado,
+        reglasPersonalizadas: _obtenerReglasValidas(),
       );
       return id;
     } finally {
