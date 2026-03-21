@@ -410,6 +410,23 @@ class ControladorPartida {
         paloSalida = cartaGanadora.palo;
         nuevoPaloSalida = paloSalida;
       }
+
+      // LÓGICA DE ARRASTRE
+      if (paloSalida == paloMuestra && miCarta.palo != paloMuestra) {
+        bool tieneMuestra = false;
+        if (rondaDataActual[miKey] is List) {
+          final mano = rondaDataActual[miKey] as List;
+          for (var c in mano) {
+            if (c is Map && c[_kKeyUsada] != true && c['palo'] == paloMuestra) {
+              tieneMuestra = true;
+              break;
+            }
+          }
+        }
+        if (tieneMuestra) {
+          throw Exception(ErroresPartida.arrastreObligatorio);
+        }
+      }
     }
 
     // 4. Calcular ganador usando la lógica de Baraja (Eager Calculation)

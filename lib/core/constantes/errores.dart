@@ -65,6 +65,9 @@ class ErroresPartida {
   static const String errorSesionInfo =
       'No se pudo obtener información de la sesión';
   static const String errorCantar = 'Error al cantar: ';
+  static const String errorPartidaLlena = 'La partida ya está llena';
+  static const String arrastreObligatorio =
+      'Arrastre: Debes soltar una carta de muestra.';
 }
 
 class ErroresValidacion {
