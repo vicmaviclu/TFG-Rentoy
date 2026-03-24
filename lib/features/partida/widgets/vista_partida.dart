@@ -6,6 +6,8 @@ import '../controllers/controlador_partida.dart';
 import 'contenedor_equipo.dart';
 import 'tablero_puntos.dart';
 import 'mesa_juego.dart';
+import 'mano_interactiva.dart';
+import 'fila_avatares_equipo_inferior.dart';
 import '../../../core/constantes/textos.dart';
 
 /// Widget englobador que estructura visualmente los 3 bloques principales
@@ -46,6 +48,15 @@ class VistaPartida extends StatelessWidget {
     final equipos = controlador.organizarEquipos(jugadores, miUid);
     final equipoAbajo = equipos['abajo']!;
     final equipoArriba = equipos['arriba']!;
+    final List<UsuarioModel> miJugadorLista = equipoAbajo
+      .where((jugador) => jugador.uid == miUid)
+      .toList();
+    final UsuarioModel? miJugadorAbajo = miJugadorLista.isNotEmpty
+      ? miJugadorLista.first
+      : null;
+    final List<UsuarioModel> companerosAbajo = equipoAbajo
+      .where((jugador) => jugador.uid != miUid)
+      .toList();
     final soyEquipo1 = controlador.soyEquipo1(jugadores, miUid);
 
     String tituloEquipoArriba = soyEquipo1
@@ -153,14 +164,31 @@ class VistaPartida extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ContenedorEquipo(
-                jugadores: equipoAbajo,
-                miUid: miUid,
-                cartaSeleccionadaIndex: cartaSeleccionadaIndex,
-                onSeleccionar: onSeleccionarCarta,
-                turnoActual: turnoActual,
-                alturaCarta: alturaCarta,
-                ocultarCartas: ocultarCartas,
+              if (miJugadorAbajo != null)
+                Align(
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: ManoInteractiva(
+                      mano: miJugadorAbajo.mano ?? [],
+                      cartaSeleccionadaIndex: cartaSeleccionadaIndex,
+                      onSeleccionar: onSeleccionarCarta,
+                      esTuTurno: miJugadorAbajo.esSuTurno(turnoActual),
+                      alturaCarta: alturaCarta,
+                      ocultas: ocultarCartas,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: FilaAvataresEquipoInferior(
+                  miJugador: miJugadorAbajo,
+                  companeros: companerosAbajo,
+                  miUid: miUid,
+                  turnoActual: turnoActual,
+                  alturaCarta: alturaCarta,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
