@@ -112,7 +112,7 @@ class ManoInteractiva extends StatelessWidget {
                         path,
                         width: kAnchoCarta,
                         height: kAlturaCarta,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         errorBuilder: (context, error, stack) => Container(
                           width: kAnchoCarta,
                           height: kAlturaCarta,

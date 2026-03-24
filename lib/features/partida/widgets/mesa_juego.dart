@@ -349,7 +349,7 @@ class MesaJuego extends StatelessWidget {
                   path,
                   width: cardWidth,
                   height: cardHeight,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -430,7 +430,7 @@ class MesaJuego extends StatelessWidget {
                   path,
                   width: cardWidth,
                   height: cardHeight,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   errorBuilder: (ctx, err, stack) =>
                       const Icon(Icons.error, color: Colors.red),
                 ),

@@ -31,6 +31,9 @@ class AvatarJugadorPartida extends StatelessWidget {
   /// Si las cartas deben mostrarse ocultas
   final bool ocultarCartas;
 
+  /// Permite ocultar la mano .
+  final bool mostrarMano;
+
   const AvatarJugadorPartida({
     super.key,
     required this.jugador,
@@ -41,6 +44,7 @@ class AvatarJugadorPartida extends StatelessWidget {
     this.esMiTurnoPropio = false,
     this.alturaCarta = 120.0,
     this.ocultarCartas = false,
+    this.mostrarMano = true,
   });
 
   @override
@@ -59,7 +63,10 @@ class AvatarJugadorPartida extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         // Cartas encima del nombre (si existen y soy yo)
-        if (esMiJugador && jugador.mano != null && jugador.mano!.isNotEmpty)
+        if (mostrarMano &&
+            esMiJugador &&
+            jugador.mano != null &&
+            jugador.mano!.isNotEmpty)
           ManoInteractiva(
             mano: jugador.mano!,
             cartaSeleccionadaIndex: cartaSeleccionadaIndex,
@@ -70,7 +77,7 @@ class AvatarJugadorPartida extends StatelessWidget {
           ),
 
         // Espacio entre cartas y avatar
-        if (jugador.mano != null && jugador.mano!.isNotEmpty)
+        if (mostrarMano && jugador.mano != null && jugador.mano!.isNotEmpty)
           const SizedBox(height: 4),
 
         // --- AVATAR DEL JUGADOR ---
