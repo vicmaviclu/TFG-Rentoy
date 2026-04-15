@@ -64,6 +64,7 @@ class TextoPartida {
   static const String iniciarPartida = 'Iniciar partida';
   static const String btnCrearPartida = 'Crear Partida';
   static const String btnUnirsePartida = 'Unirse a Partida';
+  static const String btnReglasJuego = 'Reglas del Juego';
   static const String btnBuscar = 'Buscar';
   static const String empezarPartida = 'Empezar';
 
@@ -140,4 +141,47 @@ class TextoAyuda {
   static const String ayuda = 'Ayuda';
   static const String terminos = 'Términos y condiciones';
   static const String politicaPrivacidad = 'Política de privacidad';
+}
+
+/// Textos de reglas del juego
+class TextoReglas {
+  static const String tituloOverlay = '¿Cómo jugar al Rentoy?';
+  static const String btnSiguiente = 'Siguiente';
+  static const String btnAnterior = 'Anterior';
+  static const String btnCerrar = '¡Entendido!';
+
+  static const String pagina1Titulo = '1. El Objetivo';
+  static const String pagina1Contenido =
+      'El Rentoy se juega por **equipos**. El objetivo es alcanzar la puntuación límite antes que el rival (por ejemplo, **21 puntos**).\n\n'
+      'Ganas puntos al vencer en las **"Rondas"**. Empezáis la ronda jugando por **1 punto**, pero la puntuación puede subir si alguien decide **"Cantar"**.';
+
+  static const String pagina2Titulo = '2. Las Bazas';
+  static const String pagina2Contenido =
+      'Una ronda está compuesta por pequeñas batallas llamadas **"Bazas"** (indicadas por círculos).\n\n'
+      'En cada baza, todos los jugadores tiran una carta en su turno. El que tire la **carta más fuerte** gana esa baza para su equipo. '
+      'La ronda se juega al **mejor de tres bazas**; el primer equipo en conseguir ganar **2 bazas**, gana la ronda.';
+
+  static const String pagina3Titulo = '3. La Muestra y El Arrastre';
+  static const String pagina3Contenido =
+      'Al repartir se descubre una carta central: **"La Muestra"**. Las cartas de este palo **valen más que cualquier otro palo**, menos las cartas especiales.\n\n'
+      '**Arrastre**: Si la primera persona que empieza una baza lanza una carta de la Muestra, los demás están **obligados** a echar una si tienen. Si se lanza cualquier otro palo inicial, **no hay arrastre** y puedes lanzar lo que más te convenga.';
+
+  static const String pagina4Titulo = '4. Cantar (El Envite)';
+  static const String pagina4Contenido =
+      'Esta es la salsa del juego. Antes de echar tu carta, puedes **"Cantar"** para apostar más puntos.\n\n'
+      'El rival debe decidir: si **acepta**, la ronda vale más. Si **rechaza**, pierden la ronda inmediatamente. '
+      '¡También pueden subir la apuesta (**Re-envite**)!';
+
+  static const String pagina5Titulo = '5. La Jerarquía (Orden de Fuerza)';
+  static const String pagina5Contenido =
+      'Para decidir la carta ganadora de la baza sigue este orden:\n\n'
+      '**1º. Cartas Especiales** (van primero).\n'
+      '**2º. Cartas de la Muestra** (Orden: 2, 12, 11, 10, 1, 7, 6, 5, 4, 3).\n'
+      '**3º.** Si no hay carta de Muestra, la baza del primer jugador (**Palo de Salida**) será lo que más vale (Orden: 12, 11, 10, 1, 7, 6, 5, 4, 3, 2).';
+
+  static const String pagina6Titulo = '6. Cartas Especiales';
+  static const String pagina6Contenido =
+      'Dependiendo de si sois 4 o 6 jugadores, algunas cartas de Oros se transforman en **especiales** (van primero en la jerarquía):\n\n'
+      '• **4 Jugadores**: El **"Tuerto"** (11 de Oros).\n'
+      '• **6 Jugadores**: Existen 3 especiales en este orden: 1º **"Perica"** (10 de Oros), 2º **"Pablo"** (5 de Oros), y 3º el **"Tuerto"** (11 de Oros).';
 }
