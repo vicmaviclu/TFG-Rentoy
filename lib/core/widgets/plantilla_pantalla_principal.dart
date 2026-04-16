@@ -60,7 +60,7 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
                         ),
                         child: ContenedorPrincipal(
                           // Usar todo el ancho disponible (menos padding)
-                          width: totalW - 20,
+                          width: totalW - 10,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,10 +107,10 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
                       // 4. Botón de Avatar (Arriba Derecha)
                       if (mostrarAvatar)
                         Positioned(
-                          top: 10,
-                          right: 10,
+                          top: 25,
+                          right: 35,
                           child: BotonAvatar(
-                            radius: 20,
+                            radius: 35,
                             onTap: () =>
                                 Navigator.pushNamed(context, RutasApp.perfil),
                           ),

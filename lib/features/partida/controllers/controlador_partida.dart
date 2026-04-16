@@ -254,6 +254,64 @@ class ControladorPartida {
     }
   }
 
+  /// Rechaza el envite definitivamente:
+  /// - Da los puntos actuales (antes de subir) al equipo que cantó.
+  /// - Cierra el envite y avanza la partida.
+  Future<void> rechazarCantar(String idPartida) async {
+    final ronda = await obtenerRondaActual(idPartida);
+    if (ronda == null) return;
+
+    final event = await _servicio.streamSesion(idPartida).first;
+    final val = event.snapshot.value;
+    if (val is! Map) return;
+
+    final rondas = _safeMap(val[_kKeyRondas]);
+    final rondaData = _safeMap(rondas[ronda]);
+    final enviteData = _safeMap(rondaData['envite']);
+
+    if (enviteData.isEmpty || enviteData['estado'] != 'pendiente') return;
+
+    // El equipo que cantó (quien_envia) gana los puntos actuales de la ronda (antes de subir)
+    final int equipoCanto = _safeInt(enviteData['equipo_envia'], 1);
+    final int puntosActuales = _safeInt(rondaData[_kKeyPuntos], 1);
+    final int maxPlayers = _safeInt(val[_kKeyMaxJugadores], 4);
+
+    // Leer puntos globales
+    final puntosGlobales = _safeMap(val[_kKeyPuntos]);
+    int p1 = _safeInt(puntosGlobales[_kKeyEquipo1]);
+    int p2 = _safeInt(puntosGlobales[_kKeyEquipo2]);
+
+    if (equipoCanto == 1) {
+      p1 += puntosActuales;
+    } else {
+      p2 += puntosActuales;
+    }
+
+    // Verificar si hay ganador
+    bool hayGanador = p1 >= 21 || p2 >= 21;
+    int winner = (p1 > p2) ? 1 : 2;
+
+    if (hayGanador) {
+      await _servicio.finalizarPartida(
+        sessionId: idPartida,
+        equipoGanador: winner,
+        nuevosPuntos: {_kKeyEquipo1: p1, _kKeyEquipo2: p2},
+      );
+    } else {
+      // Avanzar a la siguiente ronda
+      final proxRonda = int.parse(ronda) + 1;
+      int turnoInicial = ((proxRonda - 1) % maxPlayers) + 1;
+
+      await _servicio.iniciarSiguienteRonda(
+        sessionId: idPartida,
+        proximaRonda: proxRonda,
+        maxJugadores: maxPlayers,
+        nuevosPuntos: {_kKeyEquipo1: p1, _kKeyEquipo2: p2},
+        turnoInicial: turnoInicial,
+      );
+    }
+  }
+
   /// Escucha el turno actual de la partida
   Stream<int> streamTurnoActual(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {

@@ -260,13 +260,16 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                         if (respondoYo)
                           OverlayEnvite(
                             puntosActuales: puntosActuales,
-                            onReenviar: () => _controlador.responderCantar(
+                            onNoQuiero: () => _controlador.rechazarCantar(
                               widget.idSesion,
-                              false,
                             ),
-                            onAceptar: () => _controlador.responderCantar(
+                            onQuiero: () => _controlador.responderCantar(
                               widget.idSesion,
                               true,
+                            ),
+                            onReenvitar: () => _controlador.responderCantar(
+                              widget.idSesion,
+                              false,
                             ),
                           ),
                       ],

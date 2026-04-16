@@ -114,7 +114,10 @@ class TextoPartida {
   static const String enviteEnviado = 'Envite enviado.';
   static const String tituloEnvite = '¡TE HAN CANTADO!';
   static const String enviteSubeA = 'La ronda sube a ';
-  static const String btnReenviar = 'Reenviar';
+  static const String btnReenviar = 'Reenvitar';
+  static const String btnNoQuiero = 'No quiero';
+  static const String btnQuiero = 'Quiero';
+  static const String enviteRechazado = 'Has rechazado el envite.';
 }
 
 /// Textos relacionados con el perfil de usuario.

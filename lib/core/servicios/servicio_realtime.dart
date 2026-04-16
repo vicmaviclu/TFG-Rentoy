@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
@@ -12,11 +12,7 @@ import '../../models/carta_model.dart';
 import '../constantes/errores.dart';
 
 class ServicioRealtime {
-  final FirebaseDatabase _db = FirebaseDatabase.instanceFor(
-    app: Firebase.app(),
-    databaseURL:
-        'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
-  );
+  final FirebaseDatabase _db = FirebaseDatabase.instance;
 
   /// Devuelve el nombre de usuario a usar
   Future<String> _nombreUsuario(String? providedName, String uid) async {
@@ -187,49 +183,13 @@ class ServicioRealtime {
       throw Exception(ErroresSesion.autenticacionUnirsePartida);
     }
     final ref = referenciaSesion(sessionId);
-    final snap = await ref.get();
-    if (!snap.exists) {
+
+    // Obtenemos el número máximo de jugadores primero
+    final maxPlayersSnap = await ref.child('maxJugadores').get();
+    if (!maxPlayersSnap.exists) {
       throw Exception(ErroresSesion.sesionNoEncontrada);
     }
-
-    final data = snap.value as dynamic;
-    final maxPlayers = (data is Map && data['maxJugadores'] is int)
-        ? data['maxJugadores'] as int
-        : (data['maxJugadores'] as int?) ?? 2;
-
-    Map<String, dynamic> players = {};
-    try {
-      if (data is Map && data['jugadores'] != null) {
-        players = Map<String, dynamic>.from(data['jugadores']);
-      }
-    } catch (_) {
-      players = {};
-    }
-
-    int slot = 0;
-    bool alreadyIn = false;
-
-    for (var i = 1; i <= maxPlayers; i++) {
-      final key = 'jugador $i';
-      final val = players.containsKey(key) ? players[key] : null;
-
-      if (val is Map && val['uid'] == user.uid) {
-        alreadyIn = true;
-        break;
-      }
-
-      if (slot == 0 && (val == null || (val is String && val.isEmpty))) {
-        slot = i;
-      }
-    }
-
-    if (alreadyIn) {
-      return;
-    }
-
-    if (slot == 0) {
-      throw Exception(ErroresSesion.salaLlena);
-    }
+    final maxPlayers = (maxPlayersSnap.value as int?) ?? 2;
 
     int avatarIndex = 1;
     try {
@@ -244,12 +204,83 @@ class ServicioRealtime {
     } catch (_) {}
 
     final resolvedName = await _nombreUsuario(playerName, user.uid);
-    final playerKey = 'jugador $slot';
-    await ref.child('jugadores/$playerKey').set({
-      'name': resolvedName,
-      'avatar': avatarIndex,
-      'uid': user.uid,
+
+    // Usamos una transacción para evitar condiciones de carrera si dos entran a la vez
+    final TransactionResult
+    transactionResult = await ref.child('jugadores').runTransaction((
+      Object? jugadoresData,
+    ) {
+      final Map<String, dynamic> players = {};
+
+      if (jugadoresData is Map) {
+        jugadoresData.forEach((key, value) {
+          players[key.toString()] = value;
+        });
+      } else if (jugadoresData is List) {
+        // Manejar caso donde Firebase devuelve una lista (si los índices son numéricos)
+        for (int i = 0; i < jugadoresData.length; i++) {
+          if (jugadoresData[i] != null) {
+            players['jugador $i'] = jugadoresData[i];
+          }
+        }
+      }
+
+      int slot = 0;
+      bool alreadyIn = false;
+
+      for (var i = 1; i <= maxPlayers; i++) {
+        final key = 'jugador $i';
+        final val = players[key];
+
+        if (val is Map && val['uid'] == user.uid) {
+          alreadyIn = true;
+          break;
+        }
+
+        final bool isSlotEmpty =
+            (val == null) ||
+            (val is String && val.isEmpty) ||
+            (val is Map &&
+                (val['uid'] == null || val['uid'].toString().isEmpty));
+
+        if (slot == 0 && isSlotEmpty) {
+          slot = i;
+        }
+      }
+
+      if (alreadyIn) {
+        return Transaction.abort();
+      }
+
+      if (slot == 0) {
+        return Transaction.abort();
+      }
+
+      final playerKey = 'jugador $slot';
+      players[playerKey] = {
+        'name': resolvedName,
+        'avatar': avatarIndex,
+        'uid': user.uid,
+      };
+
+      return Transaction.success(players);
     });
+
+    if (!transactionResult.committed) {
+      // Verificamos si se canceló porque ya estaba en la sala o porque estaba llena
+      final currentJugadores = await ref.child('jugadores').get();
+      final jData = currentJugadores.value as Map?;
+      bool isIn = false;
+      if (jData != null) {
+        jData.forEach((k, v) {
+          if (v is Map && v['uid'] == user.uid) isIn = true;
+        });
+      }
+      if (isIn) {
+        return;
+      }
+      throw Exception(ErroresSesion.salaLlena);
+    }
 
     final firestore = FirebaseFirestore.instance;
     final partidaDoc = firestore.collection('partidas').doc(sessionId);
