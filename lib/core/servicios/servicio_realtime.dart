@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
@@ -12,7 +12,11 @@ import '../../models/carta_model.dart';
 import '../constantes/errores.dart';
 
 class ServicioRealtime {
-  final FirebaseDatabase _db = FirebaseDatabase.instance;
+  final FirebaseDatabase _db = FirebaseDatabase.instanceFor(
+    app: Firebase.app(),
+    databaseURL:
+        'https://rentoy-online-default-rtdb.europe-west1.firebasedatabase.app',
+  );
 
   /// Devuelve el nombre de usuario a usar
   Future<String> _nombreUsuario(String? providedName, String uid) async {

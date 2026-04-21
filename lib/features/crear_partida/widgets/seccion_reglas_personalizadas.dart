@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rentoy/core/constantes/cadenas.dart';
 
 import '../controllers/controlador_crear_partida.dart';
 import '../../../core/constantes/colores.dart';
@@ -30,7 +31,7 @@ class SeccionReglasPersonalizadas extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Jerarquía de cartas (Opcional)',
+                TextoPartida.jerarquiaCartas,
                 style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
               ),
             ],

@@ -80,7 +80,7 @@ class _InfoSalaState extends State<InfoSala> {
             const SizedBox(height: 4),
             // Nombre del anfitrión
             Text(
-              "Partida de $anfitrionDb",
+              "${TextoPartida.partidaDe}$anfitrionDb",
               style: EstilosTexto.subtitulo.copyWith(
                 color: Colores.blanco70,
                 fontSize: 16,
@@ -112,7 +112,7 @@ class _InfoSalaState extends State<InfoSala> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "PIN: ",
+                        TextoPartida.pinLabel,
                         style: EstilosTexto.cuerpoNegrita.copyWith(
                           color: Colores.textoPrimario,
                         ),

@@ -10,10 +10,12 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+    } else {
+      // Si ya está inicializada, nos aseguramos de que sea accesible
+      Firebase.app();
     }
   } catch (e) {
-    // Ignore duplicate app initialization errors
-    debugPrint('Firebase initialization error (ignored): $e');
+    debugPrint('Firebase initialization handled: $e');
   }
   runApp(const AplicacionWidget());
 }

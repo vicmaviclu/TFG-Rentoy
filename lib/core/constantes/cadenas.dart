@@ -80,6 +80,8 @@ class TextoPartida {
   static const String pinCopiado = 'PIN copiado al portapapeles';
   static const String esperandoDatos = 'Esperando datos...';
   static const String invitarJugadores = 'Invitar';
+  static const String mensajeInvitacion =
+      '¡Únete a mi partida de Pocket Rentoy! El código de acceso (PIN) es:';
   static const String esperando = 'Esperando...';
   static const String numeroJugadores = 'Número de jugadores';
   static const String introducePin = 'Introduce el PIN de la partida';
@@ -94,6 +96,9 @@ class TextoPartida {
   static const String mesaDeJuego = 'Mesa de Juego';
   static const String ganando = 'Ganando: ';
   static const String btnLanzar = 'LANZAR';
+  static const String jerarquiaCartas = 'Jerarquía de cartas';
+  static const String partidaDe = 'Partida de ';
+  static const String pinLabel = 'PIN: ';
 
   // Fin de partida
   static const String victoria = '¡VICTORIA!';
@@ -187,4 +192,13 @@ class TextoReglas {
       'Dependiendo de si sois 4 o 6 jugadores, algunas cartas de Oros se transforman en **especiales** (van primero en la jerarquía):\n\n'
       '• **4 Jugadores**: El **"Tuerto"** (11 de Oros).\n'
       '• **6 Jugadores**: Existen 3 especiales en este orden: 1º **"Perica"** (10 de Oros), 2º **"Pablo"** (5 de Oros), y 3º el **"Tuerto"** (11 de Oros).';
+}
+
+/// Nombres de las cartas y descripciones técnicas.
+class TextoCartas {
+  static const String onceOrosTuerto = '11 Oros (Tuerto)';
+  static const String diezOrosPerica = '10 Oros (Perica)';
+  static const String cincoOrosPablo = '5 Oros (Pablo)';
+  static const String tresMuestra = '3 de Muestra';
+  static const String dosMuestra = '2 de Muestra';
 }

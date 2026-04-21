@@ -27,11 +27,11 @@ class ControladorCrearPartida extends ChangeNotifier {
   final Map<String, int?> configuracionCartas = {};
 
   final List<Map<String, String>> cartasEspecialesDisponibles = [
-    {'id': '11_oros', 'nombre': '11 Oros (Tuerto)'},
-    {'id': '10_oros', 'nombre': '10 Oros (Perica)'},
-    {'id': '5_oros', 'nombre': '5 Oros (Pablo)'},
-    {'id': '3_muestra', 'nombre': '3 de Muestra'},
-    {'id': '2_muestra', 'nombre': '2 de Muestra'},
+    {'id': '11_oros', 'nombre': TextoCartas.onceOrosTuerto},
+    {'id': '10_oros', 'nombre': TextoCartas.diezOrosPerica},
+    {'id': '5_oros', 'nombre': TextoCartas.cincoOrosPablo},
+    {'id': '3_muestra', 'nombre': TextoCartas.tresMuestra},
+    {'id': '2_muestra', 'nombre': TextoCartas.dosMuestra},
   ];
 
   ControladorCrearPartida() {

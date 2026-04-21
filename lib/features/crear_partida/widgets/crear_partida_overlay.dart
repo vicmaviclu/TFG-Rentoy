@@ -80,97 +80,99 @@ class _CrearPartidaOverlayState extends State<CrearPartidaOverlay> {
         constraints: const BoxConstraints(maxWidth: 480),
         child: ContenedorPrincipal(
           // ContenedorPrincipal añade 20px de padding internamente
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Título y botón cerrar
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      TextoPartida.tituloCrearPartida,
-                      style: EstilosTexto.tituloMedio.copyWith(
-                        color: Colores.blanco,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: Colores.blanco),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Información del anfitrión
-              Text(
-                '${TextoPerfil.nombre}: ${_ctrl.nombreAnfitrion}',
-                style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                TextoPartida.numeroJugadores,
-                style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
-              ),
-              const SizedBox(height: 8),
-              // Selector de jugadores
-              Row(
-                children: [2, 4, 6].map((n) {
-                  final selected = _ctrl.maxJugadores == n;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text(
-                        '$n',
-                        style: EstilosTexto.boton.copyWith(
-                          color: Colores.textoPrimario,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Título y botón cerrar
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        TextoPartida.tituloCrearPartida,
+                        style: EstilosTexto.tituloMedio.copyWith(
+                          color: Colores.blanco,
                         ),
                       ),
-                      selected: selected,
-                      selectedColor: Colores.secundario,
-                      backgroundColor: Colores.superficie,
-                      onSelected: (_) => setState(() => _ctrl.maxJugadores = n),
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-
-              // === SECCIÓN: REGLAS PERSONALIZADAS ===
-              SeccionReglasPersonalizadas(controlador: _ctrl),
-
-              const SizedBox(height: 16),
-              // Botón crear partida
-              SizedBox(
-                height: 46,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colores.secundario,
-                    foregroundColor: Colores.textoPrimario,
-                  ),
-                  onPressed: (_ctrl.cargando || !_ctrl.reglasValidas)
-                      ? null
-                      : _crear,
-                  child: _ctrl.cargando
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, color: Colores.blanco),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Información del anfitrión
+                Text(
+                  '${TextoPerfil.nombre}: ${_ctrl.nombreAnfitrion}',
+                  style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  TextoPartida.numeroJugadores,
+                  style: EstilosTexto.subtitulo.copyWith(color: Colores.blanco70),
+                ),
+                const SizedBox(height: 8),
+                // Selector de jugadores
+                Row(
+                  children: [2, 4, 6].map((n) {
+                    final selected = _ctrl.maxJugadores == n;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ChoiceChip(
+                        label: Text(
+                          '$n',
+                          style: EstilosTexto.boton.copyWith(
                             color: Colores.textoPrimario,
                           ),
-                        )
-                      : Text(
-                          TextoPartida.btnCrearPartida,
-                          style: EstilosTexto.boton.copyWith(
-                            color: (_ctrl.cargando || !_ctrl.reglasValidas)
-                                ? Colores.textoSecundario
-                                : Colores.textoPrimario,
-                          ),
                         ),
+                        selected: selected,
+                        selectedColor: Colores.secundario,
+                        backgroundColor: Colores.superficie,
+                        onSelected: (_) => setState(() => _ctrl.maxJugadores = n),
+                      ),
+                    );
+                  }).toList(),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+
+                // === SECCIÓN: REGLAS PERSONALIZADAS ===
+                SeccionReglasPersonalizadas(controlador: _ctrl),
+
+                const SizedBox(height: 16),
+                // Botón crear partida
+                SizedBox(
+                  height: 46,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colores.secundario,
+                      foregroundColor: Colores.textoPrimario,
+                    ),
+                    onPressed: (_ctrl.cargando || !_ctrl.reglasValidas)
+                        ? null
+                        : _crear,
+                    child: _ctrl.cargando
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colores.textoPrimario,
+                            ),
+                          )
+                        : Text(
+                            TextoPartida.btnCrearPartida,
+                            style: EstilosTexto.boton.copyWith(
+                              color: (_ctrl.cargando || !_ctrl.reglasValidas)
+                                  ? Colores.textoSecundario
+                                  : Colores.textoPrimario,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

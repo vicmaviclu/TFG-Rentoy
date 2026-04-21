@@ -12,7 +12,7 @@ import '../widgets/encabezado_equipos.dart';
 import '../widgets/cuadricula_jugadores.dart';
 import 'dart:async';
 import '../widgets/acciones_sala.dart';
-// import '../../partida/screens/pantalla_partida.dart'; // No longer needed directly
+import 'package:share_plus/share_plus.dart';
 import '../../../app/rutas.dart';
 
 /// Pantalla de sala de espera.
@@ -104,33 +104,48 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
           // Botones de Acción
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: StreamBuilder<List<UsuarioModel>>(
-              stream: _streamJugadores,
-              builder: (context, instantanea) {
-                final jugadores = instantanea.data ?? [];
-                final salaLlena =
-                    jugadores.where((p) => p.nombreUsuario.isNotEmpty).length >=
-                    widget.maxJugadores;
+            child: StreamBuilder<DatabaseEvent>(
+              stream: _streamSesion,
+              builder: (context, snapshotSesion) {
+                final valorSesion = snapshotSesion.hasData
+                    ? snapshotSesion.data!.snapshot.value as Map?
+                    : null;
+                final pin = valorSesion?['pin']?.toString() ?? '';
 
-                return AccionesSala(
-                  salaLlena: salaLlena,
-                  alInvitar: () {
-                    // TODO: Implementar invitación
+                return StreamBuilder<List<UsuarioModel>>(
+                  stream: _streamJugadores,
+                  builder: (context, instantanea) {
+                    final jugadores = instantanea.data ?? [];
+                    final salaLlena = jugadores
+                            .where((p) => p.nombreUsuario.isNotEmpty)
+                            .length >=
+                        widget.maxJugadores;
+
+                    return AccionesSala(
+                      salaLlena: salaLlena,
+                      alInvitar: pin.isNotEmpty
+                          ? () {
+                              Share.share(
+                                '${TextoPartida.mensajeInvitacion} $pin',
+                              );
+                            }
+                          : null,
+                      alEmpezar: salaLlena
+                          ? () async {
+                              try {
+                                await _controlador.empezarPartida(widget.idSesion);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(TextoComun.errorInesperado),
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
+                    );
                   },
-                  alEmpezar: salaLlena
-                      ? () async {
-                          try {
-                            await _controlador.empezarPartida(widget.idSesion);
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(TextoComun.errorInesperado),
-                              ),
-                            );
-                          }
-                        }
-                      : null,
                 );
               },
             ),

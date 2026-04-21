@@ -50,7 +50,7 @@ class _FormularioLoginState extends State<FormularioLogin> {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              height: 40,
+              height: 45,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colores.secundario,
@@ -62,8 +62,8 @@ class _FormularioLoginState extends State<FormularioLogin> {
                 onPressed: controller.cargando ? null : _performLogin,
                 child: controller.cargando
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: 22,
+                        width: 28,
                         child: CircularProgressIndicator(),
                       )
                     : Text(TextoAuth.tituloLogin),
