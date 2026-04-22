@@ -86,6 +86,8 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
         ? _nombreMostrar!
         : TextoPartida.esperando;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool esPantallaReducida = screenWidth < 500;
     final bool esHuecoVacio = widget.uid == null || (widget.uid!.isEmpty);
 
     if (esHuecoVacio) {
@@ -137,48 +139,52 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            // avatar
-            if (_avatarResuelto != null || widget.indiceAvatar != null)
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colores.blanco24,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      Recursos.obtenerAvatar(
-                        _avatarResuelto ?? widget.indiceAvatar ?? 1,
-                      ),
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => Center(
-                        child: Text(
-                          textoMostrar.isNotEmpty
-                              ? textoMostrar[0].toUpperCase()
-                              : '?',
-                          style: EstilosTexto.cuerpo.copyWith(
-                            color: Colores.blanco,
+            // avatar (Oculto en pantallas pequeñas y medianas)
+            if (!esPantallaReducida) ...[
+              if (_avatarResuelto != null || widget.indiceAvatar != null)
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colores.blanco24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        Recursos.obtenerAvatar(
+                          _avatarResuelto ?? widget.indiceAvatar ?? 1,
+                        ),
+                        fit: BoxFit.contain,
+                        errorBuilder: (c, e, s) => Center(
+                          child: Text(
+                            textoMostrar.isNotEmpty
+                                ? textoMostrar[0].toUpperCase()
+                                : '?',
+                            style: EstilosTexto.cuerpo.copyWith(
+                              color: Colores.blanco,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
+                )
+              else
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colores.acento,
+                  child: Text(
+                    textoMostrar.isNotEmpty
+                        ? textoMostrar[0].toUpperCase()
+                        : '?',
+                    style: EstilosTexto.cuerpo.copyWith(color: Colores.blanco),
+                  ),
                 ),
-              )
-            else
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Colores.acento,
-                child: Text(
-                  textoMostrar.isNotEmpty ? textoMostrar[0].toUpperCase() : '?',
-                  style: EstilosTexto.cuerpo.copyWith(color: Colores.blanco),
-                ),
-              ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Text(
                 textoMostrar,
@@ -186,6 +192,9 @@ class _TarjetaJugadorState extends State<TarjetaJugador> {
                   color: Colores.blanco,
                   fontSize: 16,
                 ),
+                textAlign: esPantallaReducida
+                    ? TextAlign.center
+                    : TextAlign.start,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

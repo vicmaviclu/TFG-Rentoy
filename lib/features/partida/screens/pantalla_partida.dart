@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constantes/cadenas.dart';
+import '../../../core/constantes/colores.dart';
 import '../../../core/constantes/errores.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../core/widgets/pagina_fondo.dart';
@@ -89,6 +90,45 @@ class _PantallaPartidaState extends State<PantallaPartida> {
             );
           }
         });
+  }
+
+  /// Muestra un diálogo de confirmación para salir de la partida
+  Future<void> _confirmarSalida() async {
+    final bool? salir = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colores.tarjeta,
+        title: const Text(
+          TextoPartida.salirPartida,
+          style: TextStyle(color: Colores.blanco),
+        ),
+        content: const Text(
+          TextoPartida.confirmarSalirPartida,
+          style: TextStyle(color: Colores.blanco70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              TextoComun.no,
+              style: TextStyle(color: Colores.blanco70),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colores.acento),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              TextoComun.si,
+              style: TextStyle(color: Colores.blanco, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (salir == true && mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   @override
@@ -272,6 +312,23 @@ class _PantallaPartidaState extends State<PantallaPartida> {
                               false,
                             ),
                           ),
+
+                        // --- BOTÓN SALIR (ARRIBA IZQUIERDA) ---
+                        Positioned(
+                          top: 10,
+                          left: 10,
+                          child: SafeArea(
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back,
+                                color: Colores.blanco,
+                                size: 36,
+                              ),
+                              onPressed: _confirmarSalida,
+                              tooltip: TextoPartida.salirPartida,
+                            ),
+                          ),
+                        ),
                       ],
                     );
                   },

@@ -75,6 +75,10 @@ class _ReglasJuegoOverlayState extends State<ReglasJuegoOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool esPantallaPequena = screenHeight < 700;
+    final double pageViewHeight = esPantallaPequena ? 300 : 380;
+
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(
         horizontal: 24.0,
@@ -129,7 +133,7 @@ class _ReglasJuegoOverlayState extends State<ReglasJuegoOverlay> {
 
               // PageView con altura fija para evitar espacios redundantes
               SizedBox(
-                height: 380,
+                height: pageViewHeight,
                 child: PageView.builder(
                   controller: _pageController,
                   onPageChanged: (index) {

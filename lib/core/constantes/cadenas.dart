@@ -123,6 +123,9 @@ class TextoPartida {
   static const String btnNoQuiero = 'No quiero';
   static const String btnQuiero = 'Quiero';
   static const String enviteRechazado = 'Has rechazado el envite.';
+  static const String salirPartida = 'Salir de la partida';
+  static const String confirmarSalirPartida =
+      '¿Seguro que quieres salir de la partida?';
 }
 
 /// Textos relacionados con el perfil de usuario.

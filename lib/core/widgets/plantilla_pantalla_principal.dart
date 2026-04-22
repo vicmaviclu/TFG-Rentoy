@@ -36,6 +36,7 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
         builder: (context, constraints) {
           final totalW = constraints.maxWidth;
 
+          final bool esPantallaPequena = totalW < 400;
           double logoSize = (totalW * 0.45).clamp(100.0, 280.0);
           final double cardTopMargin = logoSize * 0.5;
 
@@ -107,10 +108,10 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
                       // 4. Botón de Avatar (Arriba Derecha)
                       if (mostrarAvatar)
                         Positioned(
-                          top: 25,
-                          right: 35,
+                          top: esPantallaPequena ? 10 : 25,
+                          right: esPantallaPequena ? 16 : 35,
                           child: BotonAvatar(
-                            radius: 35,
+                            radius: esPantallaPequena ? 25 : 35,
                             onTap: () =>
                                 Navigator.pushNamed(context, RutasApp.perfil),
                           ),
