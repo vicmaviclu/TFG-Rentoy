@@ -5,6 +5,7 @@ import '../../../core/constantes/errores.dart';
 import '../../../core/servicios/servicio_realtime.dart';
 import '../../../core/widgets/pagina_fondo.dart';
 import '../../partida/controllers/controlador_partida.dart';
+import '../../partida/controllers/controlador_bot.dart';
 import '../../../models/usuario_model.dart';
 import '../widgets/overlay_envite.dart';
 import 'pantalla_fin_partida.dart';
@@ -15,11 +16,13 @@ import 'package:firebase_database/firebase_database.dart';
 class PantallaPartida extends StatefulWidget {
   final String idSesion;
   final int maxJugadores;
+  final bool conBot;
 
   const PantallaPartida({
     super.key,
     required this.idSesion,
     required this.maxJugadores,
+    this.conBot = false,
   });
 
   @override
@@ -29,6 +32,7 @@ class PantallaPartida extends StatefulWidget {
 class _PantallaPartidaState extends State<PantallaPartida> {
   /// Controlador de la lógica de partida
   late ControladorPartida _controlador;
+  ControladorBot? _controladorBot;
 
   late Stream<List<UsuarioModel>> _streamJugadores;
   late String _miUid;
@@ -42,9 +46,15 @@ class _PantallaPartidaState extends State<PantallaPartida> {
   void initState() {
     super.initState();
     // --- INICIALIZACIÓN DE CONTROLADOR Y STREAMS ---
-    _controlador = ControladorPartida(servicio: ServicioRealtime());
+    final servicio = ServicioRealtime();
+    _controlador = ControladorPartida(servicio: servicio);
     _miUid = _controlador.obtenerMiUid();
     _streamJugadores = _controlador.streamJugadores(widget.idSesion);
+
+    if (widget.conBot) {
+      _controladorBot = ControladorBot(sessionId: widget.idSesion, servicio: servicio);
+      _controladorBot!.iniciar();
+    }
 
     // Obtener mi key de jugador (jugador1, jugador2, etc)
     _controlador.obtenerMiKeyJugador(widget.idSesion).then((key) {
@@ -54,6 +64,12 @@ class _PantallaPartidaState extends State<PantallaPartida> {
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _controladorBot?.detener();
+    super.dispose();
   }
 
   /// Maneja la selección/deselección de una carta

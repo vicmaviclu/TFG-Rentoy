@@ -20,12 +20,14 @@ class PantallaSalaEspera extends StatefulWidget {
   final String idSesion;
   final String nombreAnfitrion;
   final int maxJugadores;
+  final bool conBot;
 
   const PantallaSalaEspera({
     super.key,
     required this.idSesion,
     required this.nombreAnfitrion,
     required this.maxJugadores,
+    this.conBot = false,
   });
 
   @override
@@ -57,6 +59,7 @@ class _PantallaSalaEsperaState extends State<PantallaSalaEspera> {
           arguments: {
             'idSesion': widget.idSesion,
             'maxJugadores': widget.maxJugadores,
+            'conBot': widget.conBot,
           },
         );
       }

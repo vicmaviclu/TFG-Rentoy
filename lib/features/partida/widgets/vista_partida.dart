@@ -8,6 +8,7 @@ import 'tablero_puntos.dart';
 import 'mesa_juego.dart';
 import 'mano_interactiva.dart';
 import 'fila_avatares_equipo_inferior.dart';
+import 'popup_historial.dart';
 import '../../../core/constantes/textos.dart';
 
 /// Widget englobador que estructura visualmente los 3 bloques principales
@@ -148,6 +149,16 @@ class VistaPartida extends StatelessWidget {
                   onLanzar: onLanzarCarta,
                   onCambiar: onCambiarCartas,
                   onCantar: onCantar,
+                  onVerHistorial: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => PopupHistorial(
+                        jugadores: jugadores,
+                        miUid: miUid,
+                        controlador: controlador,
+                      ),
+                    );
+                  },
                   alturaCarta: alturaCarta,
                   bazasEquipo1: bazasEq1,
                   bazasEquipo2: bazasEq2,

@@ -24,6 +24,7 @@ class MesaJuego extends StatelessWidget {
 
   final VoidCallback? onCambiar;
   final VoidCallback? onCantar;
+  final VoidCallback? onVerHistorial;
 
   /// Cuántas bazas ha ganado el Equipo 1
   final int bazasEquipo1;
@@ -42,6 +43,7 @@ class MesaJuego extends StatelessWidget {
     this.onLanzar,
     this.onCambiar,
     this.onCantar,
+    this.onVerHistorial,
     this.alturaCarta,
     this.bazasEquipo1 = 0,
     this.bazasEquipo2 = 0,
@@ -581,6 +583,35 @@ class MesaJuego extends StatelessWidget {
                   onTap: onCambiar ?? () {},
                 ),
               ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Botón Historial (Fuera de la Row para no romper el ancho)
+            TextButton(
+              onPressed: onVerHistorial ?? () {},
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 10,
+                ),
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                backgroundColor: Colores.negro12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colores.blanco24, width: 1),
+                ),
+              ),
+              child: const Text(
+                TextoPartida.btnHistorial,
+                style: TextStyle(
+                  color: Colores.blanco,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
             ),
           ],
         );

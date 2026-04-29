@@ -39,11 +39,13 @@ class RutasApp {
     String idSesion,
     String nombreAnfitrion,
     int maxJugadores,
+    bool conBot,
   ) {
     return PantallaSalaEspera(
       idSesion: idSesion,
       nombreAnfitrion: nombreAnfitrion,
       maxJugadores: maxJugadores,
+      conBot: conBot,
     );
   }
 
@@ -56,7 +58,8 @@ class RutasApp {
       final maxJugadores = args['maxJugadores'] is int
           ? args['maxJugadores'] as int
           : int.tryParse(args['maxJugadores']?.toString() ?? '') ?? 2;
-      return _salaEsperaWidget(idSesion, nombreAnfitrion, maxJugadores);
+      final conBot = args['conBot'] == true;
+      return _salaEsperaWidget(idSesion, nombreAnfitrion, maxJugadores, conBot);
     }
     return const SizedBox.shrink();
   }
@@ -69,7 +72,8 @@ class RutasApp {
       final maxJugadores = args['maxJugadores'] is int
           ? args['maxJugadores'] as int
           : int.tryParse(args['maxJugadores']?.toString() ?? '') ?? 4;
-      return PantallaPartida(idSesion: idSesion, maxJugadores: maxJugadores);
+      final conBot = args['conBot'] == true;
+      return PantallaPartida(idSesion: idSesion, maxJugadores: maxJugadores, conBot: conBot);
     }
     return const SizedBox.shrink();
   }

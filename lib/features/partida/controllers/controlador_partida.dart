@@ -586,13 +586,43 @@ class ControladorPartida {
     }
 
     final totalCartas = maxPlayers * 3;
-    if (cartasJugadas >= totalCartas) {
+    bool finDeRonda = cartasJugadas >= totalCartas;
+    int? equipoGanador;
+
+    // Comprobar victorias de bazas
+    final bazasGanadasMap = _safeMap(rondaData['bazas_ganadas']);
+    int eq1Bazas = 0;
+    int eq2Bazas = 0;
+
+    for (var key in bazasGanadasMap.keys) {
+      String winnerKey = bazasGanadasMap[key].toString();
+      int numJugador = int.tryParse(winnerKey.replaceAll('jugador ', '')) ?? 0;
+      int equipo = (numJugador % 2 != 0) ? 1 : 2;
+      if (equipo == 1) {
+        eq1Bazas++;
+      } else if (equipo == 2) {
+        eq2Bazas++;
+      }
+    }
+
+    if (eq1Bazas >= 2) {
+      finDeRonda = true;
+      equipoGanador = 1;
+    } else if (eq2Bazas >= 2) {
+      finDeRonda = true;
+      equipoGanador = 2;
+    }
+
+    if (finDeRonda) {
       // FIN DE RONDA
-      // 1. Obtener carta ganadora de la última baza
-      final cg = _safeMap(rondaData[_kKeyCartaGanadora]);
-      int equipoGanador = 0;
-      if (cg.isNotEmpty && cg['equipo'] is int) {
-        equipoGanador = cg['equipo'];
+      // 1. Obtener ganador si no se definió por las 2 bazas (ej: última baza rompe empate)
+      if (equipoGanador == null) {
+        final cg = _safeMap(rondaData[_kKeyCartaGanadora]);
+        if (cg.isNotEmpty && cg['equipo'] is int) {
+          equipoGanador = cg['equipo'];
+        } else {
+          equipoGanador = 0;
+        }
       }
 
       // 2. Calcular puntos

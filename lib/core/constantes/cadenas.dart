@@ -65,6 +65,7 @@ class TextoPartida {
   static const String btnCrearPartida = 'Crear Partida';
   static const String btnUnirsePartida = 'Unirse a Partida';
   static const String btnReglasJuego = 'Reglas del Juego';
+  static const String btnPracticaBot = 'Practica';
   static const String btnBuscar = 'Buscar';
   static const String empezarPartida = 'Empezar';
 
@@ -126,6 +127,9 @@ class TextoPartida {
   static const String salirPartida = 'Salir de la partida';
   static const String confirmarSalirPartida =
       '¿Seguro que quieres salir de la partida?';
+  static const String historialCartas = 'Historial de Cartas Jugadas';
+  static const String ninguna = 'Ninguna';
+  static const String btnHistorial = 'Historial';
 }
 
 /// Textos relacionados con el perfil de usuario.
