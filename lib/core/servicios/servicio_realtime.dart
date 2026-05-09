@@ -67,8 +67,28 @@ class ServicioRealtime {
     if (user == null) {
       throw Exception(ErroresSesion.autenticacionCrearPartida);
     }
+    
+    // Disparamos la limpieza de basura en segundo plano (sin await para no bloquear)
+    limpiarSalasAntiguas();
     final rnd = Random.secure();
-    final pin = (rnd.nextInt(900000) + 100000).toString();
+    
+    String pin = '';
+    bool pinUnico = false;
+    
+    // Bucle para asegurar que el PIN no está en uso
+    while (!pinUnico) {
+      pin = (rnd.nextInt(900000) + 100000).toString();
+      final snapshot = await _db
+          .ref('sessions')
+          .orderByChild('pin')
+          .equalTo(pin)
+          .limitToFirst(1)
+          .get();
+          
+      if (!snapshot.exists || snapshot.children.isEmpty) {
+        pinUnico = true;
+      }
+    }
 
     final ref = _db.ref().child('sessions').push();
     final sessionId = ref.key ?? '';
@@ -100,6 +120,11 @@ class ServicioRealtime {
         'maxJugadores': maxPlayers,
         'creadoEn': FieldValue.serverTimestamp(),
       });
+
+      // Añadir al historial del usuario anfitrión
+      await firestore.collection('usuarios').doc(user.uid).set({
+        'partidas_historial': FieldValue.arrayUnion([sessionId]),
+      }, SetOptions(merge: true));
     } catch (e) {
       debugPrint("Error creando sesión: $e");
       rethrow; // Re-lanzar para que el controlador lo sepa
@@ -293,6 +318,11 @@ class ServicioRealtime {
       await partidaDoc.update({
         'jugadores': FieldValue.arrayUnion([resolvedName]),
       });
+      
+      // Añadir al historial del usuario que se une
+      await firestore.collection('usuarios').doc(user.uid).set({
+        'partidas_historial': FieldValue.arrayUnion([sessionId]),
+      }, SetOptions(merge: true));
     }
   }
 
@@ -663,6 +693,36 @@ class ServicioRealtime {
 
     if (partidaSnap.exists) {
       await partidaDoc.update(updates);
+    }
+  }
+
+  /// Limpia sesiones antiguas (más de 2 horas) desde el propio cliente.
+  Future<void> limpiarSalasAntiguas() async {
+    try {
+      final haceDosHoras = DateTime.now().subtract(const Duration(hours: 2)).toIso8601String();
+
+      // Buscamos las sesiones cuya fecha de creación sea anterior a hace 2 horas
+      final snapshot = await _db
+          .ref('sessions')
+          .orderByChild('creadoEn')
+          .endAt(haceDosHoras)
+          .get();
+
+      if (snapshot.exists) {
+        final updates = <String, dynamic>{};
+        for (var child in snapshot.children) {
+          updates[child.key!] = null; // null elimina el nodo
+        }
+
+        if (updates.isNotEmpty) {
+          // Eliminamos las sesiones de Realtime Database
+          await _db.ref('sessions').update(updates);
+          
+          debugPrint('🗑️ Se limpiaron ${updates.length} salas antiguas de más de 2 horas.');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error limpiando salas antiguas: $e');
     }
   }
 }
