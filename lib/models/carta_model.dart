@@ -31,7 +31,7 @@ class Carta {
     // Reconstruir foto (todos png)
     final prefijo = palo.isNotEmpty ? palo[0] : '';
     final foto =
-        'Assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
+        'assets/images/cartas/${palo.toLowerCase()}/$prefijo$numero.png';
 
     return Carta(
       numero: numero,
