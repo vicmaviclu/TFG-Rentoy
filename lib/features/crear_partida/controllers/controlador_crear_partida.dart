@@ -36,6 +36,11 @@ class ControladorCrearPartida extends ChangeNotifier {
 
   ControladorCrearPartida() {
     _inicializarReglas();
+    _perfil.addListener(_onPerfilChanged);
+  }
+
+  void _onPerfilChanged() {
+    notifyListeners();
   }
 
   void _inicializarReglas() {
@@ -130,6 +135,7 @@ class ControladorCrearPartida extends ChangeNotifier {
 
   @override
   void dispose() {
+    _perfil.removeListener(_onPerfilChanged);
     _perfil.dispose();
     super.dispose();
   }

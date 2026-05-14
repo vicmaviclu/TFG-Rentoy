@@ -55,6 +55,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
             onPressed: () => Navigator.of(context).pushNamed(RutasApp.login),
             child: const Text(TextoAuth.yaTienesCuenta),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

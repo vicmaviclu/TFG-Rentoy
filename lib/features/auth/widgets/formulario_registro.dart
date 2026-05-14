@@ -82,14 +82,14 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
             const SizedBox(height: 16),
             // Botón de registro
             SizedBox(
-              width: 120,
-              height: 35,
+              width: 150,
+              height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colores.secundario,
                   foregroundColor: Colores.textoPrimario,
                   textStyle: EstilosTexto.boton,
-                  elevation: 4,
+                  elevation: 8,
                 ),
                 onPressed: widget.controller.cargando
                     ? null

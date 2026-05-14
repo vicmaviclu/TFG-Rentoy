@@ -1,7 +1,7 @@
 /// Textos generales y comunes de la aplicación.
 class TextoComun {
   // App
-  static const String nombreApp = 'Pocket Rentoy';
+  static const String nombreApp = 'RentoyNow';
   static const String subtitulo = 'Juega, diviértete y conecta';
 
   // Mensajes generales / estados
@@ -82,7 +82,7 @@ class TextoPartida {
   static const String esperandoDatos = 'Esperando datos...';
   static const String invitarJugadores = 'Invitar';
   static const String mensajeInvitacion =
-      '¡Únete a mi partida de Pocket Rentoy! El código de acceso (PIN) es:';
+      '¡Únete a mi partida de RentoyNow! El código de acceso (PIN) es:';
   static const String esperando = 'Esperando...';
   static const String numeroJugadores = 'Número de jugadores';
   static const String introducePin = 'Introduce el PIN de la partida';
