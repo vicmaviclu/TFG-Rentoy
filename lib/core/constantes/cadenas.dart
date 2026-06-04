@@ -107,18 +107,18 @@ class TextoPartida {
   static const String volverAlMenu = 'Volver al Menú';
   static const String objetivo = 'Objetivo';
   static const String puntos = 'pts';
-  static const String cantar = 'Cantar';
+  static const String enviar = 'Enviar';
   static const String cambiar = 'Cambiar';
   static const String muestra = 'Muestra';
   static const String ronda = 'Ronda';
 
   // Envites
   static const String envitePendientePrecaucion = 'Ya hay un envite pendiente.';
-  static const String errorTurnoCantar = 'Solo puedes cantar en tu turno.';
+  static const String errorTurnoCantar = 'Solo puedes enviar en tu turno.';
   static const String errorEquipoYaCanto =
       'Tu equipo ya cantó. Debes esperar a que el rival cante.';
   static const String enviteEnviado = 'Envite enviado.';
-  static const String tituloEnvite = '¡TE HAN CANTADO!';
+  static const String tituloEnvite = '¡TE HAN ENVIADO!';
   static const String enviteSubeA = 'La ronda sube a ';
   static const String btnReenviar = 'Reenvitar';
   static const String btnNoQuiero = 'No quiero';
@@ -168,7 +168,7 @@ class TextoReglas {
   static const String pagina1Titulo = '1. El Objetivo';
   static const String pagina1Contenido =
       'El Rentoy se juega por **equipos**. El objetivo es alcanzar la puntuación límite antes que el rival (por ejemplo, **21 puntos**).\n\n'
-      'Ganas puntos al vencer en las **"Rondas"**. Empezáis la ronda jugando por **1 punto**, pero la puntuación puede subir si alguien decide **"Cantar"**.';
+      'Ganas puntos al vencer en las **"Rondas"**. Empezáis la ronda jugando por **1 punto**, pero la puntuación puede subir si alguien decide **"Enviar"**.';
 
   static const String pagina2Titulo = '2. Las Bazas';
   static const String pagina2Contenido =
@@ -181,9 +181,9 @@ class TextoReglas {
       'Al repartir se descubre una carta central: **"La Muestra"**. Las cartas de este palo **valen más que cualquier otro palo**, menos las cartas especiales.\n\n'
       '**Arrastre**: Si la primera persona que empieza una baza lanza una carta de la Muestra, los demás están **obligados** a echar una si tienen. Si se lanza cualquier otro palo inicial, **no hay arrastre** y puedes lanzar lo que más te convenga.';
 
-  static const String pagina4Titulo = '4. Cantar (El Envite)';
+  static const String pagina4Titulo = '4. Enviar (El Envite)';
   static const String pagina4Contenido =
-      'Esta es la salsa del juego. Antes de echar tu carta, puedes **"Cantar"** para apostar más puntos.\n\n'
+      'Esta es la salsa del juego. Antes de echar tu carta, puedes **"Enviar"** para apostar más puntos.\n\n'
       'El rival debe decidir: si **acepta**, la ronda vale más. Si **rechaza**, pierden la ronda inmediatamente. '
       '¡También pueden subir la apuesta (**Re-envite**)!';
 

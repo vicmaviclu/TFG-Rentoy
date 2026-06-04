@@ -490,10 +490,10 @@ class MesaJuego extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Botón Cantar
+                // Botón Enviar
                 BotonMesa(
                   icon: Icons.mic,
-                  label: TextoPartida.cantar,
+                  label: TextoPartida.enviar,
                   onTap: onCantar ?? () {},
                 ),
 

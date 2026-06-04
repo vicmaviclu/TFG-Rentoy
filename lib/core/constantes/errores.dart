@@ -64,7 +64,7 @@ class ErroresPartida {
   static const String errorLanzarCarta = 'Error al lanzar carta: ';
   static const String errorSesionInfo =
       'No se pudo obtener información de la sesión';
-  static const String errorCantar = 'Error al cantar: ';
+  static const String errorCantar = 'Error al enviar: ';
   static const String errorPartidaLlena = 'La partida ya está llena';
   static const String arrastreObligatorio =
       'Arrastre: Debes soltar una carta de muestra.';

@@ -521,9 +521,9 @@ class ServicioRealtime {
     ).child('rondas/$rondaId/carta_ganadora').remove();
   }
 
-  // --- LÓGICA DE ENVITES (CANTAR) ---
+  // --- LÓGICA DE ENVITES (Enviar) ---
 
-  /// Envía o reenvía un envite (canto)
+  /// Envía o reenvía un envite 
   Future<void> enviarEnvite({
     required String sessionId,
     required String rondaId,

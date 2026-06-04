@@ -380,12 +380,12 @@ class _PantallaPartidaState extends State<PantallaPartida> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => PantallaFinPartida(
+            builder: (finContext) => PantallaFinPartida(
               victoria: victoria,
               puntosEquipo1: p1,
               puntosEquipo2: p2,
               onVolver: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(finContext).popUntil((route) => route.isFirst);
               },
             ),
           ),
