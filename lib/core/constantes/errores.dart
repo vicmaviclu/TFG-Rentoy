@@ -10,7 +10,7 @@ class ErroresAuth {
       'Demasiados intentos, inténtalo más tarde';
 }
 
-/// Mapea códigos de error de FirebaseAuth a mensajes amigables para el usuario.
+/// Mapea códigos de error de Firebase para el usuario.
 String mensajeErrorFirebaseAuth(String code) {
   switch (code) {
     case 'user-not-found':

@@ -9,9 +9,7 @@ import 'contenedor_principal.dart';
 /// - Fondo degradado verde (vía PaginaFondo).
 /// - LayoutBuilder para calcular tamaño del logo y posición de la tarjeta.
 /// - Logo flotante en la parte superior central.
-/// - ContenedorPrincipal (Tarjeta Verde) que contiene el [child].
-/// - [onBack] opcional para navegación (renderiza botón de volver).
-/// - [showAvatar] opcional para mostrar botón de avatar (default false).
+/// - ContenedorPrincipal (Tarjeta Verde).
 class PlantillaPantallaPrincipal extends StatelessWidget {
   final Widget child;
   final bool mostrarVolver;
@@ -55,18 +53,17 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(
                           top: cardTopMargin + 4,
-                          left: 10, // Margen reducido
-                          right: 10, // Margen reducido
+                          left: 10,
+                          right: 10,
                           bottom: 20,
                         ),
                         child: ContenedorPrincipal(
-                          // Usar todo el ancho disponible (menos padding)
                           width: totalW - 10,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Fila de Botón de Volver (Integrado en la tarjeta)
+                              // Fila de Botón de Volver
                               if (mostrarVolver)
                                 Align(
                                   alignment: Alignment.centerLeft,
@@ -96,7 +93,7 @@ class PlantillaPantallaPrincipal extends StatelessWidget {
 
                       // 3. Logo Flotante (Arriba Centro)
                       Positioned(
-                        top: 0, // Relativo al top del Stack
+                        top: 0,
                         child: Image.asset(
                           Recursos.logo,
                           width: logoSize,

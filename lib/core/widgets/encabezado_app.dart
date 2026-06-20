@@ -6,8 +6,7 @@ import '../constantes/tamanos.dart';
 import '../constantes/recursos.dart';
 
 /// Encabezado reutilizable con logo, título y subtítulo del juego.
-///
-/// Diseñado para usarse en la parte superior de varias pantallas.
+
 class EncabezadoApp extends StatelessWidget {
   const EncabezadoApp({
     super.key,

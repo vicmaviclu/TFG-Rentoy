@@ -9,7 +9,6 @@ import '../features/crear_partida/screens/pantalla_crear_partida.dart';
 import '../features/unirse_partida/screens/pantalla_unirse_partida.dart';
 import '../features/partida/screens/pantalla_partida.dart';
 
-/// Rutas globales de la aplicación.
 class RutasApp {
   static const String inicio = '/inicio';
   static const String login = '/login';
@@ -34,7 +33,7 @@ class RutasApp {
     };
   }
 
-  // Helper: construye el widget de la sala de espera.
+  // Construye el widget de la sala de espera.
   static Widget _salaEsperaWidget(
     String idSesion,
     String nombreAnfitrion,
@@ -49,7 +48,6 @@ class RutasApp {
     );
   }
 
-  // Extrae `RouteSettings.arguments` del contexto y construye el widget.
   static Widget _salaEsperaFromContext(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic>) {
@@ -64,7 +62,7 @@ class RutasApp {
     return const SizedBox.shrink();
   }
 
-  // Helper: construye el widget de la partida.
+  // Construye el widget de la partida.
   static Widget _partidaFromContext(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic>) {
@@ -73,7 +71,11 @@ class RutasApp {
           ? args['maxJugadores'] as int
           : int.tryParse(args['maxJugadores']?.toString() ?? '') ?? 4;
       final conBot = args['conBot'] == true;
-      return PantallaPartida(idSesion: idSesion, maxJugadores: maxJugadores, conBot: conBot);
+      return PantallaPartida(
+        idSesion: idSesion,
+        maxJugadores: maxJugadores,
+        conBot: conBot,
+      );
     }
     return const SizedBox.shrink();
   }

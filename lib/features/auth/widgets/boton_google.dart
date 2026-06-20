@@ -11,8 +11,7 @@ class BotonGoogle extends StatelessWidget {
   final VoidCallback? onPressed;
   final String label;
 
-  /// Si es true, el botón usará todo el ancho disponible. Si es false,
-  /// ajustará su tamaño al contenido y se centrará.
+  /// Si es true, el botón usará todo el ancho disponible.
   final bool fullWidth;
 
   /// Altura opcional del botón

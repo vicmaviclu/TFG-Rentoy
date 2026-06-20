@@ -32,7 +32,7 @@ class TextoComun {
   static const String funcionalidadPendiente = 'Funcionalidad próximamente';
 }
 
-/// Textos relacionados con la autenticación (Login, Registro).
+/// Textos relacionados con la autenticación.
 class TextoAuth {
   // Títulos
   static const String tituloLogin = 'Inicia sesión';
@@ -58,7 +58,7 @@ class TextoAuth {
   static const String usuarioEnUso = 'El nombre de usuario ya está en uso';
 }
 
-/// Textos relacionados con la partida (Crear, Unirse, Sala de espera).
+/// Textos relacionados con la partida.
 class TextoPartida {
   // Acciones principales
   static const String iniciarPartida = 'Iniciar partida';

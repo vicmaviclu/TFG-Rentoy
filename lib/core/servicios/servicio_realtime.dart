@@ -67,15 +67,15 @@ class ServicioRealtime {
     if (user == null) {
       throw Exception(ErroresSesion.autenticacionCrearPartida);
     }
-    
-    // Disparamos la limpieza de basura en segundo plano (sin await para no bloquear)
+
+    // limpieza de basura en segundo plano
     limpiarSalasAntiguas();
     final rnd = Random.secure();
-    
+
     String pin = '';
     bool pinUnico = false;
-    
-    // Bucle para asegurar que el PIN no está en uso
+
+    // Asegurar que el PIN no está en uso
     while (!pinUnico) {
       pin = (rnd.nextInt(900000) + 100000).toString();
       final snapshot = await _db
@@ -84,7 +84,7 @@ class ServicioRealtime {
           .equalTo(pin)
           .limitToFirst(1)
           .get();
-          
+
       if (!snapshot.exists || snapshot.children.isEmpty) {
         pinUnico = true;
       }
@@ -127,14 +127,14 @@ class ServicioRealtime {
       }, SetOptions(merge: true));
     } catch (e) {
       debugPrint("Error creando sesión: $e");
-      rethrow; // Re-lanzar para que el controlador lo sepa
+      rethrow;
     }
 
     return sessionId;
   }
 
-  /// Sale de la sesión: elimina la entrada del jugador que coincide con el uid actual
-  /// y actualiza el documento de Firestore eliminando el nombre del array `jugadores`.
+  /// Sale de la sesión: elimina la entrada del jugador
+  /// que coincide con el uid actual
   Future<void> salirDeSesion(String sessionId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -192,7 +192,7 @@ class ServicioRealtime {
   Stream<DatabaseEvent> streamSesion(String sessionId) =>
       referenciaSesion(sessionId).onValue;
 
-  /// Elimina la sesión tanto en Realtime como en Firestore (usado por el anfitrión)
+  /// Elimina la sesión tanto en Realtime como en Firestore
   Future<void> cancelarSesion(String sessionId) async {
     // eliminar Realtime
     await referenciaSesion(sessionId).remove();
@@ -205,7 +205,7 @@ class ServicioRealtime {
     }
   }
 
-  /// Une a la sesión buscando el siguiente slot libre (jugador2..jugadorN)
+  /// Une a la sesión buscando el siguiente slot libre
   Future<void> unirASesion(String sessionId, String playerName) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -213,7 +213,7 @@ class ServicioRealtime {
     }
     final ref = referenciaSesion(sessionId);
 
-    // Obtenemos el número máximo de jugadores primero
+    // Obtenemos el número máximo de jugadores
     final maxPlayersSnap = await ref.child('maxJugadores').get();
     if (!maxPlayersSnap.exists) {
       throw Exception(ErroresSesion.sesionNoEncontrada);
@@ -234,66 +234,64 @@ class ServicioRealtime {
 
     final resolvedName = await _nombreUsuario(playerName, user.uid);
 
-    // Usamos una transacción para evitar condiciones de carrera si dos entran a la vez
-    final TransactionResult
-    transactionResult = await ref.child('jugadores').runTransaction((
-      Object? jugadoresData,
-    ) {
-      final Map<String, dynamic> players = {};
+    // Usamos una transacción para evitar condiciones de carrera
+    final TransactionResult transactionResult = await ref
+        .child('jugadores')
+        .runTransaction((Object? jugadoresData) {
+          final Map<String, dynamic> players = {};
 
-      if (jugadoresData is Map) {
-        jugadoresData.forEach((key, value) {
-          players[key.toString()] = value;
-        });
-      } else if (jugadoresData is List) {
-        // Manejar caso donde Firebase devuelve una lista (si los índices son numéricos)
-        for (int i = 0; i < jugadoresData.length; i++) {
-          if (jugadoresData[i] != null) {
-            players['jugador $i'] = jugadoresData[i];
+          if (jugadoresData is Map) {
+            jugadoresData.forEach((key, value) {
+              players[key.toString()] = value;
+            });
+          } else if (jugadoresData is List) {
+            for (int i = 0; i < jugadoresData.length; i++) {
+              if (jugadoresData[i] != null) {
+                players['jugador $i'] = jugadoresData[i];
+              }
+            }
           }
-        }
-      }
 
-      int slot = 0;
-      bool alreadyIn = false;
+          int slot = 0;
+          bool alreadyIn = false;
 
-      for (var i = 1; i <= maxPlayers; i++) {
-        final key = 'jugador $i';
-        final val = players[key];
+          for (var i = 1; i <= maxPlayers; i++) {
+            final key = 'jugador $i';
+            final val = players[key];
 
-        if (val is Map && val['uid'] == user.uid) {
-          alreadyIn = true;
-          break;
-        }
+            if (val is Map && val['uid'] == user.uid) {
+              alreadyIn = true;
+              break;
+            }
 
-        final bool isSlotEmpty =
-            (val == null) ||
-            (val is String && val.isEmpty) ||
-            (val is Map &&
-                (val['uid'] == null || val['uid'].toString().isEmpty));
+            final bool isSlotEmpty =
+                (val == null) ||
+                (val is String && val.isEmpty) ||
+                (val is Map &&
+                    (val['uid'] == null || val['uid'].toString().isEmpty));
 
-        if (slot == 0 && isSlotEmpty) {
-          slot = i;
-        }
-      }
+            if (slot == 0 && isSlotEmpty) {
+              slot = i;
+            }
+          }
 
-      if (alreadyIn) {
-        return Transaction.abort();
-      }
+          if (alreadyIn) {
+            return Transaction.abort();
+          }
 
-      if (slot == 0) {
-        return Transaction.abort();
-      }
+          if (slot == 0) {
+            return Transaction.abort();
+          }
 
-      final playerKey = 'jugador $slot';
-      players[playerKey] = {
-        'name': resolvedName,
-        'avatar': avatarIndex,
-        'uid': user.uid,
-      };
+          final playerKey = 'jugador $slot';
+          players[playerKey] = {
+            'name': resolvedName,
+            'avatar': avatarIndex,
+            'uid': user.uid,
+          };
 
-      return Transaction.success(players);
-    });
+          return Transaction.success(players);
+        });
 
     if (!transactionResult.committed) {
       // Verificamos si se canceló porque ya estaba en la sala o porque estaba llena
@@ -318,7 +316,7 @@ class ServicioRealtime {
       await partidaDoc.update({
         'jugadores': FieldValue.arrayUnion([resolvedName]),
       });
-      
+
       // Añadir al historial del usuario que se une
       await firestore.collection('usuarios').doc(user.uid).set({
         'partidas_historial': FieldValue.arrayUnion([sessionId]),
@@ -419,7 +417,7 @@ class ServicioRealtime {
     return {'id': id, 'anfitrion': anfitrion, 'maxJugadores': maxJugadores};
   }
 
-  /// Actualiza el estado de la sesión (ej. 'jugando', 'finalizada')
+  /// Actualiza el estado de la sesión
   Future<void> actualizarEstadoSesion(
     String sessionId,
     String nuevoEstado,
@@ -444,7 +442,7 @@ class ServicioRealtime {
     // 1. Actualizar Realtime Database
     await referenciaSesion(sessionId).update(updates);
 
-    // 2. Actualizar Firestore (Espejo parcial)
+    // 2. Actualizar Firestore
     final nuevoEstado = updates['estado'];
     final puntos = updates['puntos'];
     final ronda = updates['rondas/actual'];
@@ -468,7 +466,7 @@ class ServicioRealtime {
     }
   }
 
-  /// Juega una carta: marca usada, actualiza carta ganadora (si se pasa), pasa turno.
+  /// Juega una carta: marca usada, actualiza carta ganadora, pasa turno.
   Future<void> jugarCarta({
     required String sessionId,
     required String rondaId,
@@ -476,10 +474,8 @@ class ServicioRealtime {
     required int cartaIndex,
     required Map<String, dynamic> cartaData,
     required int nuevoTurno,
-    Map<String, dynamic>?
-    cartaGanadoraData, // Opcional: Si es null, no se cambia
-    String?
-    paloSalida, // Opcional: Si se pasa, se guarda como palo de salida de la baza
+    Map<String, dynamic>? cartaGanadoraData,
+    String? paloSalida,
     String? ganadorBazaKey,
     int? numBaza,
   }) async {
@@ -523,7 +519,7 @@ class ServicioRealtime {
 
   // --- LÓGICA DE ENVITES (Enviar) ---
 
-  /// Envía o reenvía un envite 
+  /// Envía o reenvía un envite
   Future<void> enviarEnvite({
     required String sessionId,
     required String rondaId,
@@ -553,13 +549,13 @@ class ServicioRealtime {
     final updates = <String, dynamic>{};
 
     if (aceptar) {
-      // Si acepta, se actualizan los puntos de la ronda y se limpia el envite
+      // Si acepta, se actualizan los puntos de la ronda
       updates['rondas/$rondaId/envite'] = null;
       if (nuevosPuntos != null) {
         updates['rondas/$rondaId/puntos'] = nuevosPuntos;
       }
     } else {
-      // Reenviar es enviarEnvite, pero puede que queramos actualizar los puntos provisionales
+      // Reenviar es enviarEnvite
       updates['rondas/$rondaId/envite'] = null;
       if (nuevosPuntos != null) {
         updates['rondas/$rondaId/puntos'] = nuevosPuntos;
@@ -655,7 +651,7 @@ class ServicioRealtime {
           .toList();
     });
 
-    // 3. Ejecutar actualización atómica
+    // 3. Ejecutar actualización
     await referenciaSesion(sessionId).update(updates);
 
     // 4. Actualizar Firestore
@@ -696,12 +692,14 @@ class ServicioRealtime {
     }
   }
 
-  /// Limpia sesiones antiguas (más de 2 horas) desde el propio cliente.
+  /// Limpia sesiones antiguas (más de 2 horas)
   Future<void> limpiarSalasAntiguas() async {
     try {
-      final haceDosHoras = DateTime.now().subtract(const Duration(hours: 2)).toIso8601String();
+      final haceDosHoras = DateTime.now()
+          .subtract(const Duration(hours: 2))
+          .toIso8601String();
 
-      // Buscamos las sesiones cuya fecha de creación sea anterior a hace 2 horas
+      // Buscamos las sesiones
       final snapshot = await _db
           .ref('sessions')
           .orderByChild('creadoEn')
@@ -717,8 +715,10 @@ class ServicioRealtime {
         if (updates.isNotEmpty) {
           // Eliminamos las sesiones de Realtime Database
           await _db.ref('sessions').update(updates);
-          
-          debugPrint('🗑️ Se limpiaron ${updates.length} salas antiguas de más de 2 horas.');
+
+          debugPrint(
+            '🗑️ Se limpiaron ${updates.length} salas antiguas de más de 2 horas.',
+          );
         }
       }
     } catch (e) {

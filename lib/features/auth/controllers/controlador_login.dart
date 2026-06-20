@@ -83,7 +83,7 @@ class ControladorLogin extends ChangeNotifier {
       await _iniciarSesionEmail(email, pass);
       return null;
     } on FirebaseAuthException catch (e) {
-      // Mapear códigos de Firebase a mensajes amigables cuando sea posible
+      // Mapear códigos de Firebase
       return mensajeErrorFirebaseAuth(e.code);
     } catch (e) {
       return e.toString();
@@ -105,7 +105,7 @@ class ControladorLogin extends ChangeNotifier {
       if (pass.length < 6) return ErroresValidacion.contrasenaCorta;
       if (username.isEmpty) return TextoAuth.introducirUsuario;
 
-      // Comprobar si el nombre de usuario ya existe en la colección 'usuarios'
+      // Comprobar si el nombre de usuario ya existe
       if (!_ignorarFirestoreParaTest) {
         final existente = await FirebaseFirestore.instance
             .collection('usuarios')
@@ -120,7 +120,7 @@ class ControladorLogin extends ChangeNotifier {
       // Crear el usuario en Firebase Auth
       await _crearUsuarioEmail(email, pass);
 
-      // Guardar datos adicionales en Firestore (sin contraseña)
+      // Guardar datos adicionales en Firestore
       if (!_ignorarFirestoreParaTest) {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {

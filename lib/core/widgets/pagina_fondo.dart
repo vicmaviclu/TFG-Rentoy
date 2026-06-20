@@ -6,8 +6,7 @@ import '../constantes/textos.dart';
 import '../constantes/recursos.dart';
 
 /// Componente que encapsula el fondo con las "cartas" y el logo grande
-/// semitransparente, además de proporcionar el layout superior común
-/// utilizado en varias páginas (padding, scroll, título del juego).
+/// semitransparente, además de proporcionar el layout superior común.
 class PaginaFondo extends StatelessWidget {
   final Widget child;
   final bool mostrarTitulo;

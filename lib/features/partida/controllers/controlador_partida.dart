@@ -114,7 +114,6 @@ class ControladorPartida {
     });
   }
 
-  /// Obtiene el ID del usuario actual
   String obtenerMiUid() {
     return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
@@ -133,7 +132,6 @@ class ControladorPartida {
     });
   }
 
-  /// Escucha la carta de muestra de la ronda actual
   Stream<Map<String, dynamic>> streamCartaMuestra(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {
       final val = event.snapshot.value;
@@ -148,7 +146,6 @@ class ControladorPartida {
     });
   }
 
-  /// Escucha el estado del envite de la ronda actual
   Stream<Map<String, dynamic>> streamEnvite(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {
       final val = event.snapshot.value;
@@ -163,7 +160,6 @@ class ControladorPartida {
     });
   }
 
-  /// Inicia un envite por primera vez en la ronda
   Future<void> cantar(String idPartida) async {
     final miKey = await obtenerMiKeyJugador(idPartida);
     if (miKey == null) return;
@@ -200,7 +196,6 @@ class ControladorPartida {
     );
   }
 
-  /// Responde a un envite (aceptar o reenviar subiéndolo)
   Future<void> responderCantar(String idPartida, bool aceptar) async {
     final miKey = await obtenerMiKeyJugador(idPartida);
     if (miKey == null) return;
@@ -221,7 +216,6 @@ class ControladorPartida {
     int nuevosPuntos = puntosActuales == 1 ? 3 : puntosActuales + 3;
 
     if (aceptar) {
-      // Calcula puntos y envía respuesta
       await _servicio.responderEnvite(
         sessionId: idPartida,
         rondaId: ronda,
@@ -255,7 +249,7 @@ class ControladorPartida {
   }
 
   /// Rechaza el envite definitivamente:
-  /// - Da los puntos actuales (antes de subir) al equipo que cantó.
+  /// - Da los puntos actuales
   /// - Cierra el envite y avanza la partida.
   Future<void> rechazarCantar(String idPartida) async {
     final ronda = await obtenerRondaActual(idPartida);
@@ -312,7 +306,6 @@ class ControladorPartida {
     }
   }
 
-  /// Escucha el turno actual de la partida
   Stream<int> streamTurnoActual(String idPartida) {
     return _servicio.streamSesion(idPartida).map((event) {
       final val = event.snapshot.value;
@@ -327,7 +320,6 @@ class ControladorPartida {
     });
   }
 
-  /// Busca qué "jugador X" soy yo en la partida
   Future<String?> obtenerMiKeyJugador(String idPartida) async {
     final uid = obtenerMiUid();
     if (uid.isEmpty) return null;
@@ -350,7 +342,6 @@ class ControladorPartida {
     return null;
   }
 
-  /// Obtiene la ronda actual
   Future<String?> obtenerRondaActual(String idPartida) async {
     final event = await _servicio.streamSesion(idPartida).first;
     final val = event.snapshot.value;
@@ -361,7 +352,6 @@ class ControladorPartida {
     return actual?.toString();
   }
 
-  /// Juega una carta en la partida actual.
   Future<void> jugarCarta(String idPartida, int cartaIndex) async {
     // Obtener mi key (jugador 1, etc)
     final miKey = await obtenerMiKeyJugador(idPartida);
@@ -407,10 +397,8 @@ class ControladorPartida {
       // throw Exception(TextoPartida.errorNoEsTuTurno);
     }
 
-    // Calcular siguiente turno
     int proximoTurno = (turnoActual % maxPlayers) + 1;
 
-    // Calcular fuerzas y determinar ganador
     // 1. Contar cartas usadas para saber si empiezo baza
     int cartasUsadas = 0;
     if (val is Map) {
@@ -639,7 +627,6 @@ class ControladorPartida {
         p2 += puntosRonda;
       }
 
-      // Comprobar si hay ganador
       bool hayGanador = false;
       int winner = 0;
 
@@ -675,8 +662,6 @@ class ControladorPartida {
     }
   }
 
-  /// Organiza a los jugadores en dos equipos: rivales (arriba) y mi equipo (abajo).
-  /// Retorna un mapa con claves 'arriba' y 'abajo'.
   Map<String, List<UsuarioModel>> organizarEquipos(
     List<UsuarioModel> jugadores,
     String miUid,
@@ -706,7 +691,6 @@ class ControladorPartida {
     };
   }
 
-  /// Determina si el usuario pertenece al Equipo 1 (índices pares).
   bool soyEquipo1(List<UsuarioModel> jugadores, String miUid) {
     for (int i = 0; i < jugadores.length; i++) {
       if (jugadores[i].uid == miUid) {
@@ -716,14 +700,12 @@ class ControladorPartida {
     return false;
   }
 
-  /// Comprueba si es el turno del jugador especificado por su key (ej: "jugador 1")
   bool esMiTurno(String? miKey, int turnoActual) {
     if (miKey == null) return false;
     final miNumero = int.tryParse(miKey.replaceAll('jugador ', '')) ?? 0;
     return miNumero == turnoActual;
   }
 
-  /// Extrae el turno actual de los datos de la partida
   int obtenerTurnoActual(Map datosPartida) {
     if (datosPartida['rondas'] is Map) {
       final rondas = datosPartida['rondas'];
@@ -735,7 +717,6 @@ class ControladorPartida {
     return 1;
   }
 
-  /// Extrae las bazas ganadas por cada equipo en la ronda actual
   Map<String, int> obtenerBazasGanadas(Map datosPartida) {
     int bazasEq1 = 0;
     int bazasEq2 = 0;
@@ -768,7 +749,6 @@ class ControladorPartida {
     return {'equipo1': bazasEq1, 'equipo2': bazasEq2};
   }
 
-  /// Método para saber si es el turno de un jugador usando su keyJugador (ej: 'jugador 1')
   bool esTurnoDeJugador(UsuarioModel usuario, int turnoActual) {
     if (usuario.keyJugador == null) return false;
     int? numeroJugador = int.tryParse(

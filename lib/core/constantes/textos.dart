@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'colores.dart';
 
 class EstilosTexto {
-  // Estilo para títulos grandes (p. ej. pantallas principales)
+  // Estilo para títulos grandes
   static const TextStyle tituloGrande = TextStyle(
     fontSize: 34,
     fontWeight: FontWeight.w700,
