@@ -4,6 +4,8 @@ Rentoy es una aplicación móvil multijugador desarrollada en **Flutter** para j
 
 📄 **[Ver Memoria del Proyecto (PDF)](docs/proyecto.pdf)**
 
+Enlace al juego online  [RentoyNow](https://rentoy-online.web.app)
+
 ## 🚀 Características Principales
 
 *   **Autenticación segura**: Registro e inicio de sesión de usuarios, integrado con Google Sign-In.
@@ -52,7 +54,3 @@ A continuación se muestra el flujo y las distintas interfaces de la aplicación
    ```bash
    flutter run
    ```
-
-## 🧪 Automatización de Pruebas Multijugador
-
-Para información detallada sobre cómo probar el flujo multijugador en local (lanzando múltiples instancias y simulando jugadores simultáneamente en Flutter Web), por favor consulta las guías de automatización y scripts disponibles en el proyecto.
