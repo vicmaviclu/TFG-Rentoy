@@ -7,9 +7,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      if (!e.toString().contains('duplicate-app')) {
+        rethrow;
+      }
+    }
 
     runApp(const AplicacionWidget());
   } catch (e) {
